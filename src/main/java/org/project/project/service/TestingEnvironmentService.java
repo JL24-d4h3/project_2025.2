@@ -1,4 +1,7 @@
 package org.project.project.service;
 
-public class TestingEnviromentService {
+import org.springframework.stereotype.Service;
+
+@Service
+public class TestingEnvironmentService {
 }

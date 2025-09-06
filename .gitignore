@@ -1,33 +1,35 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# Archivos de la máquina y del sistema operativo
+.DS_Store
+*~
+.cache/
 
-### STS ###
-.apt_generated
+# Archivos de build y de Maven
+target/
+pom.xml.tag
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+releaseArguments.properties
+.m2/repository/
+*.jar
+*.war
+
+# Archivos de IDEs
+.idea/
+.vscode/
+.settings/
+.project
 .classpath
 .factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
+.sts4-cache/
 *.iml
+*.iws
 *.ipr
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+# Archivos de configuración con información sensible
+src/main/resources/application.properties
+src/main/resources/application.yml
 
-### VS Code ###
-.vscode/
+# Archivos de log
+*.log
+logs/

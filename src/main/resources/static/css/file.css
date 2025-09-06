@@ -1,0 +1,64 @@
+/* Estilos para la barra de navegación de doble fila */
+.navbar-doble-fila {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px;
+    background-color: #333;
+}
+
+.navbar-contenedor {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Estilos para las filas */
+.fila-superior, .fila-inferior {
+    display: flex;             /* La clave para usar Flexbox */
+    align-items: center;       /* Centra verticalmente los elementos */
+    width: 100%;               /* Ocupa todo el ancho disponible */
+}
+
+/* Modificación clave para la fila inferior */
+.fila-inferior {
+    justify-content: space-between; /* ¡Esto empuja el UL a la izquierda y el buscador a la derecha! */
+}
+
+/* Estilos para los enlaces */
+.fila-superior a, .fila-inferior a {
+    text-decoration: none;
+    color: white;
+    font-family: sans-serif;
+}
+
+/* Estilos para la lista de enlaces de la fila inferior */
+.fila-inferior ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 20px;
+}
+
+.fila-inferior ul li a {
+    text-decoration: none;
+    color: #fff;
+    font-family: sans-serif;
+    padding: 10px 15px;
+}
+
+/* Estilos para la barra de búsqueda */
+.input-wrapper input {
+    /* Aquí puedes añadir o modificar estilos específicos para la barra de búsqueda */
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+
+.espacio-trabajo {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
