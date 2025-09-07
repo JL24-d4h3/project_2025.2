@@ -1,0 +1,35 @@
+# Archivos de la máquina y del sistema operativo
+.DS_Store
+*~
+.cache/
+
+# Archivos de build y de Maven
+target/
+pom.xml.tag
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+releaseArguments.properties
+.m2/repository/
+*.jar
+*.war
+
+# Archivos de IDEs
+.idea/
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+.sts4-cache/
+*.iml
+*.iws
+*.ipr
+
+# Archivos de configuración con información sensible
+src/main/resources/application.properties
+src/main/resources/application.yml
+
+# Archivos de log
+*.log
+logs/
