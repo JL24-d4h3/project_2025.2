@@ -36,7 +36,7 @@ public class SolicitudAccesoAPI {
     private Usuario solicitante;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_usuario_id1", nullable = false)
+    @JoinColumn(name = "aprobador_usuario_id", nullable = true)
     private Usuario aprobador;
 
     @ManyToOne

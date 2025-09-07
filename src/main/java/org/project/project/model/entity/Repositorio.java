@@ -61,7 +61,7 @@ public class Repositorio {
     @JoinTable(
         name = "Categoria_has_Repositorio",
         joinColumns = @JoinColumn(name = "Repositorio_repositorio_id"),
-        inverseJoinColumns = @JoinColumn(name = "Categoria_idCategoria")
+        inverseJoinColumns = @JoinColumn(name = "categoria_id_categoria")
     )
     private Set<Categoria> categorias;
 

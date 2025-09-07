@@ -59,9 +59,9 @@ public class API {
 
     @ManyToMany
     @JoinTable(
-        name = "Categoria_has_api",
+        name = "Categoria_has_API",
         joinColumns = @JoinColumn(name = "API_api_id"),
-        inverseJoinColumns = @JoinColumn(name = "Categoria_idCategoria")
+        inverseJoinColumns = @JoinColumn(name = "categoria_id_categoria")
     )
     private Set<Categoria> categorias;
 

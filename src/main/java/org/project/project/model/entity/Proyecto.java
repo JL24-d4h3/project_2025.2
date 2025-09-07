@@ -53,7 +53,7 @@ public class Proyecto {
     @JoinTable(
             name = "Categoria_has_Proyecto",
             joinColumns = @JoinColumn(name = "Proyecto_proyecto_id"),
-            inverseJoinColumns = @JoinColumn(name = "Categoria_idCategoria")
+            inverseJoinColumns = @JoinColumn(name = "categoria_id_categoria")
     )
     private Set<Categoria> categorias;
 

@@ -25,7 +25,7 @@ USE `database` ;
 -- Table `database`.`API`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`API` (
-  `api_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `api_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `nombre_api` VARCHAR(45) NOT NULL,
   `descripcion_api` TEXT NOT NULL,
   `estado_api` ENUM('PRODUCCION', 'QA', 'DEPRECATED') NOT NULL,
@@ -39,9 +39,10 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Categoria`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Categoria` (
-  `idCategoria` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id_categoria` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `nombre_categoria` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`idCategoria`))
+  PRIMARY KEY (`id_categoria`),
+  INDEX `idx_id_categoria` (`id_categoria` ASC) VISIBLE)
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
@@ -50,7 +51,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Clasificacion`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Clasificacion` (
-  `clasificacion_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `clasificacion_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `tipo_contenido_texto` VARCHAR(45) NULL DEFAULT NULL,
   PRIMARY KEY (`clasificacion_id`))
 ENGINE = InnoDB
@@ -61,9 +62,9 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Documentacion`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Documentacion` (
-  `documentacion_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `documentacion_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `seccion_documentacion` VARCHAR(128) NULL DEFAULT NULL,
-  `API_api_id` INT UNSIGNED NOT NULL,
+  `API_api_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`documentacion_id`),
   INDEX `fk_Documentacion_API1_idx` (`API_api_id` ASC) VISIBLE,
   UNIQUE INDEX `API_api_id_UNIQUE` (`API_api_id` ASC) VISIBLE,
@@ -80,7 +81,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Metrica_API`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Metrica_API` (
-  `metrica_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `metrica_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `fecha_hora` DATETIME NULL DEFAULT NULL,
   `cantidad_llamadas` INT NOT NULL DEFAULT '0',
   `cantidad_errores` INT NOT NULL DEFAULT '0',
@@ -96,14 +97,14 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Version_API`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Version_API` (
-  `version_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `version_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `numero_version` VARCHAR(45) NOT NULL,
   `descripcion_version` TEXT NULL DEFAULT NULL,
   `contrato_api_url` TEXT NOT NULL,
   `fecha_lanzamiento` DATE NOT NULL,
-  `API_api_id` INT UNSIGNED NOT NULL,
-  `metrica_api_metrica_id` INT UNSIGNED NOT NULL,
-  `Documentacion_documentacion_id` INT UNSIGNED NOT NULL,
+  `API_api_id` BIGINT UNSIGNED NOT NULL,
+  `metrica_api_metrica_id` BIGINT UNSIGNED NOT NULL,
+  `Documentacion_documentacion_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`version_id`),
   INDEX `fk_Version_API_API1_idx` (`API_api_id` ASC) VISIBLE,
   INDEX `fk_version_api_metrica_api1_idx` (`metrica_api_metrica_id` ASC) VISIBLE,
@@ -130,12 +131,12 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Contenido`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Contenido` (
-  `contenido_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `contenido_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `titulo_contenido` VARCHAR(45) NOT NULL,
   `fecha_creacion` DATETIME NOT NULL,
-  `Clasificacion_clasificacion_id` INT UNSIGNED NOT NULL,
-  `Documentacion_documentacion_id` INT UNSIGNED NOT NULL,
-  `Version_API_version_id` INT UNSIGNED NOT NULL,
+  `Clasificacion_clasificacion_id` BIGINT UNSIGNED NOT NULL,
+  `Documentacion_documentacion_id` BIGINT UNSIGNED NOT NULL,
+  `Version_API_version_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`contenido_id`),
   INDEX `fk_Contenido_Clasificacion1_idx` (`Clasificacion_clasificacion_id` ASC) VISIBLE,
   INDEX `fk_Contenido_Documentacion1_idx` (`Documentacion_documentacion_id` ASC) VISIBLE,
@@ -159,7 +160,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Usuario`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Usuario` (
-  `usuario_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `usuario_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `nombre_usuario` VARCHAR(100) NOT NULL,
   `apellido_paterno` VARCHAR(100) NOT NULL,
   `apellido_materno` VARCHAR(100) NOT NULL,
@@ -192,12 +193,12 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Conversacion`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Conversacion` (
-  `conversacion_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `conversacion_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `titulo_conversacion` VARCHAR(255) NULL,
   `fecha_inicio_conversacion` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `fecha_fin_conversacion` DATETIME NULL,
   `estado_conversacion` ENUM('ACTIVA', 'CERRADA') NOT NULL DEFAULT 'ACTIVA',
-  `Usuario_usuario_id` INT UNSIGNED NOT NULL,
+  `Usuario_usuario_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`conversacion_id`),
   INDEX `fk_Conversacion_Usuario1_idx` (`Usuario_usuario_id` ASC) VISIBLE,
   CONSTRAINT `fk_Conversacion_Usuario1`
@@ -213,7 +214,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Repositorio`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Repositorio` (
-  `repositorio_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `repositorio_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `nombre_repositorio` VARCHAR(128) NOT NULL,
   `descripcion_repositorio` TEXT NULL DEFAULT NULL,
   `visibilidad_repositorio` ENUM('PUBLICO', 'PRIVADO') NOT NULL DEFAULT 'PRIVADO',
@@ -230,10 +231,10 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Enlace`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Enlace` (
-  `enlace_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `enlace_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `direccion_almacenamiento` TEXT NOT NULL,
   `fecha_creacion_enlace` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `Repositorio_repositorio_id` INT UNSIGNED NOT NULL,
+  `Repositorio_repositorio_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`enlace_id`),
   INDEX `fk_Enlace_Repositorio1_idx` (`Repositorio_repositorio_id` ASC) VISIBLE,
   CONSTRAINT `fk_Enlace_Repositorio1`
@@ -247,7 +248,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Equipo`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Equipo` (
-  `equipo_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `equipo_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `nombre_equipo` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`equipo_id`))
 ENGINE = InnoDB
@@ -258,7 +259,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Proyecto`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Proyecto` (
-  `proyecto_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `proyecto_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `nombre_proyecto` VARCHAR(128) NOT NULL,
   `descripcion_proyecto` TEXT NULL DEFAULT NULL,
   `visibilidad_proyecto` ENUM('PUBLICO', 'PRIVADO') NOT NULL DEFAULT 'PRIVADO',
@@ -276,8 +277,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Equipo_has_proyecto`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Equipo_has_proyecto` (
-  `Equipo_equipo_id` INT UNSIGNED NOT NULL,
-  `Proyecto_proyecto_id` INT UNSIGNED NOT NULL,
+  `Equipo_equipo_id` BIGINT UNSIGNED NOT NULL,
+  `Proyecto_proyecto_id` BIGINT UNSIGNED NOT NULL,
   `privilegio_equipo_proyecto` ENUM('EDITOR', 'LECTOR', 'COMENTADOR') NOT NULL DEFAULT 'LECTOR',
   `fecha_equipo_proyecto` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`Equipo_equipo_id`, `Proyecto_proyecto_id`),
@@ -297,8 +298,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Equipo_has_repositorio`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Equipo_has_repositorio` (
-  `Equipo_equipo_id` INT UNSIGNED NOT NULL,
-  `Repositorio_repositorio_id` INT UNSIGNED NOT NULL,
+  `Equipo_equipo_id` BIGINT UNSIGNED NOT NULL,
+  `Repositorio_repositorio_id` BIGINT UNSIGNED NOT NULL,
   `privilegio_equipo_repositorio` ENUM('EDITOR', 'LECTOR', 'COMENTADOR') NOT NULL DEFAULT 'LECTOR',
   `fecha_equipo_repositorio` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`Equipo_equipo_id`, `Repositorio_repositorio_id`),
@@ -318,7 +319,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Etiqueta`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Etiqueta` (
-  `tag_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `tag_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `nombre_tag` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`tag_id`))
 ENGINE = InnoDB
@@ -329,8 +330,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Etiqueta_has_api`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Etiqueta_has_api` (
-  `Etiqueta_tag_id` INT UNSIGNED NOT NULL,
-  `API_api_id` INT UNSIGNED NOT NULL,
+  `Etiqueta_tag_id` BIGINT UNSIGNED NOT NULL,
+  `API_api_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`Etiqueta_tag_id`, `API_api_id`),
   INDEX `fk_Etiqueta_has_API_API1_idx` (`API_api_id` ASC) VISIBLE,
   INDEX `fk_Etiqueta_has_API_Etiqueta1_idx` (`Etiqueta_tag_id` ASC) VISIBLE,
@@ -348,7 +349,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`faq`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`faq` (
-  `faq_id` INT NOT NULL AUTO_INCREMENT,
+  `faq_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `pregunta` TEXT NOT NULL,
   PRIMARY KEY (`faq_id`))
 ENGINE = InnoDB
@@ -359,11 +360,11 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Feedback`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Feedback` (
-  `feedback_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `feedback_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `comentario` TEXT NOT NULL,
   `puntuacion` DECIMAL(2,1) UNSIGNED NOT NULL,
-  `Usuario_usuario_id` INT UNSIGNED NOT NULL,
-  `Documentacion_documentacion_id` INT UNSIGNED NOT NULL,
+  `Usuario_usuario_id` BIGINT UNSIGNED NOT NULL,
+  `Documentacion_documentacion_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`feedback_id`),
   INDEX `fk_Feedback_Usuario1_idx` (`Usuario_usuario_id` ASC) VISIBLE,
   INDEX `fk_Feedback_Documentacion1_idx` (`Documentacion_documentacion_id` ASC) VISIBLE,
@@ -383,13 +384,13 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Notificacion`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Notificacion` (
-  `notificacion_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `notificacion_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `tipo_notificacion` ENUM('SISTEMA', 'TICKET', 'ALERTA', 'METRICA') NOT NULL,
   `asunto_notificacion` VARCHAR(255) NOT NULL,
   `mensaje_notificacion` TEXT NOT NULL,
   `estado_notificacion` ENUM('ENVIADA', 'RECIBIDA') NOT NULL,
   `inspeccion_notificacion` ENUM('LEIDA', 'NO_LEIDA') NOT NULL,
-  `Usuario_usuario_id` INT UNSIGNED NOT NULL,
+  `Usuario_usuario_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`notificacion_id`),
   INDEX `fk_Notificacion_Usuario1_idx` (`Usuario_usuario_id` ASC) VISIBLE,
   CONSTRAINT `fk_Notificacion_Usuario1`
@@ -403,13 +404,13 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Recurso`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Recurso` (
-  `recurso_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `recurso_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `nombre_archivo` VARCHAR(255) NOT NULL,
   `tipo_recurso` ENUM('TEXTO', 'IMAGEN', 'AUDIO', 'VIDEO', 'CODIGO', 'DOCUMENTO', 'GRAFICA', 'OTRO') NOT NULL DEFAULT 'TEXTO',
   `formato_recurso` VARCHAR(10) NULL,
   `mime_type` VARCHAR(50) NOT NULL,
-  `Contenido_contenido_id` INT UNSIGNED NOT NULL,
-  `Enlace_enlace_id` INT UNSIGNED NOT NULL,
+  `Contenido_contenido_id` BIGINT UNSIGNED NOT NULL,
+  `Enlace_enlace_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`recurso_id`),
   INDEX `fk_Recurso_Contenido1_idx` (`Contenido_contenido_id` ASC) VISIBLE,
   INDEX `fk_Recurso_Enlace1_idx` (`Enlace_enlace_id` ASC) VISIBLE,
@@ -429,7 +430,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Rol`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Rol` (
-  `rol_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `rol_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `nombre_rol` VARCHAR(30) NOT NULL,
   PRIMARY KEY (`rol_id`))
 ENGINE = InnoDB
@@ -440,7 +441,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Ticket`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Ticket` (
-  `ticket_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `ticket_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `asunto_ticket` VARCHAR(255) NOT NULL,
   `cuerpo_ticket` TEXT NOT NULL,
   `fecha_creacion` DATETIME NOT NULL,
@@ -448,8 +449,8 @@ CREATE TABLE IF NOT EXISTS `database`.`Ticket` (
   `estado_ticket` ENUM('ENVIADO', 'RECIBIDO', 'EN_PROGRESO', 'RESUELTO', 'CERRADO', 'RECHAZADO') NOT NULL,
   `tipo_ticket` ENUM('INCIDENCIA', 'CONSULTA', 'REQUERIMIENTO') NOT NULL DEFAULT 'CONSULTA',
   `prioridad_ticket` ENUM('BAJA', 'MEDIA', 'ALTA') NOT NULL DEFAULT 'MEDIA',
-  `reportado_por_usuario_id` INT UNSIGNED NOT NULL,
-  `asignado_a_usuario_id` INT UNSIGNED NULL DEFAULT NULL,
+  `reportado_por_usuario_id` BIGINT UNSIGNED NOT NULL,
+  `asignado_a_usuario_id` BIGINT UNSIGNED NULL DEFAULT NULL,
   PRIMARY KEY (`ticket_id`),
   INDEX `fk_Ticket_Usuario1_idx` (`reportado_por_usuario_id` ASC) VISIBLE,
   INDEX `fk_Ticket_Usuario2_idx` (`asignado_a_usuario_id` ASC) VISIBLE,
@@ -467,8 +468,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Ticket_has_usuario`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Ticket_has_usuario` (
-  `Ticket_ticket_id` INT UNSIGNED NOT NULL,
-  `Usuario_usuario_id` INT UNSIGNED NOT NULL,
+  `Ticket_ticket_id` BIGINT UNSIGNED NOT NULL,
+  `Usuario_usuario_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`Ticket_ticket_id`, `Usuario_usuario_id`),
   INDEX `fk_Ticket_has_Usuario_Usuario1_idx` (`Usuario_usuario_id` ASC) VISIBLE,
   INDEX `fk_Ticket_has_Usuario_Ticket1_idx` (`Ticket_ticket_id` ASC) VISIBLE,
@@ -486,12 +487,12 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Token`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Token` (
-  `token_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `token_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `valor_token` VARCHAR(45) NULL DEFAULT NULL,
   `estado_token` ENUM('ACTIVO', 'REVOCADO') NULL DEFAULT NULL,
   `fecha_creacion_token` DATETIME NULL DEFAULT NULL,
   `fecha_expiracion_token` DATETIME NULL DEFAULT NULL,
-  `Usuario_usuario_id` INT UNSIGNED NOT NULL,
+  `Usuario_usuario_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`token_id`),
   INDEX `fk_Token_Usuario1_idx` (`Usuario_usuario_id` ASC) VISIBLE,
   CONSTRAINT `fk_Token_Usuario1`
@@ -505,8 +506,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Usuario_has_equipo`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Usuario_has_equipo` (
-  `Usuario_usuario_id` INT UNSIGNED NOT NULL,
-  `Equipo_equipo_id` INT UNSIGNED NOT NULL,
+  `Usuario_usuario_id` BIGINT UNSIGNED NOT NULL,
+  `Equipo_equipo_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`Usuario_usuario_id`, `Equipo_equipo_id`),
   INDEX `fk_Usuario_has_Equipo_Equipo1_idx` (`Equipo_equipo_id` ASC) VISIBLE,
   INDEX `fk_Usuario_has_Equipo_Usuario1_idx` (`Usuario_usuario_id` ASC) VISIBLE,
@@ -524,8 +525,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Usuario_has_proyecto`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Usuario_has_proyecto` (
-  `Usuario_usuario_id` INT UNSIGNED NOT NULL,
-  `Proyecto_proyecto_id` INT UNSIGNED NOT NULL,
+  `Usuario_usuario_id` BIGINT UNSIGNED NOT NULL,
+  `Proyecto_proyecto_id` BIGINT UNSIGNED NOT NULL,
   `privilegio_usuario_proyecto` ENUM('EDITOR', 'LECTOR', 'COMENTADOR') NOT NULL DEFAULT 'LECTOR',
   `fecha_usuario_proyecto` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`Usuario_usuario_id`, `Proyecto_proyecto_id`),
@@ -545,8 +546,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Usuario_has_repositorio`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Usuario_has_repositorio` (
-  `Usuario_usuario_id` INT UNSIGNED NOT NULL,
-  `Repositorio_repositorio_id` INT UNSIGNED NOT NULL,
+  `Usuario_usuario_id` BIGINT UNSIGNED NOT NULL,
+  `Repositorio_repositorio_id` BIGINT UNSIGNED NOT NULL,
   `privilegio_usuario_repositorio` ENUM('EDITOR', 'LECTOR', 'COMENTADOR') NOT NULL DEFAULT 'LECTOR',
   `fecha_usuario_repositorio` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`Usuario_usuario_id`, `Repositorio_repositorio_id`),
@@ -566,8 +567,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Usuario_has_rol`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Usuario_has_rol` (
-  `Usuario_usuario_id` INT UNSIGNED NOT NULL,
-  `Rol_rol_id` INT UNSIGNED NOT NULL,
+  `Usuario_usuario_id` BIGINT UNSIGNED NOT NULL,
+  `Rol_rol_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`Usuario_usuario_id`, `Rol_rol_id`),
   INDEX `fk_Usuario_has_Rol_Rol1_idx` (`Rol_rol_id` ASC) VISIBLE,
   INDEX `fk_Usuario_has_Rol_Usuario1_idx` (`Usuario_usuario_id` ASC) VISIBLE,
@@ -585,13 +586,14 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Solicitud_acceso_API`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Solicitud_acceso_API` (
-  `accesibilidad_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `accesibilidad_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `tipo_entorno` ENUM('SANDBOX', 'QA', 'PROD') NOT NULL,
   `estado_solicitud` ENUM('PENDIENTE', 'APROBADO', 'RECHAZADO') NOT NULL,
   `fecha_solicitud` DATETIME NOT NULL,
   `comentario_solicitud` VARCHAR(255) NULL,
-  `usuario_usuario_id` INT UNSIGNED NOT NULL,
-  `api_api_id` INT UNSIGNED NOT NULL,
+  `usuario_usuario_id` BIGINT UNSIGNED NOT NULL,
+  `aprobador_usuario_id` BIGINT UNSIGNED NULL,
+  `api_api_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`accesibilidad_id`),
   INDEX `fk_acceso_API_usuario1_idx` (`usuario_usuario_id` ASC) VISIBLE,
   INDEX `fk_solicitud_acceso_API_api1_idx` (`api_api_id` ASC) VISIBLE,
@@ -612,7 +614,7 @@ ENGINE = InnoDB;
 -- Table `database`.`Credencial_API`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Credencial_API` (
-  `credencial_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `credencial_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `entorno_credencial` ENUM('SANDBOX', 'QA', 'PROD') NOT NULL,
   `tipo_credencial` ENUM('API_KEY', 'OAUTH_CLIENT') NOT NULL,
   `valor_publico` VARCHAR(255) NOT NULL,
@@ -620,7 +622,7 @@ CREATE TABLE IF NOT EXISTS `database`.`Credencial_API` (
   `estado_credencial` ENUM('ACTIVO', 'REVOCADO') NOT NULL DEFAULT 'ACTIVO',
   `fecha_creacion_credencial` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `fecha_vencimiento_credencial` DATETIME NULL,
-  `api_api_id` INT UNSIGNED NOT NULL,
+  `api_api_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`credencial_id`),
   INDEX `fk_credencial_api1_idx` (`api_api_id` ASC) VISIBLE,
   CONSTRAINT `fk_credencial_api1`
@@ -635,10 +637,10 @@ ENGINE = InnoDB;
 -- Table `database`.`Impersonacion`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Impersonacion` (
-  `idImpersonacion` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `idImpersonacion` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `fecha_inicio_impersonacion` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `fecha_fin_impersonacion` DATETIME NULL,
-  `usuario_usuario_id` INT UNSIGNED NOT NULL,
+  `usuario_usuario_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`idImpersonacion`),
   INDEX `fk_Impersonacion_usuario1_idx` (`usuario_usuario_id` ASC) VISIBLE,
   CONSTRAINT `fk_Impersonacion_usuario1`
@@ -653,14 +655,14 @@ ENGINE = InnoDB;
 -- Table `database`.`Historial`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Historial` (
-  `historial_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `historial_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `tipo_evento` ENUM('CREACION', 'MODIFICACION', 'ELIMINACION', 'LOGIN', 'LOGOUT') NOT NULL,
   `entidad_afectada` VARCHAR(45) NULL,
-  `id_entidad_afectada` INT NULL,
+  `id_entidad_afectada` BIGINT NULL,
   `descripcion_evento` TEXT NOT NULL,
   `fecha_evento` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `ip_origen` VARCHAR(128) NULL,
-  `Usuario_usuario_id` INT UNSIGNED NOT NULL,
+  `Usuario_usuario_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`historial_id`),
   INDEX `fk_Historial_Usuario1_idx` (`Usuario_usuario_id` ASC) VISIBLE,
   CONSTRAINT `fk_Historial_Usuario1`
@@ -675,11 +677,11 @@ ENGINE = InnoDB;
 -- Table `database`.`Mensaje`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Mensaje` (
-  `mensaje_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `mensaje_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `remitente` ENUM('USUARIO', 'CHATBOT') NOT NULL,
   `contenido_mensaje` TEXT NULL,
   `fecha_envio_mensaje` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `Conversacion_conversacion_id` INT UNSIGNED NOT NULL,
+  `Conversacion_conversacion_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`mensaje_id`),
   INDEX `fk_Mensaje_Conversacion1_idx` (`Conversacion_conversacion_id` ASC) VISIBLE,
   CONSTRAINT `fk_Mensaje_Conversacion1`
@@ -694,14 +696,14 @@ ENGINE = InnoDB;
 -- Table `database`.`Categoria_has_Notificacion`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Categoria_has_Notificacion` (
-  `Categoria_idCategoria` INT UNSIGNED NOT NULL,
-  `Notificacion_notificacion_id` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`Categoria_idCategoria`, `Notificacion_notificacion_id`),
+  `categoria_id_categoria` BIGINT UNSIGNED NOT NULL,
+  `Notificacion_notificacion_id` BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY (`categoria_id_categoria`, `Notificacion_notificacion_id`),
   INDEX `fk_Categoria_has_Notificacion_Notificacion1_idx` (`Notificacion_notificacion_id` ASC) VISIBLE,
-  INDEX `fk_Categoria_has_Notificacion_Categoria1_idx` (`Categoria_idCategoria` ASC) VISIBLE,
+  INDEX `fk_Categoria_has_Notificacion_Categoria1_idx` (`categoria_id_categoria` ASC) VISIBLE,
   CONSTRAINT `fk_Categoria_has_Notificacion_Categoria1`
-    FOREIGN KEY (`Categoria_idCategoria`)
-    REFERENCES `database`.`Categoria` (`idCategoria`)
+    FOREIGN KEY (`categoria_id_categoria`)
+    REFERENCES `database`.`Categoria` (`id_categoria`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Categoria_has_Notificacion_Notificacion1`
@@ -717,8 +719,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Proyecto_has_Repositorio`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Proyecto_has_Repositorio` (
-  `Proyecto_proyecto_id` INT UNSIGNED NOT NULL,
-  `Repositorio_repositorio_id` INT UNSIGNED NOT NULL,
+  `Proyecto_proyecto_id` BIGINT UNSIGNED NOT NULL,
+  `Repositorio_repositorio_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`Proyecto_proyecto_id`, `Repositorio_repositorio_id`),
   INDEX `fk_Proyecto_has_Repositorio_Repositorio1_idx` (`Repositorio_repositorio_id` ASC) VISIBLE,
   INDEX `fk_Proyecto_has_Repositorio_Proyecto1_idx` (`Proyecto_proyecto_id` ASC) VISIBLE,
@@ -740,11 +742,11 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Adjunto`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Adjunto` (
-  `adjunto_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `adjunto_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `nombre_archivo_adjunto` VARCHAR(128) NULL,
   `tipo_archivo_adjunto` ENUM('PDF', 'TXT', 'IMAGEN', 'DOC', 'OTRO') NOT NULL,
   `url_archivo_adjunto` TEXT NOT NULL,
-  `Mensaje_mensaje_id` INT UNSIGNED NOT NULL,
+  `Mensaje_mensaje_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`adjunto_id`),
   INDEX `fk_Adjunto_Mensaje1_idx` (`Mensaje_mensaje_id` ASC) VISIBLE,
   CONSTRAINT `fk_Adjunto_Mensaje1`
@@ -759,10 +761,10 @@ ENGINE = InnoDB;
 -- Table `database`.`Payload`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Payload` (
-  `payload_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `payload_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `tipo_payload` ENUM('BOTON', 'ENLACE', 'JSON', 'OTRO') NOT NULL,
   `contenido_payload` JSON NOT NULL,
-  `Mensaje_mensaje_id` INT UNSIGNED NOT NULL,
+  `Mensaje_mensaje_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`payload_id`),
   INDEX `fk_Payload_Mensaje1_idx` (`Mensaje_mensaje_id` ASC) VISIBLE,
   CONSTRAINT `fk_Payload_Mensaje1`
@@ -777,8 +779,8 @@ ENGINE = InnoDB;
 -- Table `database`.`Version_API_has_Enlace`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Version_API_has_Enlace` (
-  `Version_API_version_id` INT UNSIGNED NOT NULL,
-  `Enlace_enlace_id` INT UNSIGNED NOT NULL,
+  `Version_API_version_id` BIGINT UNSIGNED NOT NULL,
+  `Enlace_enlace_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`Version_API_version_id`, `Enlace_enlace_id`),
   INDEX `fk_Version_API_has_Enlace_Enlace1_idx` (`Enlace_enlace_id` ASC) VISIBLE,
   INDEX `fk_Version_API_has_Enlace_Version_API1_idx` (`Version_API_version_id` ASC) VISIBLE,
@@ -800,8 +802,8 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Repositorio_has_Enlace`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Repositorio_has_Enlace` (
-  `Repositorio_repositorio_id` INT UNSIGNED NOT NULL,
-  `Enlace_enlace_id` INT UNSIGNED NOT NULL,
+  `Repositorio_repositorio_id` BIGINT UNSIGNED NOT NULL,
+  `Enlace_enlace_id` BIGINT UNSIGNED NOT NULL,
   PRIMARY KEY (`Repositorio_repositorio_id`, `Enlace_enlace_id`),
   INDEX `fk_Repositorio_has_Enlace_Enlace1_idx` (`Enlace_enlace_id` ASC) VISIBLE,
   INDEX `fk_Repositorio_has_Enlace_Repositorio1_idx` (`Repositorio_repositorio_id` ASC) VISIBLE,
@@ -823,14 +825,14 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Categoria_has_API`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Categoria_has_API` (
-  `Categoria_idCategoria` INT UNSIGNED NOT NULL,
-  `API_api_id` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`Categoria_idCategoria`, `API_api_id`),
+  `categoria_id_categoria` BIGINT UNSIGNED NOT NULL,
+  `API_api_id` BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY (`categoria_id_categoria`, `API_api_id`),
   INDEX `fk_Categoria_has_API_API1_idx` (`API_api_id` ASC) VISIBLE,
-  INDEX `fk_Categoria_has_API_Categoria1_idx` (`Categoria_idCategoria` ASC) VISIBLE,
+  INDEX `fk_Categoria_has_API_Categoria1_idx` (`categoria_id_categoria` ASC) VISIBLE,
   CONSTRAINT `fk_Categoria_has_API_Categoria1`
-    FOREIGN KEY (`Categoria_idCategoria`)
-    REFERENCES `database`.`Categoria` (`idCategoria`)
+    FOREIGN KEY (`categoria_id_categoria`)
+    REFERENCES `database`.`Categoria` (`id_categoria`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Categoria_has_API_API1`
@@ -846,14 +848,14 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Categoria_has_Repositorio`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Categoria_has_Repositorio` (
-  `Categoria_idCategoria` INT UNSIGNED NOT NULL,
-  `Repositorio_repositorio_id` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`Categoria_idCategoria`, `Repositorio_repositorio_id`),
+  `categoria_id_categoria` BIGINT UNSIGNED NOT NULL,
+  `Repositorio_repositorio_id` BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY (`categoria_id_categoria`, `Repositorio_repositorio_id`),
   INDEX `fk_Categoria_has_Repositorio_Repositorio1_idx` (`Repositorio_repositorio_id` ASC) VISIBLE,
-  INDEX `fk_Categoria_has_Repositorio_Categoria1_idx` (`Categoria_idCategoria` ASC) VISIBLE,
+  INDEX `fk_Categoria_has_Repositorio_Categoria1_idx` (`categoria_id_categoria` ASC) VISIBLE,
   CONSTRAINT `fk_Categoria_has_Repositorio_Categoria1`
-    FOREIGN KEY (`Categoria_idCategoria`)
-    REFERENCES `database`.`Categoria` (`idCategoria`)
+    FOREIGN KEY (`categoria_id_categoria`)
+    REFERENCES `database`.`Categoria` (`id_categoria`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Categoria_has_Repositorio_Repositorio1`
@@ -869,14 +871,14 @@ DEFAULT CHARACTER SET = utf8mb3;
 -- Table `database`.`Categoria_has_Proyecto`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `database`.`Categoria_has_Proyecto` (
-  `Categoria_idCategoria` INT UNSIGNED NOT NULL,
-  `Proyecto_proyecto_id` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`Categoria_idCategoria`, `Proyecto_proyecto_id`),
+  `categoria_id_categoria` BIGINT UNSIGNED NOT NULL,
+  `Proyecto_proyecto_id` BIGINT UNSIGNED NOT NULL,
+  PRIMARY KEY (`categoria_id_categoria`, `Proyecto_proyecto_id`),
   INDEX `fk_Categoria_has_Proyecto_Proyecto1_idx` (`Proyecto_proyecto_id` ASC) VISIBLE,
-  INDEX `fk_Categoria_has_Proyecto_Categoria1_idx` (`Categoria_idCategoria` ASC) VISIBLE,
+  INDEX `fk_Categoria_has_Proyecto_Categoria1_idx` (`categoria_id_categoria` ASC) VISIBLE,
   CONSTRAINT `fk_Categoria_has_Proyecto_Categoria1`
-    FOREIGN KEY (`Categoria_idCategoria`)
-    REFERENCES `database`.`Categoria` (`idCategoria`)
+    FOREIGN KEY (`categoria_id_categoria`)
+    REFERENCES `database`.`Categoria` (`id_categoria`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Categoria_has_Proyecto_Proyecto1`

@@ -13,8 +13,9 @@ import java.util.Set;
 public class Categoria {
 
     @Id
-    @Column(name = "idCategoria", nullable = false)
-    private Integer idCategoria;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_categoria", nullable = false)
+    private Long idCategoria;
 
     @Column(name = "nombre_categoria", nullable = false, length = 45)
     private String nombreCategoria;
@@ -31,7 +32,7 @@ public class Categoria {
     @ManyToMany
     @JoinTable(
         name = "Categoria_has_Notificacion",
-        joinColumns = @JoinColumn(name = "Categoria_idCategoria"),
+        joinColumns = @JoinColumn(name = "categoria_id_categoria"),
         inverseJoinColumns = @JoinColumn(name = "Notificacion_notificacion_id")
     )
     private Set<Notificacion> notificaciones;
