@@ -43,7 +43,7 @@ public class UserViewController {
         return "redirect:/devportal/users/crear";
     }
 
-    @GetMapping("/list")
+    @GetMapping("/listar")
     public String listUsers(Model model) {
         List<Usuario> usuarios = userService.listarUsuarios();
         model.addAttribute("usuarios", usuarios);

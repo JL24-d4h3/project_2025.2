@@ -61,6 +61,12 @@ public class Usuario {
     @Column(name = "hashed_password", nullable = false, length = 512)
     private String hashedPassword;
 
+    @Column(name="proveedor", length = 20)
+    private String proveedor;
+
+    @Column(name="id_proveedor", length = 255)
+    private String idProveedor;
+
     @Column(name = "direccion_usuario", nullable = false, length = 255)
     private String direccionUsuario;
 
@@ -78,18 +84,18 @@ public class Usuario {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_usuario", nullable = false)
-    private EstadoUsuario estadoUsuario;
+    private EstadoUsuario estadoUsuario = EstadoUsuario.HABILITADO;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "actividad_usuario", nullable = false)
-    private ActividadUsuario actividadUsuario;
+    private ActividadUsuario actividadUsuario = ActividadUsuario.ACTIVO;
 
     @Column(name = "codigo_usuario", length = 45, unique = true)
     private String codigoUsuario;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "acceso_usuario", nullable = false)
-    private AccesoUsuario accesoUsuario;
+    private AccesoUsuario accesoUsuario = AccesoUsuario.SI;
 
     @OneToMany(mappedBy = "usuario")
     private Set<Conversacion> conversaciones;

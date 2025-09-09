@@ -3,7 +3,7 @@ package org.project.project.service;
 import org.project.project.model.entity.Usuario;
 import org.project.project.repository.UsuarioRepository;
 import org.project.project.exception.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,8 +12,13 @@ import java.util.List;
 @Service
 public class UserService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public List<Usuario> listarUsuarios() {
         return usuarioRepository.findAll();
@@ -25,9 +30,15 @@ public class UserService {
     }
 
     public Usuario guardarUsuario(Usuario usuario) {
+        // La contraseña debe ser codificada ANTES de llamar a este método.
         usuario.setFechaCreacion(LocalDateTime.now());
-        // En una aplicación real, aquí se debería codificar la contraseña antes de guardarla
         return usuarioRepository.save(usuario);
+    }
+
+    public void updatePassword(String usernameOrEmail, String newPassword) {
+        Usuario usuario = findByUsernameOrEmail(usernameOrEmail);
+        usuario.setHashedPassword(passwordEncoder.encode(newPassword));
+        usuarioRepository.save(usuario);
     }
 
     public Usuario actualizarUsuario(Long id, Usuario usuarioDetails) {
@@ -52,8 +63,25 @@ public class UserService {
         return usuarioRepository.save(usuario);
     }
 
-    public void eliminarUsuario(Long id) {
+    public Usuario eliminarUsuario(Long id) {
         Usuario usuario = buscarUsuarioPorId(id);
         usuarioRepository.delete(usuario);
+        return usuario;
+    }
+
+    public Usuario findByUsernameOrEmail(String usernameOrEmail) {
+        return usuarioRepository.findByUsername(usernameOrEmail)
+                .orElseGet(() -> usuarioRepository.findByCorreo(usernameOrEmail)
+                        .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + usernameOrEmail)));
+    }
+
+    public boolean existsByUsernameOrEmail(String username, String email) {
+        return usuarioRepository.findByUsername(username).isPresent() ||
+               usuarioRepository.findByCorreo(email).isPresent();
+    }
+
+    public Usuario findByEmail(String email) {
+        return usuarioRepository.findByCorreo(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con email: " + email));
     }
 }

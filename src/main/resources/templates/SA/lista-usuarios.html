@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Usuarios</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #dddddd; text-align: left; padding: 8px; }
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        a { text-decoration: none; color: #007bff; }
+        .nav-link { display: inline-block; margin-bottom: 1em; padding: 0.5em 1em; border: 1px solid #007bff; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1>Lista de Usuarios</h1>
+
+    <a th:href="@{/devportal/SA/crear}" class="nav-link">Crear Nuevo Usuario</a>
+    <a th:href="@{/devportal/SA/eliminar}" class="nav-link">Eliminar Usuario</a>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Nombre Completo</th>
+                <th>Correo</th>
+                <th>Estado</th>
+                <th>Actividad</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!--/* Itera sobre la lista de usuarios pasada desde el controlador */-->
+            <tr th:each="usuario : ${usuarios}">
+                <td th:text="${usuario.usuarioId}">1</td>
+                <td th:text="${usuario.username}">testuser</td>
+                <td th:text="${usuario.nombreUsuario + ' ' + usuario.apellidoPaterno}">Test User</td>
+                <td th:text="${usuario.correo}">test@example.com</td>
+                <td th:text="${usuario.estadoUsuario}">HABILITADO</td>
+                <td th:text="${usuario.actividadUsuario}">ACTIVO</td>
+            </tr>
+            <!--/* Si la lista está vacía, muestra un mensaje */-->
+            <tr th:if="${usuarios.isEmpty()}">
+                <td colspan="6" style="text-align: center;">No se encontraron usuarios.</td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>

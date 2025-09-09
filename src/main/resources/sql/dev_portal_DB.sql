@@ -178,7 +178,7 @@ CREATE TABLE IF NOT EXISTS `database`.`Usuario` (
   `foto_perfil` VARCHAR(255) NULL DEFAULT NULL,
   `estado_usuario` ENUM('HABILITADO', 'INHABILITADO') NOT NULL,
   `actividad_usuario` ENUM('ACTIVO', 'INACTIVO') NOT NULL,
-  `codigo_usuario` VARCHAR(45) NOT NULL,
+  `codigo_usuario` VARCHAR(45) NULL,
   `acceso_usuario` ENUM('SI', 'NO') NOT NULL,
   PRIMARY KEY (`usuario_id`),
   UNIQUE INDEX `dni_UNIQUE` (`dni` ASC) VISIBLE,
@@ -188,6 +188,9 @@ CREATE TABLE IF NOT EXISTS `database`.`Usuario` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb3;
 
+ALTER TABLE `database`.`Usuario`
+    ADD COLUMN `proveedor` VARCHAR(20) NULL COMMENT 'Proveedor de autenticacion (local, google, github, facebook)' AFTER `hashed_password`,
+ADD COLUMN `id_proveedor` VARCHAR(255) NULL COMMENT 'ID unico del usuario en el proveedor' AFTER `proveedor`;
 
 -- -----------------------------------------------------
 -- Table `database`.`Conversacion`

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Nuevo Usuario</title>
+    <!-- Simple styling -->
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        form { max-width: 500px; }
+        div { margin-bottom: 1em; }
+        label { display: block; margin-bottom: 0.2em; }
+        input { width: 100%; padding: 0.5em; box-sizing: border-box; }
+        button { padding: 0.7em 1.5em; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h1>Crear Nuevo Usuario</h1>
+
+    <a th:href="@{/devportal/SA}" class="nav-link">Ver lista de usuarios</a>
+
+    <!--/* Muestra un mensaje de éxito si existe */-->
+    <div th:if="${successMessage}" style="color: green; border: 1px solid green; padding: 1em; margin-bottom: 1em;">
+        <p th:text="${successMessage}"></p>
+    </div>
+
+    <form action="#" th:action="@{/devportal/SA/crear}" th:object="${usuario}" method="post">
+        <div>
+            <label for="username">Username:</label>
+            <input type="text" id="username" th:field="*{username}" required />
+        </div>
+        <div>
+            <label for="nombreUsuario">Nombre:</label>
+            <input type="text" id="nombreUsuario" th:field="*{nombreUsuario}" required />
+        </div>
+        <div>
+            <label for="apellidoPaterno">Apellido Paterno:</label>
+            <input type="text" id="apellidoPaterno" th:field="*{apellidoPaterno}" required />
+        </div>
+        <div>
+            <label for="apellidoMaterno">Apellido Materno:</label>
+            <input type="text" id="apellidoMaterno" th:field="*{apellidoMaterno}" required />
+        </div>
+        <div>
+            <label for="correo">Correo Electrónico:</label>
+            <input type="email" id="correo" th:field="*{correo}" required />
+        </div>
+        <div>
+            <label for="hashedPassword">Contraseña:</label>
+            <input type="password" id="hashedPassword" th:field="*{hashedPassword}" required />
+        </div>
+        <div>
+            <label for="dni">DNI:</label>
+            <input type="text" id="dni" th:field="*{dni}" required />
+        </div>
+        <div>
+            <label for="direccionUsuario">Dirección:</label>
+            <input type="text" id="direccionUsuario" th:field="*{direccionUsuario}" required />
+        </div>
+        <div>
+            <label for="codigoUsuario">Código de Usuario:</label>
+            <input type="text" id="codigoUsuario" th:field="*{codigoUsuario}" required />
+        </div>
+
+        <!-- Campos ENUM como desplegables -->
+        <div>
+            <label for="estadoUsuario">Estado:</label>
+            <select id="estadoUsuario" th:field="*{estadoUsuario}">
+                <option th:each="estado : ${T(org.project.project.model.entity.Usuario.EstadoUsuario).values()}"
+                        th:value="${estado}" th:text="${estado}"></option>
+            </select>
+        </div>
+        <div>
+            <label for="actividadUsuario">Actividad:</label>
+            <select id="actividadUsuario" th:field="*{actividadUsuario}">
+                <option th:each="actividad : ${T(org.project.project.model.entity.Usuario.ActividadUsuario).values()}"
+                        th:value="${actividad}" th:text="${actividad}"></option>
+            </select>
+        </div>
+        <div>
+            <label for="accesoUsuario">Acceso:</label>
+            <select id="accesoUsuario" th:field="*{accesoUsuario}">
+                <option th:each="acceso : ${T(org.project.project.model.entity.Usuario.AccesoUsuario).values()}"
+                        th:value="${acceso}" th:text="${acceso}"></option>
+            </select>
+        </div>
+
+        <div>
+            <button type="submit">Crear Usuario</button>
+        </div>
+    </form>
+
+</body>
+</html>
