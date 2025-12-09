@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repositorios - DevPortal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/project-repository.css}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
+</head>
+<body>
+    <!-- Banner de Impersonación -->
+    <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Header Section -->
+        <div class="header-section">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <!-- Breadcrumb simple -->
+                    <div class="breadcrumb-simple">
+                        <span class="text-primary">Dashboard</span>
+                        <span class="mx-2">/</span>
+                        <span>Repositorios</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Header -->
+            <section class="dashboard-header">
+                <div class="dashboard-title">
+                    <div class="dropdown">
+                        <button class="create-button dropdown-toggle" type="button" id="createRepositoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-plus"></i>
+                            Nuevo Repositorio
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="createRepositoryDropdown">
+                            <li>
+                                <a class="dropdown-item" th:href="@{/devportal/{userRole}/{username}/repositories/create?type=personal(userRole=${userRole}, username=${username})}">
+                                    <i class="fas fa-user"></i>
+                                    Repositorio Personal
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" th:href="@{/devportal/{userRole}/{username}/repositories/create?type=colaborativo(userRole=${userRole}, username=${username})}">
+                                    <i class="fas fa-users"></i>
+                                    Repositorio Colaborativo
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <a th:href="@{/devportal/{userRole}/{username}/repositories/personal-repositories(userRole=${userRole}, username=${username})}" 
+                       class="stat-card" th:classappend="${currentView == 'personal' ? 'active' : ''}">
+                        <div class="stat-value" th:text="${stats.personal_repositories ?: 0}">0</div>
+                        <div class="stat-label">Repositorios personales</div>
+                    </a>
+                    <a th:href="@{/devportal/{userRole}/{username}/repositories/collaborative-repositories(userRole=${userRole}, username=${username})}" 
+                       class="stat-card" th:classappend="${currentView == 'collaborative' ? 'active' : ''}">
+                        <div class="stat-value" th:text="${stats.collaborative_repositories ?: 0}">0</div>
+                        <div class="stat-label">Repositorios colaborativos</div>
+                    </a>
+                    <a th:href="@{/devportal/{userRole}/{username}/repositories/i-am-part-of(userRole=${userRole}, username=${username})}" 
+                       class="stat-card" th:classappend="${currentView == 'i-am-part-of' ? 'active' : ''}">
+                        <div class="stat-value" th:text="${stats.i_am_part_of ?: 0}">0</div>
+                        <div class="stat-label">Repositorios de los que formo parte</div>
+                    </a>
+                    <a th:href="@{/devportal/{userRole}/{username}/repositories/other-repositories(userRole=${userRole}, username=${username})}" 
+                       class="stat-card" th:classappend="${currentView == 'other' ? 'active' : ''}">
+                        <div class="stat-value" th:text="${stats.other_repositories ?: 0}">0</div>
+                        <div class="stat-label">Otros repositorios</div>
+                    </a>
+                </div>
+            </section>
+            
+
+            
+            <!-- Filters Section -->
+            <section class="filters-section">
+                <div class="filters-header">
+                    <h3 class="filters-title">Filtros y Búsqueda</h3>
+                </div>
+                
+                <form class="filters-form" th:action="@{/devportal/{userRole}/{username}/repositories(userRole=${userRole}, username=${username})}" method="get">
+                    <div class="filters-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="search">Buscar repositorios</label>
+                            <input type="text" 
+                                   id="search" 
+                                   name="search" 
+                                   class="form-input search-input" 
+                                   placeholder="Buscar por nombre o descripción..."
+                                   th:value="${param.search}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="category">Categoría</label>
+                            <select id="category" name="category" class="form-select">
+                                <option value="">Todas las categorías</option>
+                                <option th:each="categoria : ${categories}" 
+                                        th:value="${categoria.nombreCategoria}"
+                                        th:text="${categoria.nombreCategoria}"
+                                        th:selected="${param.category == categoria.nombreCategoria}">
+                                    Categoría
+                                </option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="sort">Ordenar por</label>
+                            <select id="sort" name="sort" class="form-select">
+                                <option value="recent" th:selected="${param.sort == 'recent' or param.sort == null}">Más recientes</option>
+                                <option value="name" th:selected="${param.sort == 'name'}">Nombre A-Z</option>
+                                <option value="oldest" th:selected="${param.sort == 'oldest'}">Más antiguos</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="filter-button">
+                            <i class="fas fa-filter"></i>
+                            Filtrar
+                        </button>
+                    </div>
+                </form>
+            </section>
+            
+            <!-- Grouped by Projects Section (only for project view) -->
+            <section class="grouped-projects-section" th:if="${currentView == 'project' and projectsWithRepositories != null and #lists.size(projectsWithRepositories) > 0}">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-folder-open"></i>
+                        Repositorios por Proyecto
+                        <span class="text-muted">(<span th:text="${#lists.size(repositories)}">0</span> repositorios en <span th:text="${#lists.size(projectsWithRepositories)}">0</span> proyectos)</span>
+                    </h3>
+                </div>
+                
+                <div class="projects-with-repos">
+                    <div class="project-group" th:each="proyecto : ${projectsWithRepositories}">
+                        <div class="project-group-header">
+                            <h4 class="project-group-title">
+                                <i class="fas fa-folder"></i>
+                                <span th:text="${proyecto.nombre_proyecto}">Nombre del Proyecto</span>
+                                <span class="project-repo-count" th:text="'(' + ${proyecto.total_repositorios} + ' repositorios)'">
+                                    (0 repositorios)
+                                </span>
+                            </h4>
+                            <p class="project-group-description" th:text="${proyecto.descripcion_proyecto ?: 'Sin descripción'}" th:if="${proyecto.descripcion_proyecto}">
+                                Descripción del proyecto
+                            </p>
+                        </div>
+                        
+                        <div class="project-repositories">
+                            <div class="repo-card" th:each="repositorio : ${proyecto.repositorios}">
+                                <div class="repo-header">
+                                    <h5 class="repo-title">
+                                        <i class="fas fa-code-branch"></i>
+                                        <span th:text="${repositorio.nombre_repositorio}">Nombre del repositorio</span>
+                                    </h5>
+                                    <p class="repo-description" th:text="${repositorio.descripcion_repositorio ?: 'Sin descripción'}">
+                                        Descripción del repositorio
+                                    </p>
+                                </div>
+                                
+                                <div class="repo-meta">
+                                    <span th:if="${repositorio.fecha_creacion}">
+                                        <i class="fas fa-calendar"></i>
+                                        <span th:text="${#temporals.format(repositorio.fecha_creacion, 'dd/MM/yyyy')}">01/01/2024</span>
+                                    </span>
+                                    <span th:if="${repositorio.rama_principal_repositorio}">
+                                        <i class="fas fa-code-branch"></i>
+                                        <span th:text="${repositorio.rama_principal_repositorio}">main</span>
+                                    </span>
+                                    <span class="badge badge-public" th:if="${repositorio.visibilidad_repositorio == 'PUBLICO'}">
+                                        Público
+                                    </span>
+                                    <span class="badge badge-private" th:if="${repositorio.visibilidad_repositorio == 'PRIVADO'}">
+                                        Privado
+                                    </span>
+                                </div>
+                                
+                                <div class="repo-actions">
+                                    <a th:href="@{/devportal/{userRole}/{username}/repositories/R-{id}(userRole=${userRole}, username=${username}, id=${repositorio.repositorio_id})}" 
+                                       class="action-button primary">
+                                        <i class="fas fa-eye"></i>
+                                        Ver
+                                    </a>
+                                    <a th:href="@{/devportal/{userRole}/{username}/repositories/R-{id}/edit(userRole=${userRole}, username=${username}, id=${repositorio.repositorio_id})}" 
+                                       class="action-button"
+                                       th:if="${repositorio.privilegio_usuario_actual == 'PROPIETARIO' or repositorio.privilegio_usuario_actual == 'ADMIN'}">
+                                        <i class="fas fa-edit"></i>
+                                        Editar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Standard Items Section -->
+            <section class="items-section" th:unless="${currentView == 'project' and projectsWithRepositories != null and #lists.size(projectsWithRepositories) > 0}">
+                <div class="items-header">
+                    <h3 class="items-title">
+                        <span class="title-text">
+                            <span th:if="${currentView == 'personal'}">Repositorios personales</span>
+                            <span th:if="${currentView == 'collaborative'}">Repositorios colaborativos</span>
+                            <span th:if="${currentView == 'i-am-part-of'}">Todos Mis Repositorios</span>
+                            <span th:if="${currentView == 'other'}">Otros repositorios</span>
+                        </span>
+                        <span class="text-muted title-count">(<span th:text="${#lists.size(allRepositories)}">0</span>)</span>
+                    </h3>
+                    
+                    <div class="view-toggle">
+                        <button type="button" class="active" data-view="grid">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button type="button" data-view="list">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Grid View -->
+                <div class="items-grid" th:if="${#lists.size(repositories) > 0}">
+                    <div class="item-card" 
+                         th:each="repositorio : ${repositories}"
+                         th:data-id="${repositorio.repositorio_id}"
+                         th:data-type="repository">
+                        
+                        <div class="item-header">
+                            <h4 class="item-title">
+                                <div class="icon">
+                                    <i class="fas fa-code-branch"></i>
+                                </div>
+                                <span th:text="${repositorio.nombre_repositorio}">Nombre del repositorio</span>
+                            </h4>
+                            <p class="item-description" th:text="${repositorio.descripcion_repositorio ?: 'Sin descripción'}">
+                                Descripción del repositorio
+                            </p>
+                        </div>
+                        
+                        <div class="item-meta">
+                            <div class="item-info">
+                                <span th:if="${repositorio.fecha_creacion}">
+                                    <i class="fas fa-calendar"></i>
+                                    <span th:text="${#temporals.format(repositorio.fecha_creacion, 'dd/MM/yyyy')}">01/01/2024</span>
+                                </span>
+                                <span th:if="${repositorio.rama_principal_repositorio}">
+                                    <i class="fas fa-code-branch"></i>
+                                    <span th:text="${repositorio.rama_principal_repositorio}">main</span>
+                                </span>
+                                <!-- Proyecto asociado - deshabilitado temporalmente -->
+                                <!-- <span th:if="${repositorio.nombre_proyecto}">
+                                    <i class="fas fa-folder"></i>
+                                    <span th:text="${repositorio.nombre_proyecto}">Proyecto</span>
+                                </span> -->
+                            </div>
+                            
+                            <div class="item-badges">
+                                <span class="badge badge-public" th:if="${repositorio.visibilidad_repositorio == 'PUBLICO'}">
+                                    Público
+                                </span>
+                                <span class="badge badge-private" th:if="${repositorio.visibilidad_repositorio == 'PRIVADO'}">
+                                    Privado
+                                </span>
+                                <span class="badge badge-category" th:if="${repositorio.nombre_categoria}" th:text="${repositorio.nombre_categoria}">
+                                    Categoría
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="item-actions">
+                            <a th:href="@{/devportal/{userRole}/{username}/repositories/R-{id}(userRole=${userRole}, username=${username}, id=${repositorio.repositorio_id})}" 
+                               class="action-button primary">
+                                <i class="fas fa-eye"></i>
+                                Ver
+                            </a>
+                            <a th:href="@{/devportal/{userRole}/{username}/repositories/R-{id}/edit(userRole=${userRole}, username=${username}, id=${repositorio.repositorio_id})}" 
+                               class="action-button"
+                               th:if="${repositorio.privilegio_usuario_actual == 'PROPIETARIO' or repositorio.privilegio_usuario_actual == 'ADMIN'}">
+                                <i class="fas fa-edit"></i>
+                                Editar
+                            </a>
+                            <button class="action-button" 
+                                    data-action="clone" 
+                                    th:data-id="${repositorio.repositorio_id}">
+                                <i class="fas fa-clone"></i>
+                                Clonar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- List View -->
+                <div class="items-list" style="display: none;" th:if="${#lists.size(repositories) > 0}">
+                    <div class="item-row" 
+                         th:each="repositorio : ${repositories}"
+                         th:data-id="${repositorio.repositorio_id}"
+                         th:data-type="repository">
+                        
+                        <div class="row-info">
+                            <div class="row-title" th:text="${repositorio.nombre_repositorio}">Nombre del repositorio</div>
+                            <div class="row-description" th:text="${repositorio.descripcion_repositorio ?: 'Sin descripción'}">
+                                Descripción del repositorio
+                            </div>
+                        </div>
+                        
+                        <div class="row-meta">
+                            <span th:if="${repositorio.nombre_categoria}" th:text="${repositorio.nombre_categoria}">Categoría</span>
+                            <!-- <span th:if="${repositorio.nombre_proyecto}" th:text="${repositorio.nombre_proyecto}">Proyecto</span> -->
+                            <span class="badge badge-public" th:if="${repositorio.visibilidad_repositorio == 'PUBLICO'}">Público</span>
+                            <span class="badge badge-private" th:if="${repositorio.visibilidad_repositorio == 'PRIVADO'}">Privado</span>
+                        </div>
+                        
+                        <div class="row-meta">
+                            <span th:if="${repositorio.fecha_creacion}" th:text="${#temporals.format(repositorio.fecha_creacion, 'dd/MM/yyyy')}">01/01/2024</span>
+                            <span th:if="${repositorio.rama_principal_repositorio}" th:text="${repositorio.rama_principal_repositorio}">main</span>
+                        </div>
+                        
+                        <div class="row-actions">
+                            <a th:href="@{/devportal/{userRole}/{username}/repositories/R-{id}(userRole=${userRole}, username=${username}, id=${repositorio.repositorio_id})}" 
+                               class="action-button primary">
+                                Ver
+                            </a>
+                            <a th:href="@{/devportal/{userRole}/{username}/repositories/R-{id}/edit(userRole=${userRole}, username=${username}, id=${repositorio.repositorio_id})}" 
+                               class="action-button"
+                               th:if="${repositorio.privilegio_usuario_actual == 'PROPIETARIO' or repositorio.privilegio_usuario_actual == 'ADMIN'}">
+                                Editar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Empty State -->
+                <div class="empty-state" th:if="${#lists.isEmpty(repositories)}">
+                    <div class="empty-icon">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
+                    <h3 class="empty-title">No se encontraron repositorios</h3>
+                    <p class="empty-description">
+                        <span th:if="${param.search}">No hay repositorios que coincidan con tu búsqueda.</span>
+                        <span th:unless="${param.search}">Comienza creando tu primer repositorio.</span>
+                    </p>
+                    <a th:href="@{/devportal/{userRole}/{username}/repositories/create(userRole=${userRole}, username=${username})}" 
+                       class="btn btn-primary" th:unless="${param.search}">
+                        <i class="fas fa-plus"></i>
+                        Crear Repositorio
+                    </a>
+                </div>
+                
+                <!-- ✅ PAGINACIÓN: Botones de navegación -->
+                <div class="pagination-controls" th:if="${#lists.size(repositories) > 0 or currentPage > 0}" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 15px; border-top: 1px solid #e0e0e0;">
+                    <div style="color: #666; font-size: 14px;">
+                        Mostrando <strong th:text="${startIndex}">1</strong> - <strong th:text="${endIndex}">12</strong> de <strong th:text="${totalRepositories}">30</strong> repositorios
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <a th:if="${currentPage > 0}" 
+                           th:href="@{/devportal/{userRole}/{username}/repositories(userRole=${userRole}, username=${username}, page=${currentPage - 1}, category=${currentCategory}, search=${currentSearch}, sort=${currentSort})}"
+                           class="btn btn-outline-primary" style="min-width: 100px;">
+                            <i class="fas fa-chevron-left"></i> Anterior
+                        </a>
+                        
+                        <span style="font-weight: 500; color: #333;">
+                            Página <strong th:text="${currentPage + 1}">1</strong> de <strong th:text="${totalPages}">3</strong>
+                        </span>
+                        
+                        <a th:if="${hasNextRepositories}" 
+                           th:href="@{/devportal/{userRole}/{username}/repositories(userRole=${userRole}, username=${username}, page=${currentPage + 1}, category=${currentCategory}, search=${currentSearch}, sort=${currentSort})}"
+                           class="btn btn-outline-primary" style="min-width: 100px;">
+                            Siguiente <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+        
+    <!-- Create Repository Modal -->
+    <div id="createRepositoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Crear Nuevo Repositorio</h2>
+                <button type="button" class="modal-close">&times;</button>
+            </div>
+            
+            <form th:action="@{/devportal/{userRole}/{username}/repositories/create(userRole=${userRole}, username=${username})}" method="post">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label" for="nombreRepositorio">
+                            Nombre del repositorio <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                               id="nombreRepositorio" 
+                               name="nombreRepositorio" 
+                               class="form-control" 
+                               required 
+                               placeholder="Ingresa el nombre del repositorio">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="descripcionRepositorio">Descripción</label>
+                        <textarea id="descripcionRepositorio" 
+                                  name="descripcionRepositorio" 
+                                  class="form-control" 
+                                  rows="3" 
+                                  placeholder="Describe brevemente tu repositorio"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="categoriaId">Categoría</label>
+                            <select id="categoriaId" name="categoriaId" class="form-select">
+                                <option value="">Seleccionar categoría</option>
+                                <option th:each="categoria : ${categories}" 
+                                        th:value="${categoria.idCategoria}"
+                                        th:text="${categoria.nombreCategoria}">
+                                    Categoría
+                                </option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="visibilidadRepositorio">Visibilidad</label>
+                            <select id="visibilidadRepositorio" name="visibilidadRepositorio" class="form-select">
+                                <option value="PRIVADO">Privado</option>
+                                <option value="PUBLICO">Público</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="licenciaRepositorio">Licencia</label>
+                            <input type="text"
+                                   id="licenciaRepositorio"
+                                   name="licenciaRepositorio"
+                                   class="form-control"
+                                   placeholder="Ejemplo: MIT, GPL, Apache 2.0, etc.">
+                            <div class="form-text">
+                                Especifica la licencia bajo la cual se distribuye el repositorio.
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="proyectoId">Proyecto (opcional)</label>
+                            <select id="proyectoId" name="proyectoId" class="form-select">
+                                <option value="">Sin proyecto asociado</option>
+                                <option th:each="proyecto : ${projects}" 
+                                        th:value="${proyecto.proyecto_id}"
+                                        th:text="${proyecto.nombre_proyecto}">
+                                    Proyecto
+                                </option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="ramaPrincipal">Rama principal</label>
+                            <input type="text" 
+                                   id="ramaPrincipal" 
+                                   name="ramaPrincipal" 
+                                   class="form-control" 
+                                   value="main" 
+                                   placeholder="main">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary btn-cancel">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Crear Repositorio
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Styles for Repository Dashboard -->
+    <style>
+        /* Stats cards clickeable styles */
+        .stats-grid .stat-card {
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .stats-grid .stat-card:hover {
+            text-decoration: none;
+            color: inherit;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stats-grid .stat-card.active {
+            background: #0891b2 !important;
+            color: white !important;
+        }
+        
+        .stats-grid .stat-card.active .stat-value,
+        .stats-grid .stat-card.active .stat-label {
+            color: white !important;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+        }
+        
+        /* Grouped Projects Styles */
+        .grouped-projects-section {
+            margin-bottom: 2rem;
+        }
+        
+        .section-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .section-title i {
+            color: var(--primary-color);
+        }
+        
+        .projects-with-repos {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .project-group {
+            background: var(--white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+        
+        .project-group-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .project-group-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .project-group-title i {
+            color: var(--primary-color);
+        }
+        
+        .project-repo-count {
+            font-size: 0.875rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+        }
+        
+        .project-group-description {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        
+        .project-repositories {
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1rem;
+        }
+        
+        .repo-card {
+            background: var(--white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            transition: var(--transition);
+        }
+        
+        .repo-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .repo-header {
+            margin-bottom: 0.75rem;
+        }
+        
+        .repo-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .repo-title i {
+            color: var(--primary-color);
+            font-size: 0.875rem;
+        }
+        
+        .repo-description {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+        
+        .repo-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .repo-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .repo-meta i {
+            font-size: 0.75rem;
+        }
+        
+        .repo-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-button {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: var(--transition);
+        }
+        
+        .action-button:hover {
+            text-decoration: none;
+        }
+        
+        .action-button.primary {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .action-button.primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            color: white;
+        }
+        
+        .action-button:not(.primary) {
+            background: var(--white);
+            color: var(--text-primary);
+        }
+        
+        .action-button:not(.primary):hover {
+            background: var(--gray-50);
+            border-color: var(--primary-color);
+        }
+        
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-public {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .badge-private {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        /* Estilo especial para la tarjeta total */
+        .total-card {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%) !important;
+            border: 2px solid #d1d5db !important;
+        }
+        
+        .total-card:hover {
+            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%) !important;
+        }
+        
+        .total-card.active {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%) !important;
+            border-color: #047857 !important;
+        }
+    </style>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/project-repository.js}"></script>
+    
+    <!-- ✅ AJAX Navigation Script - Optimización de rendimiento -->
+    <script th:inline="javascript">
+    /*<![CDATA[*/
+    (function() {
+        'use strict';
+        
+        // Cache para repositorios con TTL de 5 minutos
+        const repositoryCache = new Map();
+        const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
+        const CACHE_MAX_SIZE = 50;
+        
+        // Variables de estado
+        let isLoading = false;
+        const userRole = /*[[${userRole}]]*/ 'dev';
+        const username = /*[[${username}]]*/ 'username';
+        
+        /**
+         * Limpia cache antiguo basado en TTL
+         */
+        function cleanOldCache() {
+            const now = Date.now();
+            for (const [key, value] of repositoryCache.entries()) {
+                if (now - value.timestamp > CACHE_TTL) {
+                    repositoryCache.delete(key);
+                }
+            }
+            
+            // Si cache es muy grande, eliminar entradas más antiguas
+            if (repositoryCache.size > CACHE_MAX_SIZE) {
+                const entries = Array.from(repositoryCache.entries());
+                entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+                const toDelete = entries.slice(0, repositoryCache.size - CACHE_MAX_SIZE);
+                toDelete.forEach(([key]) => repositoryCache.delete(key));
+            }
+        }
+        
+        /**
+         * Obtiene repositorios desde cache o API
+         */
+        async function fetchRepositories(section, page = 0, category = '', search = '', sort = 'recent') {
+            cleanOldCache();
+            
+            const cacheKey = `${section}-${page}-${category}-${search}-${sort}`;
+            const cached = repositoryCache.get(cacheKey);
+            
+            if (cached && (Date.now() - cached.timestamp < CACHE_TTL)) {
+                console.log('✅ Cache HIT:', cacheKey);
+                return cached.data;
+            }
+            
+            console.log('🔍 Cache MISS, fetching from API:', cacheKey);
+            
+            const endpoint = `/api/repositories/${section}`;
+            const params = new URLSearchParams({
+                page: page,
+                category: category || '',
+                search: search || '',
+                sort: sort || 'recent'
+            });
+            
+            const response = await fetch(`${endpoint}?${params}`);
+            if (!response.ok) throw new Error('Error al cargar repositorios');
+            
+            const data = await response.json();
+            
+            // Guardar en cache
+            repositoryCache.set(cacheKey, {
+                data: data,
+                timestamp: Date.now()
+            });
+            
+            return data;
+        }
+        
+        /**
+         * Renderiza repositorios en el grid
+         */
+        function renderRepositories(repositories) {
+            const grid = document.querySelector('.items-grid');
+            if (!grid) return;
+            
+            if (repositories.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><p>No se encontraron repositorios</p></div>';
+                return;
+            }
+            
+            grid.innerHTML = repositories.map(repo => `
+                <div class="item-card" data-id="${repo.repositorio_id}" data-type="repository">
+                    <div class="repo-header">
+                        <h4 class="repo-title">
+                            <div class="icon">
+                                <i class="fas fa-code-branch"></i>
+                            </div>
+                            <span>${repo.nombre_repositorio}</span>
+                        </h4>
+                        <p class="repo-description">${repo.descripcion_repositorio || 'Sin descripción'}</p>
+                    </div>
+                    
+                    <div class="repo-meta">
+                        ${repo.fecha_creacion ? `
+                            <span>
+                                <i class="fas fa-calendar"></i>
+                                <span>${new Date(repo.fecha_creacion).toLocaleDateString('es-ES')}</span>
+                            </span>
+                        ` : ''}
+                        ${repo.nombre_categoria ? `
+                            <span>
+                                <i class="fas fa-tag"></i>
+                                <span>${repo.nombre_categoria}</span>
+                            </span>
+                        ` : ''}
+                        ${repo.visibilidad_repositorio ? `
+                            <span class="badge ${repo.visibilidad_repositorio === 'PUBLICO' ? 'badge-public' : 'badge-private'}">
+                                ${repo.visibilidad_repositorio}
+                            </span>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="repo-actions">
+                        <a href="/devportal/${userRole}/${username}/repositories/R-${repo.repositorio_id}" class="action-button primary">
+                            <i class="fas fa-eye"></i>
+                            Ver
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        /**
+         * Actualiza UI con nuevos datos
+         */
+        function updateUI(data, apiSection) {
+            renderRepositories(data.repositories);
+            
+            // Actualizar título
+            const titleMap = {
+                'personal': 'Repositorios Personales',
+                'collaborative': 'Repositorios Colaborativos',
+                'all': 'Todos Mis Repositorios',
+                'other': 'Otros Repositorios'
+            };
+            const titleElement = document.querySelector('.items-title');
+            if (titleElement) {
+                titleElement.innerHTML = `${titleMap[apiSection] || 'Repositorios'} <span class="text-muted">(${data.totalRepositories})</span>`;
+            }
+            
+            // Actualizar stat-cards active state
+            document.querySelectorAll('.stat-card').forEach(card => card.classList.remove('active'));
+            const activeCard = document.querySelector(`.stat-card[data-api-section="${apiSection}"]`);
+            if (activeCard) activeCard.classList.add('active');
+            
+            // ✅ Actualizar contadores de stat-cards dinámicamente
+            const statCardsMap = [
+                { section: 'personal', value: data.stats?.personal_repositories || 0 },
+                { section: 'collaborative', value: data.stats?.collaborative_repositories || 0 },
+                { section: 'all', value: data.stats?.i_am_part_of || 0 },
+                { section: 'other', value: data.stats?.other_repositories || 0 }
+            ];
+            
+            document.querySelectorAll('.stat-card').forEach((card, index) => {
+                const valueElement = card.querySelector('.stat-value');
+                if (valueElement && statCardsMap[index]) {
+                    valueElement.textContent = statCardsMap[index].value;
+                }
+            });
+            
+            // ✅ PAGINACIÓN: Mostrar/ocultar según total de items
+            const paginationControls = document.querySelector('.pagination-controls');
+            if (paginationControls) {
+                if (data.totalRepositories <= 12) {
+                    paginationControls.style.display = 'none';
+                } else {
+                    paginationControls.style.display = 'flex';
+                    // Actualizar contadores de paginación
+                    const startSpan = paginationControls.querySelector('strong:nth-of-type(1)');
+                    const endSpan = paginationControls.querySelector('strong:nth-of-type(2)');
+                    const totalSpan = paginationControls.querySelector('strong:nth-of-type(3)');
+                    const currentPageSpan = paginationControls.querySelector('span strong:nth-of-type(1)');
+                    const totalPagesSpan = paginationControls.querySelector('span strong:nth-of-type(2)');
+                    
+                    if (startSpan) startSpan.textContent = data.startIndex || 1;
+                    if (endSpan) endSpan.textContent = data.endIndex || data.totalRepositories;
+                    if (totalSpan) totalSpan.textContent = data.totalRepositories;
+                    if (currentPageSpan) currentPageSpan.textContent = (data.currentPage || 0) + 1;
+                    if (totalPagesSpan) totalPagesSpan.textContent = data.totalPages || 1;
+                }
+            }
+        }
+        
+        /**
+         * Navegar a sección específica
+         */
+        async function navigateToSection(apiSection, urlSection, updateHistory = true) {
+            if (isLoading) return;
+            
+            isLoading = true;
+            
+            try {
+                const category = document.getElementById('category')?.value || '';
+                const search = document.getElementById('search')?.value || '';
+                const sort = document.getElementById('sort')?.value || 'recent';
+                
+                const data = await fetchRepositories(apiSection, 0, category, search, sort);
+                updateUI(data, apiSection);
+                
+                if (updateHistory) {
+                    const url = `/devportal/${userRole}/${username}/repositories/${urlSection}`;
+                    history.pushState({ apiSection, urlSection, page: 0 }, '', url);
+                }
+            } catch (error) {
+                console.error('Error al navegar:', error);
+            } finally {
+                isLoading = false;
+            }
+        }
+        
+        // Interceptar clics en stat-cards
+        const sectionMap = [
+            { url: 'personal-repositories', api: 'personal' },
+            { url: 'collaborative-repositories', api: 'collaborative' },
+            { url: 'i-am-part-of', api: 'all' }, // ✅ "Todos Mis Repositorios" usa endpoint /api/repositories/all
+            { url: 'other-repositories', api: 'other' }
+        ];
+        
+        document.querySelectorAll('.stat-card').forEach((card, index) => {
+            const section = sectionMap[index];
+            card.dataset.section = section.url;
+            card.dataset.apiSection = section.api;
+            
+            card.addEventListener('click', (e) => {
+                e.preventDefault();
+                navigateToSection(section.api, section.url);
+            });
+        });
+        
+        // Interceptar submit del formulario de filtros
+        const filterForm = document.querySelector('.filters-form');
+        if (filterForm) {
+            filterForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const activeCard = document.querySelector('.stat-card.active');
+                const apiSection = activeCard?.dataset.apiSection || 'personal';
+                const urlSection = activeCard?.dataset.section || 'personal-repositories';
+                await navigateToSection(apiSection, urlSection, false);
+            });
+        }
+        
+        // Manejar botón atrás/adelante del navegador
+        window.addEventListener('popstate', (e) => {
+            if (e.state && e.state.apiSection && e.state.urlSection) {
+                navigateToSection(e.state.apiSection, e.state.urlSection, false);
+            }
+        });
+        
+        console.log('✅ AJAX Navigation initialized for repositories dashboard');
+    })();
+    /*]]>*/
+    </script>
+    
+    <!-- Chatbot Widget -->
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - DevPortal SuperAdmin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-dark: #2980b9;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --dark-color: #2c3e50;
+            --light-color: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+        
+        body {
+            background-color: var(--light-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .form-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .profile-avatar {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        
+        .profile-avatar img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid var(--border-color);
+            object-fit: cover;
+        }
+        
+        .profile-avatar .upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .profile-avatar:hover .upload-overlay {
+            opacity: 1;
+        }
+        
+        .profile-avatar .upload-overlay i {
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .profile-header h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .profile-header .badge {
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: none;
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+        }
+        
+        .form-section h5 {
+            color: var(--dark-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-control {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .form-control[readonly] {
+            background-color: #f8f9fa;
+            color: var(--secondary-color);
+        }
+        
+        .form-floating {
+            margin-bottom: 1.5rem;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .info-item {
+            background: var(--light-color);
+            border-radius: 8px;
+            padding: 1rem;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .info-item h6 {
+            color: var(--dark-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-item p {
+            color: var(--secondary-color);
+            margin: 0;
+            font-size: 1rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            border-radius: 8px;
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        
+        .btn-warning {
+            background: var(--warning-color);
+            color: var(--dark-color);
+        }
+        
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .modal-content {
+            border-radius: 12px;
+        }
+        
+        .modal-header {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+        
+        .password-input-group {
+            position: relative;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--secondary-color);
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .hidden-file-input {
+            display: none;
+        }
+        
+        .admin-badge {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .form-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+    <div th:replace="~{fragments/navbar-sa :: navbar-sa(currentNavSection='profile')}"></div>
+
+    <div class="main-container content-after-navbar">
+        <div class="form-card">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <img th:src="@{/devportal/sa/{username}/profile/photo(username=${username})}" 
+                         alt="Foto de perfil" 
+                         id="profileImage"
+                         style="display: block;">
+                    <div class="profile-avatar-default" style="display: none; width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--border-color); background: var(--primary-color); color: white; align-items: center; justify-content: center; font-size: 3rem;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="upload-overlay" onclick="document.getElementById('profilePhotoInput').click()">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </div>
+                <h2 th:text="${currentUser.nombreUsuario + ' ' + currentUser.apellidoPaterno}">
+                    Nombre del Usuario
+                </h2>
+                <span class="badge">SUPER ADMINISTRADOR</span>
+                <p class="mt-2" th:text="'@' + ${currentUser.username}">@usuario</p>
+                <div class="admin-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Acceso Total al Sistema</span>
+                </div>
+            </div>
+            
+            <div th:if="${error}" class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span th:text="${error}">Error</span>
+            </div>
+            
+            <div th:if="${success}" class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${success}">Éxito</span>
+            </div>
+            
+            <div class="form-section">
+                <h5><i class="fas fa-user"></i> Información Personal (Solo Lectura)</h5>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <h6>Nombre Completo</h6>
+                        <p th:text="${currentUser.nombreUsuario + ' ' + currentUser.apellidoPaterno + ' ' + currentUser.apellidoMaterno}">
+                            Nombre Apellido Apellido
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <h6>DNI</h6>
+                        <p th:text="${currentUser.dni}">12345678</p>
+                    </div>
+                    <div class="info-item">
+                        <h6>Fecha de Nacimiento</h6>
+                        <p th:text="${currentUser.fechaNacimiento != null ? #temporals.format(currentUser.fechaNacimiento, 'dd/MM/yyyy') : 'No disponible'}">
+                            01/01/1990
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <h6>Sexo</h6>
+                        <p th:text="${currentUser.sexoUsuario != null ? currentUser.sexoUsuario : 'No especificado'}">
+                            No especificado
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <h6>Correo Electrónico</h6>
+                        <p th:text="${currentUser.correo}">correo@ejemplo.com</p>
+                    </div>
+                    <div class="info-item">
+                        <h6>Username</h6>
+                        <p th:text="${currentUser.username}">username</p>
+                    </div>
+                </div>
+            </div>
+            
+            <form id="profileForm" th:action="@{/devportal/sa/{username}/profile/update(username=${username})}" method="post">
+                <div class="form-section">
+                    <h5><i class="fas fa-edit"></i> Información Editable</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="tel" class="form-control" id="telefono" name="telefono" 
+                                       th:value="${currentUser.telefono}" placeholder="Teléfono">
+                                <label for="telefono">Teléfono</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-control" id="estadoCivil" name="estadoCivil">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="SOLTERO" th:selected="${currentUser.estadoCivil != null && currentUser.estadoCivil.name() == 'SOLTERO'}">Soltero/a</option>
+                                    <option value="CASADO" th:selected="${currentUser.estadoCivil != null && currentUser.estadoCivil.name() == 'CASADO'}">Casado/a</option>
+                                    <option value="VIUDO" th:selected="${currentUser.estadoCivil != null && currentUser.estadoCivil.name() == 'VIUDO'}">Viudo/a</option>
+                                    <option value="DIVORCIADO" th:selected="${currentUser.estadoCivil != null && currentUser.estadoCivil.name() == 'DIVORCIADO'}">Divorciado/a</option>
+                                </select>
+                                <label for="estadoCivil">Estado Civil</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-floating">
+                        <textarea class="form-control" id="direccionUsuario" name="direccionUsuario" 
+                                  style="min-height: 100px" placeholder="Dirección"
+                                  th:text="${currentUser.direccionUsuario}"></textarea>
+                        <label for="direccionUsuario">Dirección</label>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Guardar Cambios
+                    </button>
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                        <i class="fas fa-key me-2"></i>Cambiar Contraseña
+                    </button>
+                    <a th:href="@{/devportal/sa/{username}/dashboard(username=${username})}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Cambiar Contraseña -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-key me-2"></i>Cambiar Contraseña
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="changePasswordForm">
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">Contraseña Actual</label>
+                            <div class="password-input-group">
+                                <input type="password" class="form-control" id="currentPassword" required>
+                                <button type="button" class="password-toggle" onclick="togglePassword('currentPassword')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">Nueva Contraseña</label>
+                            <div class="password-input-group">
+                                <input type="password" class="form-control" id="newPassword" minlength="8" required>
+                                <button type="button" class="password-toggle" onclick="togglePassword('newPassword')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">Mínimo 8 caracteres</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirmar Nueva Contraseña</label>
+                            <div class="password-input-group">
+                                <input type="password" class="form-control" id="confirmPassword" minlength="8" required>
+                                <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="passwordError" class="alert alert-danger d-none"></div>
+                        <div id="passwordSuccess" class="alert alert-success d-none"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="changePassword()">
+                        <i class="fas fa-save me-2"></i>Cambiar Contraseña
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="profilePhotoInput" class="hidden-file-input" accept="image/*" onchange="uploadProfilePhoto()">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        const username = /*[[${username}]]*/ 'sa1';
+        
+        // Manejar imagen de perfil principal con fallback
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileImage = document.getElementById('profileImage');
+            const profileDefault = document.querySelector('.profile-avatar-default');
+            
+            if (profileImage && profileDefault) {
+                profileImage.addEventListener('error', function() {
+                    this.style.display = 'none';
+                    profileDefault.style.display = 'flex';
+                });
+                
+                profileImage.addEventListener('load', function() {
+                    this.style.display = 'block';
+                    profileDefault.style.display = 'none';
+                });
+            }
+        });
+        
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const button = field.parentElement.querySelector('.password-toggle');
+            const icon = button.querySelector('i');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+        
+        function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorDiv = document.getElementById('passwordError');
+            const successDiv = document.getElementById('passwordSuccess');
+            
+            errorDiv.classList.add('d-none');
+            successDiv.classList.add('d-none');
+            
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                errorDiv.textContent = 'Todos los campos son obligatorios.';
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                errorDiv.textContent = 'La nueva contraseña debe tener al menos 8 caracteres.';
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                errorDiv.textContent = 'Las contraseñas no coinciden.';
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+            
+            fetch(`/devportal/sa/${username}/profile/change-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    currentPassword: currentPassword,
+                    newPassword: newPassword,
+                    confirmPassword: confirmPassword
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    successDiv.textContent = data.message;
+                    successDiv.classList.remove('d-none');
+                    document.getElementById('changePasswordForm').reset();
+                    setTimeout(() => {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+                        modal.hide();
+                    }, 2000);
+                } else {
+                    errorDiv.textContent = data.message;
+                    errorDiv.classList.remove('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                errorDiv.textContent = 'Error de conexión.';
+                errorDiv.classList.remove('d-none');
+            });
+        }
+        
+        function uploadProfilePhoto() {
+            const fileInput = document.getElementById('profilePhotoInput');
+            const file = fileInput.files[0];
+            
+            if (!file) return;
+            
+            if (!file.type.startsWith('image/')) {
+                alert('Por favor selecciona un archivo de imagen válido.');
+                return;
+            }
+            
+            if (file.size > 5 * 1024 * 1024) {
+                alert('El archivo es demasiado grande. Máximo 5MB.');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('profilePhoto', file);
+            
+            // Preview inmediato
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const profileImage = document.getElementById('profileImage');
+                const profileDefault = document.querySelector('.profile-avatar-default');
+                profileImage.src = e.target.result;
+                profileImage.style.display = 'block';
+                profileDefault.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+            
+            // Subir al servidor
+            fetch(`/devportal/sa/${username}/profile/upload-photo`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Foto actualizada:', data.photoUrl);
+                    
+                    // Agregar timestamp para forzar recarga de imagen (evitar cache)
+                    const timestamp = new Date().getTime();
+                    const newPhotoUrl = data.photoUrl + '?t=' + timestamp;
+                    
+                    // Actualizar imagen principal en ver-perfil-sa
+                    const profileImage = document.getElementById('profileImage');
+                    const profileDefault = document.querySelector('.profile-avatar-default');
+                    if (profileImage && profileDefault) {
+                        profileImage.src = newPhotoUrl;
+                        profileImage.style.display = 'block';
+                        profileDefault.style.display = 'none';
+                    }
+                    
+                    // Actualizar imagen del navbar principal
+                    const navbarPic = document.querySelector('.sa-profile-pic');
+                    const navbarDefault = document.querySelector('.sa-profile-default');
+                    if (navbarPic && navbarDefault) {
+                        navbarPic.src = newPhotoUrl;
+                        navbarPic.classList.remove('d-none');
+                        navbarPic.classList.add('d-block');
+                        navbarDefault.classList.add('d-none');
+                        navbarDefault.classList.remove('d-flex');
+                    }
+                    
+                    // Actualizar imagen del dropdown del navbar
+                    const navbarPicDropdown = document.querySelector('.sa-profile-pic-dropdown');
+                    const navbarDefaultDropdown = document.querySelector('.sa-profile-default-dropdown');
+                    if (navbarPicDropdown && navbarDefaultDropdown) {
+                        navbarPicDropdown.src = newPhotoUrl;
+                        navbarPicDropdown.classList.remove('d-none');
+                        navbarPicDropdown.classList.add('d-block');
+                        navbarDefaultDropdown.classList.add('d-none');
+                        navbarDefaultDropdown.classList.remove('d-flex');
+                    }
+                    
+                    alert('Foto de perfil actualizada exitosamente');
+                } else {
+                    alert('Error: ' + data.message);
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al subir la foto.');
+                location.reload();
+            });
+        }
+    </script>
+    
+    <div th:replace="~{fragments/navbar :: navbar-scripts}"></div>
+</body>
+</html>

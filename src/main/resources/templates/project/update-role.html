@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Rol - GTICS DevPortal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/project-repository.css}">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <style>
+        .form-container {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .form-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .form-header i {
+            font-size: 2rem;
+            color: #1976d2;
+            margin-right: 15px;
+        }
+        
+        .form-header h2 {
+            margin: 0;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .role-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .meta-item {
+            font-size: 0.9rem;
+        }
+        
+        .meta-item label {
+            font-weight: 600;
+            color: #6c757d;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .meta-item span {
+            color: #2c3e50;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .form-group small {
+            display: block;
+            margin-top: 4px;
+            color: #6c757d;
+        }
+        
+        .form-control, .form-select {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px 12px;
+            transition: border-color 0.2s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #1976d2;
+            box-shadow: 0 0 0 0.2rem rgba(25, 118, 210, 0.25);
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            justify-content: flex-end;
+        }
+        
+        .form-actions .btn {
+            padding: 10px 24px;
+            font-weight: 500;
+        }
+        
+        .character-count {
+            font-size: 0.85rem;
+            color: #6c757d;
+            float: right;
+            margin-top: 4px;
+        }
+        
+        .divider {
+            margin: 30px 0;
+            border-top: 2px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="container">
+        <div class="form-container">
+            <!-- Header -->
+            <div class="form-header">
+                <i class="fas fa-shield-alt"></i>
+                <div>
+                    <h2>Editar Rol</h2>
+                    <small class="text-muted mt-2 d-block" th:text="'Proyecto: ' + ${proyecto.nombreProyecto}">
+                        Proyecto: TelDevPortal
+                    </small>
+                </div>
+            </div>
+
+            <!-- Role Metadata -->
+            <div class="role-meta">
+                <div class="meta-item">
+                    <label>Usuarios Asignados</label>
+                    <span class="badge bg-info" th:text="${rol.usuariosAsignados ?: '0'}">5</span>
+                </div>
+                <div class="meta-item">
+                    <label>Fecha Creación</label>
+                    <span th:text="${#temporals.format(rol.creadoEn, 'dd/MM/yyyy')}">01/01/2024</span>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form th:action="@{/devportal/sa/{username}/projects/P-{id}/roles/update-roles/{rolId}(username=${username}, id=${proyecto.proyectoId}, rolId=${rol.rolProyectoId})}" 
+                  method="POST">
+                
+                <!-- Nombre del Rol (ReadOnly) -->
+                <div class="form-group mb-4">
+                    <label for="nombreRol">Nombre del Rol</label>
+                    <input type="text" class="form-control" id="nombreRol" 
+                           th:value="${rol.nombreRolProyecto}"
+                           readonly>
+                    <small class="text-muted">El nombre del rol no se puede cambiar.</small>
+                </div>
+
+                <!-- Descripción -->
+                <div class="form-group mb-4">
+                    <label for="descripcion">Descripción <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="4"
+                              maxlength="500" required
+                              th:text="${rol.descripcionRolProyecto}"></textarea>
+                    <div class="character-count"><span id="descCount">0</span>/500</div>
+                    <small>Máximo 500 caracteres.</small>
+                </div>
+
+                <!-- Error Messages -->
+                <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span th:if="${param.error == 'rol_no_encontrado'}">El rol no fue encontrado.</span>
+                    <span th:if="${param.error == 'sin_permiso'}">No tienes permiso para editar este rol.</span>
+                    <span th:if="${param.error == 'campos_requeridos'}">Por favor completa todos los campos.</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Success Message -->
+                <div th:if="${param.success == 'true'}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i>
+                    Rol actualizado exitosamente.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="divider"></div>
+                
+                <div class="alert alert-warning" style="background: #fff3cd; border-color: #ffc107; color: #856404;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Zona de Peligro</strong>
+                    <p class="mt-2 mb-0">
+                        Si eliminas este rol, todos los usuarios asignados perderán los permisos asociados.
+                    </p>
+                </div>
+
+                <!-- Buttons -->
+                <div class="form-actions">
+                    <a th:href="@{/devportal/sa/{username}/projects/P-{id}/roles(username=${username}, id=${proyecto.proyectoId})}" 
+                       class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteRoleModal">
+                        <i class="fas fa-trash"></i> Eliminar Rol
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteRoleModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header border-danger">
+                    <h5 class="modal-title text-danger">
+                        <i class="fas fa-exclamation-triangle"></i> Eliminar Rol
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas <strong>eliminar permanentemente</strong> el rol <strong th:text="${rol.nombreRolProyecto}">Editor</strong>?</p>
+                    <p class="text-danger small mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Esta acción no se puede deshacer. Todos los usuarios perderán los permisos de este rol.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form th:action="@{/devportal/sa/{username}/projects/P-{id}/roles/delete(username=${username}, id=${proyecto.proyectoId})}" 
+                          method="POST" style="display: inline;">
+                        <input type="hidden" name="rolId" th:value="${rol.rolProyectoId}">
+                        <button type="submit" class="btn btn-danger">Eliminar Permanentemente</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Character counter
+        document.getElementById('descripcion').addEventListener('input', function() {
+            document.getElementById('descCount').textContent = this.value.length;
+        });
+        
+        // Initialize counter on load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('descCount').textContent = document.getElementById('descripcion').value.length;
+        });
+    </script>
+</body>
+</html>
+
+
+

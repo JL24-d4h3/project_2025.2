@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error 404 - Página no encontrada</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center">
+        <div class="row justify-content-center w-100">
+            <div class="col-md-8 col-lg-6">
+                <div class="text-center">
+                    <!-- Error Icon -->
+                    <div class="mb-4">
+                        <i class="fas fa-exclamation-triangle text-warning" style="font-size: 6rem;"></i>
+                    </div>
+                    
+                    <!-- Error Message -->
+                    <h1 class="display-1 fw-bold text-primary mb-3">404</h1>
+                    <h2 class="mb-3" th:text="${title}">Página no encontrada</h2>
+                    <p class="lead text-muted mb-4" th:text="${description}">
+                        La página que buscas no existe o ha sido movida.
+                    </p>
+                    
+                    <!-- Error Details -->
+                    <div class="alert alert-info" role="alert">
+                        <strong>URI solicitada:</strong> 
+                        <code th:text="${requestUri}">URI desconocida</code>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2 d-md-block">
+                        <a href="javascript:history.back()" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Volver atrás
+                        </a>
+                        <a href="/" class="btn btn-primary">
+                            <i class="fas fa-home me-2"></i>Ir al inicio
+                        </a>
+                    </div>
+                    
+                    <!-- Debug Info (solo en desarrollo) -->
+                    <div class="mt-4 p-3 bg-light rounded text-start small text-muted">
+                        <strong>Información de debug:</strong><br>
+                        Código de estado: <span th:text="${statusCode}">404</span><br>
+                        Mensaje de error: <span th:text="${errorMessage}">Página no encontrada</span><br>
+                        URI: <span th:text="${requestUri}">URI desconocida</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+

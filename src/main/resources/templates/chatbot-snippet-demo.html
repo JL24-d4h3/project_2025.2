@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Demo Chatbot con Snippets de Código</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .demo-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 32px;
+            font-size: 16px;
+        }
+
+        .info-box {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .info-box h3 {
+            color: #0369a1;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .info-box p {
+            color: #075985;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .examples {
+            margin-top: 32px;
+        }
+
+        .example-title {
+            color: #334155;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .message-demo {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .message-label {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .bot-response {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .bot-response p {
+            margin: 8px 0;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .bot-response p:first-child {
+            margin-top: 0;
+        }
+
+        .bot-response p:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .bot-response pre {
+            background: #282c34;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+            overflow-x: auto;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .bot-response pre code {
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: #abb2bf;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .bot-response code {
+            background: #f1f5f9;
+            color: #e91e63;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .bot-response ul {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+
+        .bot-response li {
+            margin: 4px 0;
+            color: #475569;
+        }
+
+        .bot-response strong {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 24px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .feature-list {
+            background: #fefce8;
+            border: 1px solid #fde047;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 24px;
+        }
+
+        .feature-list h4 {
+            color: #854d0e;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .feature-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            color: #a16207;
+            padding: 6px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #84cc16;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>🤖 Chatbot con Soporte para Código</h1>
+        <p class="subtitle">Ahora el chatbot puede mostrar código formateado con resaltado de sintaxis</p>
+
+        <div class="info-box">
+            <h3>¿Cómo funciona?</h3>
+            <p>El chatbot ahora utiliza <strong>Marked.js</strong> para procesar Markdown y <strong>Highlight.js</strong> para resaltar la sintaxis del código. Cuando el chatbot responde con código en formato Markdown, automáticamente se renderiza con colores y formato profesional.</p>
+        </div>
+
+        <div class="examples">
+            <h2 class="example-title">📝 Ejemplos de Respuestas</h2>
+
+            <!-- Ejemplo 1: Código en C -->
+            <div class="message-demo">
+                <div class="message-label">👤 Usuario pregunta:</div>
+                <p style="color: #475569; margin-bottom: 16px;">"Créame un código en C para obtener números primos"</p>
+                
+                <div class="message-label">🤖 Chatbot responde:</div>
+                <div class="bot-response" id="example1"></div>
+            </div>
+
+            <!-- Ejemplo 2: Código en Python -->
+            <div class="message-demo">
+                <div class="message-label">👤 Usuario pregunta:</div>
+                <p style="color: #475569; margin-bottom: 16px;">"Dame un ejemplo de conexión a base de datos en Python"</p>
+                
+                <div class="message-label">🤖 Chatbot responde:</div>
+                <div class="bot-response" id="example2"></div>
+            </div>
+
+            <!-- Ejemplo 3: Query de Cypher -->
+            <div class="message-demo">
+                <div class="message-label">👤 Usuario pregunta:</div>
+                <p style="color: #475569; margin-bottom: 16px;">"Muéstrame un query de Cypher para buscar nodos relacionados"</p>
+                
+                <div class="message-label">🤖 Chatbot responde:</div>
+                <div class="bot-response" id="example3"></div>
+            </div>
+        </div>
+
+        <div class="feature-list">
+            <h4>✨ Lenguajes soportados con resaltado de sintaxis:</h4>
+            <ul>
+                <li>Python, Java, JavaScript, TypeScript</li>
+                <li>C, C++, C#, Go, Rust</li>
+                <li>SQL, Cypher, MongoDB</li>
+                <li>HTML, CSS, JSON, XML</li>
+                <li>Bash, PowerShell, Dockerfile</li>
+                <li>Y más de 190 lenguajes adicionales</li>
+            </ul>
+        </div>
+
+        <button class="test-button" onclick="window.location.href='/'">
+            Probar el Chatbot →
+        </button>
+    </div>
+
+    <script>
+        // Configurar marked para usar highlight.js
+        marked.setOptions({
+            highlight: function(code, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(code, { language: lang }).value;
+                    } catch (err) {
+                        console.error('Error highlighting code:', err);
+                    }
+                }
+                return hljs.highlightAuto(code).value;
+            },
+            breaks: true,
+            gfm: true
+        });
+
+        // Ejemplo 1: Código en C
+        const example1 = `Aquí tienes un programa en **C** para encontrar números primos:
+
+\`\`\`c
+#include <stdio.h>
+#include <stdbool.h>
+
+// Función para verificar si un número es primo
+bool esPrimo(int numero) {
+    if (numero <= 1) return false;
+    if (numero <= 3) return true;
+    
+    if (numero % 2 == 0 || numero % 3 == 0) return false;
+    
+    for (int i = 5; i * i <= numero; i += 6) {
+        if (numero % i == 0 || numero % (i + 2) == 0)
+            return false;
+    }
+    
+    return true;
+}
+
+int main() {
+    int limite;
+    
+    printf("Ingrese el límite para buscar números primos: ");
+    scanf("%d", &limite);
+    
+    printf("\\nNúmeros primos hasta %d:\\n", limite);
+    
+    for (int i = 2; i <= limite; i++) {
+        if (esPrimo(i)) {
+            printf("%d ", i);
+        }
+    }
+    
+    printf("\\n");
+    return 0;
+}
+\`\`\`
+
+Este programa usa el **algoritmo de optimización 6k±1** para verificar primos de manera eficiente. 🚀`;
+
+        // Ejemplo 2: Código en Python
+        const example2 = `Aquí tienes un ejemplo de **conexión a PostgreSQL** usando Python:
+
+\`\`\`python
+import psycopg2
+from psycopg2 import Error
+
+def conectar_base_datos():
+    try:
+        # Establecer conexión
+        conexion = psycopg2.connect(
+            host="localhost",
+            database="mi_base_datos",
+            user="usuario",
+            password="contraseña",
+            port="5432"
+        )
+        
+        # Crear cursor
+        cursor = conexion.cursor()
+        
+        # Ejecutar consulta
+        cursor.execute("SELECT version();")
+        version = cursor.fetchone()
+        print(f"Conectado a: {version[0]}")
+        
+        # Consulta de ejemplo
+        cursor.execute("""
+            SELECT id, nombre, email 
+            FROM usuarios 
+            WHERE activo = TRUE
+            LIMIT 10
+        """)
+        
+        usuarios = cursor.fetchall()
+        
+        for usuario in usuarios:
+            print(f"ID: {usuario[0]}, Nombre: {usuario[1]}, Email: {usuario[2]}")
+        
+    except (Exception, Error) as error:
+        print(f"Error al conectar a PostgreSQL: {error}")
+        
+    finally:
+        if conexion:
+            cursor.close()
+            conexion.close()
+            print("Conexión cerrada")
+
+# Ejecutar función
+conectar_base_datos()
+\`\`\`
+
+**Notas importantes:**
+- Instala la librería: \`pip install psycopg2-binary\`
+- Usa variables de entorno para credenciales en producción
+- Siempre cierra las conexiones con \`finally\``;
+
+        // Ejemplo 3: Query Cypher
+        const example3 = `Aquí tienes ejemplos de **consultas Cypher** para Neo4j:
+
+\`\`\`cypher
+// 1. Buscar usuario y sus amigos
+MATCH (u:Usuario {nombre: "Juan"})-[:AMIGO_DE]->(amigo)
+RETURN u.nombre AS usuario, 
+       collect(amigo.nombre) AS amigos;
+
+// 2. Encontrar rutas entre dos usuarios
+MATCH path = shortestPath(
+  (a:Usuario {id: 1})-[*]-(b:Usuario {id: 50})
+)
+RETURN path, length(path) AS distancia;
+
+// 3. Recomendar amigos (amigos de amigos)
+MATCH (yo:Usuario {id: 123})-[:AMIGO_DE]->(amigo)-[:AMIGO_DE]->(sugerencia)
+WHERE NOT (yo)-[:AMIGO_DE]->(sugerencia) 
+  AND yo <> sugerencia
+RETURN sugerencia.nombre, 
+       count(*) AS amigos_en_comun
+ORDER BY amigos_en_comun DESC
+LIMIT 10;
+
+// 4. Crear nueva relación
+MATCH (a:Usuario {id: 1}), (b:Usuario {id: 2})
+CREATE (a)-[r:AMIGO_DE {desde: datetime()}]->(b)
+RETURN r;
+\`\`\`
+
+Estas consultas te permiten:
+- 🔍 Buscar relaciones entre nodos
+- 🛤️ Encontrar caminos óptimos
+- 💡 Generar recomendaciones
+- ✏️ Crear nuevas conexiones`;
+
+        // Renderizar ejemplos
+        document.getElementById('example1').innerHTML = marked.parse(example1);
+        document.getElementById('example2').innerHTML = marked.parse(example2);
+        document.getElementById('example3').innerHTML = marked.parse(example3);
+    </script>
+</body>
+</html>

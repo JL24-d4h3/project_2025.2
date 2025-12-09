@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${api.nombreApi + ' v' + version.numeroVersion + ' - Documentación'}">Documentación API</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Swagger UI CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui.css">
+    
+    <!-- Marked.js para renderizar Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Prism.js para syntax highlighting en secciones CMS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/api-documentation-redesign.css}">
+</head>
+<body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <!-- Botón toggle para móvil -->
+    <button class="sidebar-toggle" aria-label="Toggle navigation">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+    
+    <!-- Overlay para cerrar sidebar en móvil -->
+    <div class="sidebar-overlay"></div>
+    
+    <!-- Contenedor principal con nueva estructura -->
+    <div class="content-after-navbar">
+        <div class="docs-layout">
+            
+            <!-- SIDEBAR - Menú lateral unificado -->
+            <aside class="docs-sidebar">
+                <div class="sidebar-header">
+                    <h2 class="sidebar-title">
+                        <i class="fa-solid fa-book"></i>
+                        <span class="sidebar-version" th:text="${'v' + version.numeroVersion}">v1.0.0</span>
+                    </h2>
+                </div>
+                
+                <nav class="docs-nav">
+                    <ul class="docs-nav-list">
+                        <!-- El menú se genera dinámicamente via JavaScript -->
+                        <!-- Combina secciones de OpenAPI + Secciones CMS -->
+                    </ul>
+                </nav>
+            </aside>
+            
+            <!-- MAIN CONTENT - Contenido principal -->
+            <main class="docs-main">
+                
+                <!-- Header de la documentación -->
+                <header class="docs-header" id="info-section">
+                    <!-- Título y descripción se llenan dinámicamente desde OpenAPI spec -->
+                    <h1 class="docs-title" id="api-title">Nombre de la API</h1>
+                    <p class="docs-subtitle" id="api-description">Descripción de la versión</p>
+                    
+                    <div class="docs-meta">
+                        <div class="docs-meta-item">
+                            <i class="fa-solid fa-code-branch"></i>
+                            <span class="version-badge" th:text="${'v' + version.numeroVersion}">v1.0.0</span>
+                        </div>
+                        <div class="docs-meta-item">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span class="status-badge" 
+                                  th:classappend="${api.estadoApi.name() == 'PRODUCCION' ? 'produccion' : 
+                                                   api.estadoApi.name() == 'DESARROLLO' ? 'desarrollo' : 
+                                                   'deprecado'}"
+                                  th:text="${api.estadoApi}">Estado</span>
+                        </div>
+                        <div class="docs-meta-item" th:if="${api.creadoPor != null}">
+                            <i class="fa-solid fa-user"></i>
+                            <span th:text="${'@' + api.creadoPor.correo.split('@')[0]}">@usuario</span>
+                        </div>
+                        <div class="docs-meta-item" th:if="${api.categorias != null && !api.categorias.isEmpty()}">
+                            <i class="fa-solid fa-tag"></i>
+                            <span>
+                                <th:block th:each="categoria, iterStat : ${api.categorias}">
+                                    <span th:text="${categoria.nombreCategoria}">Categoría</span>
+                                    <span th:if="${!iterStat.last}">, </span>
+                                </th:block>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="docs-actions">
+                        <button onclick="downloadYamlContract()" class="btn-download">
+                            <i class="fa-solid fa-download"></i>
+                            Descargar YAML
+                        </button>
+                        <button onclick="copyDocLink()" class="btn-copy-link">
+                            <i class="fa-solid fa-link"></i>
+                            Copiar Enlace
+                        </button>
+                    </div>
+                </header>
+
+                <!-- SECCIÓN: Swagger UI (contrato OpenAPI) -->
+                <section class="docs-section" id="openapi-contract">
+                    <div id="swagger-ui"></div>
+                </section>
+
+                <!-- SECCIONES CMS (después de OpenAPI) -->
+                <div th:if="${seccionesCMS != null and !#lists.isEmpty(seccionesCMS)}">
+                    <div th:each="seccion : ${seccionesCMS}">
+                        <section class="docs-section cms-section" 
+                                 th:id="${'cms-section-' + seccion.contenidoId}">
+                            <h2 class="cms-section-title">
+                                <i class="fa-solid fa-file-lines"></i>
+                                <span th:text="${seccion.titulo}">Título de la Sección</span>
+                            </h2>
+                            <div class="cms-section-content" 
+                                 th:attr="data-markdown=${seccion.contenidoMarkdown}">
+                                <!-- El contenido Markdown se renderiza via JavaScript -->
+                            </div>
+                            
+                            <!-- Archivos adjuntos -->
+                            <div class="archivos-adjuntos" 
+                                 th:if="${seccion.archivosAdjuntos != null and !seccion.archivosAdjuntos.isEmpty()}">
+                                <h4 class="archivos-adjuntos-title">
+                                    <i class="fa-solid fa-paperclip"></i>
+                                    Archivos Adjuntos
+                                </h4>
+                                <div class="archivos-adjuntos-list">
+                                    <div th:each="archivo : ${seccion.archivosAdjuntos}" 
+                                         class="archivo-adjunto-item">
+                                        <i class="fa-solid fa-file-pdf" 
+                                           th:if="${archivo.mimeType == 'application/pdf'}"></i>
+                                        <i class="fa-solid fa-file-image" 
+                                           th:if="${archivo.mimeType != null and archivo.mimeType.startsWith('image/')}"></i>
+                                        <i class="fa-solid fa-file" 
+                                           th:unless="${archivo.mimeType == 'application/pdf' or (archivo.mimeType != null and archivo.mimeType.startsWith('image/'))}"></i>
+                                        <a th:href="${archivo.url}" 
+                                           th:text="${archivo.nombreArchivo}" 
+                                           target="_blank" 
+                                           rel="noopener noreferrer"
+                                           class="archivo-adjunto-link">Archivo</a>
+                                        <span class="archivo-adjunto-tipo" 
+                                              th:text="${archivo.mimeType}">tipo</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+
+                <!-- Enlaces externos (al final) -->
+                <section class="docs-section external-links-section" 
+                         th:if="${enlacesExternos != null and !#lists.isEmpty(enlacesExternos)}"
+                         id="external-links-section">
+                    <h3 class="external-links-title">
+                        <i class="fa-solid fa-link"></i>
+                        Enlaces Externos
+                    </h3>
+                    <div class="external-links-list">
+                        <div th:each="enlace : ${enlacesExternos}" class="external-link-item">
+                            <div class="external-link-item-header">
+                                <i class="fa-solid fa-external-link-alt"></i>
+                                <a th:href="${enlace.direccionAlmacenamiento}" 
+                                   th:text="${enlace.nombreArchivo}" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer"
+                                   class="external-link">Enlace Externo</a>
+                            </div>
+                            <div class="external-link-url" th:text="${enlace.direccionAlmacenamiento}"></div>
+                        </div>
+                    </div>
+                </section>
+                
+            </main>
+            
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- js-yaml para parsear YAML -->
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    
+    <!-- Swagger UI Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui-bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.10.0/swagger-ui-standalone-preset.js"></script>
+    
+    <!-- Prism.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    
+    <!-- API Documentation Redesign Script -->
+    <script th:src="@{/js/api-documentation-redesign.js}"></script>
+    
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // Obtener datos desde Thymeleaf
+        const contratoYaml = /*[[${contratoContent}]]*/ null;
+        const seccionesCMS = /*[[${seccionesCMS}]]*/ [];
+        
+        console.log('📚 Secciones CMS cargadas:', seccionesCMS ? seccionesCMS.length : 0);
+
+        // Inicializar Swagger UI
+        let openApiSpec = null;
+        if (contratoYaml) {
+            try {
+                openApiSpec = jsyaml.load(contratoYaml);
+                console.log('✅ OpenAPI Spec cargado:', openApiSpec);
+                
+                // ✨ PRIORIZAR TÍTULO Y DESCRIPCIÓN DEL OPENAPI SPEC
+                if (openApiSpec && openApiSpec.info) {
+                    // Actualizar título desde OpenAPI spec (prioridad sobre BD)
+                    if (openApiSpec.info.title) {
+                        document.getElementById('api-title').textContent = openApiSpec.info.title;
+                        document.title = openApiSpec.info.title + ' - Documentación';
+                    }
+                    
+                    // Actualizar descripción desde OpenAPI spec (prioridad sobre BD)
+                    if (openApiSpec.info.description) {
+                        document.getElementById('api-description').textContent = openApiSpec.info.description;
+                    }
+                }
+                
+                const ui = SwaggerUIBundle({
+                    spec: openApiSpec,
+                    dom_id: '#swagger-ui',
+                    deepLinking: true,
+                    presets: [
+                        SwaggerUIBundle.presets.apis,
+                        SwaggerUIStandalonePreset
+                    ],
+                    plugins: [
+                        SwaggerUIBundle.plugins.DownloadUrl
+                    ],
+                    layout: "BaseLayout",
+                    defaultModelsExpandDepth: 3,
+                    defaultModelExpandDepth: 3,
+                    docExpansion: "list",
+                    displayRequestDuration: true,
+                    filter: true,
+                    displayOperationId: false,
+                    showExtensions: true,
+                    showCommonExtensions: true,
+                    tryItOutEnabled: true,
+                    requestSnippetsEnabled: true,
+                    syntaxHighlight: {
+                        activate: true,
+                        theme: "monokai"
+                    },
+                    persistAuthorization: true,
+                    onComplete: function() {
+                        console.log('✅ Swagger UI renderizado, añadiendo IDs de navegación...');
+                        
+                        // Añadir IDs a las secciones de Swagger para navegación
+                        setTimeout(() => {
+                            // Info section (ya existe en el header)
+                            // Servers section
+                            const serversSection = document.querySelector('.swagger-ui .servers');
+                            if (serversSection && !serversSection.id) {
+                                serversSection.id = 'servers-section';
+                                serversSection.scrollMarginTop = '80px';
+                            }
+                            
+                            // Security/Auth section
+                            const authSection = document.querySelector('.swagger-ui .auth-wrapper');
+                            if (authSection && !authSection.id) {
+                                authSection.id = 'security-section';
+                                authSection.scrollMarginTop = '80px';
+                            }
+                            
+                            // Operations section (todos los endpoints)
+                            const operationsSection = document.querySelector('.swagger-ui .operations-tag');
+                            if (operationsSection && !operationsSection.closest('.opblock-tag-section')) {
+                                const opsContainer = operationsSection.closest('.swagger-ui') || operationsSection.parentElement;
+                                if (opsContainer && !document.getElementById('endpoints-section')) {
+                                    const endpointsWrapper = document.createElement('div');
+                                    endpointsWrapper.id = 'endpoints-section';
+                                    endpointsWrapper.style.scrollMarginTop = '80px';
+                                    operationsSection.parentNode.insertBefore(endpointsWrapper, operationsSection);
+                                    endpointsWrapper.appendChild(operationsSection);
+                                }
+                            }
+                            
+                            // Models/Schemas section
+                            const modelsSection = document.querySelector('.swagger-ui .models');
+                            if (modelsSection && !modelsSection.id) {
+                                modelsSection.id = 'schemas-section';
+                                modelsSection.scrollMarginTop = '80px';
+                            }
+                            
+                            // Añadir IDs a cada opblock-tag para navegación por tag
+                            document.querySelectorAll('.swagger-ui .opblock-tag').forEach((tagSection, index) => {
+                                if (!tagSection.id) {
+                                    const tagName = tagSection.getAttribute('data-tag') || 
+                                                   tagSection.querySelector('.opblock-tag-section h3, .opblock-tag-section h4')?.textContent?.trim() ||
+                                                   `tag-${index}`;
+                                    const tagId = tagName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                                    tagSection.id = `tag-${tagId}`;
+                                    tagSection.style.scrollMarginTop = '80px';
+                                }
+                            });
+                            
+                            console.log('✅ IDs añadidos a secciones de Swagger UI');
+                        }, 500); // Esperar a que Swagger termine de renderizar
+                    }
+                });
+            } catch (error) {
+                console.error('❌ Error inicializando Swagger UI:', error);
+                document.getElementById('swagger-ui').innerHTML = 
+                    `<div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Error cargando la especificación OpenAPI: ${error.message}
+                    </div>`;
+            }
+        } else {
+            document.getElementById('swagger-ui').innerHTML = 
+                `<div class="empty-state">
+                    <i class="fas fa-file-code"></i>
+                    <p>No hay contrato OpenAPI disponible para esta versión.</p>
+                </div>`;
+        }
+
+        // Función para descargar el contrato YAML
+        function downloadYamlContract() {
+            if (contratoYaml) {
+                const apiName = /*[[${api.nombreApi}]]*/ 'api';
+                const version = /*[[${version.numeroVersion}]]*/ '1.0.0';
+                const cleanName = apiName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                const fileName = `${cleanName}_v${version}_openapi.yaml`;
+                
+                const blob = new Blob([contratoYaml], { type: 'application/x-yaml' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        // Renderizar secciones CMS con Markdown
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 DOM cargado, inicializando...');
+            
+            // Generar menú unificado
+            if (window.generateDocumentationMenu && openApiSpec) {
+                console.log('📋 Generando menú de navegación...');
+                window.generateDocumentationMenu(openApiSpec, seccionesCMS);
+            }
+            
+            // Renderizar Markdown en secciones CMS
+            const cmsSections = document.querySelectorAll('.cms-section-content');
+            console.log(`📝 Renderizando ${cmsSections.length} secciones CMS...`);
+            
+            cmsSections.forEach(section => {
+                const markdown = section.getAttribute('data-markdown');
+                if (markdown) {
+                    try {
+                        marked.setOptions({
+                            breaks: true,
+                            gfm: true,
+                            highlight: function(code, lang) {
+                                if (lang && Prism.languages[lang]) {
+                                    return Prism.highlight(code, Prism.languages[lang], lang);
+                                }
+                                return code;
+                            }
+                        });
+                        
+                        section.innerHTML = marked.parse(markdown);
+                        
+                        section.querySelectorAll('pre code').forEach(block => {
+                            Prism.highlightElement(block);
+                        });
+                    } catch (error) {
+                        console.error('❌ Error renderizando Markdown:', error);
+                        section.innerHTML = '<p class="text-danger">Error renderizando el contenido.</p>';
+                    }
+                }
+            });
+            
+            console.log('✅ Inicialización completada');
+        });
+        /*]]>*/
+    </script>
+
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+</body>
+</html>

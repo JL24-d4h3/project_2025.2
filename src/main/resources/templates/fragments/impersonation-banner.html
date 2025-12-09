@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Impersonation Banner Fragment</title>
+</head>
+<body>
+
+<!-- Fragment para el banner de impersonación -->
+<div th:fragment="impersonation-banner" id="impersonationBanner">
+    <script>
+        // Script para verificar si el usuario está siendo impersonado
+        function checkImpersonationStatus() {
+            fetch('/impersonacion/check-status', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.isImpersonating) {
+                            showImpersonationBanner(data.originalUser, data.impersonatedUser);
+                        }
+                    })
+                    .catch(error => {
+                        console.log('No impersonation active or error checking status');
+                    });
+        }
+
+        function showImpersonationBanner(originalUser, impersonatedUser) {
+            // Verificar si el banner ya existe
+            if (document.getElementById('impersonation-warning-banner')) {
+                return;
+            }
+
+            const bannerHtml = `
+                <div id="impersonation-warning-banner" style="
+                    position: fixed; 
+                    top: 0; 
+                    left: 0; 
+                    right: 0; 
+                    z-index: 9999; 
+                    background: linear-gradient(135deg, #ff6b35, #f7931e); 
+                    color: white; 
+                    padding: 12px 20px; 
+                    text-align: center; 
+                    font-weight: 600; 
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                    border-bottom: 3px solid #e55d2d;
+                ">
+                    <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-user-secret" style="font-size: 18px; animation: pulse 2s infinite;"></i>
+                            <span style="font-size: 16px;">
+                                🔍 <strong>MODO IMPERSONACIÓN ACTIVA</strong>
+                            </span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <small style="opacity: 0.9; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 12px;">
+                                Impersonando: <strong>${impersonatedUser || 'Usuario'}</strong>
+                            </small>
+                            <small style="opacity: 0.9; background: rgba(255,255,255,0.2); padding: 4px 8px; border-radius: 12px;">
+                                SuperAdmin: <strong>${originalUser}</strong>
+                            </small>
+                            <button onclick="finalizarImpersonacion()" 
+                                    style="
+                                        background: #dc3545; 
+                                        border: none; 
+                                        color: white; 
+                                        padding: 8px 15px; 
+                                        border-radius: 20px; 
+                                        cursor: pointer; 
+                                        font-weight: 600; 
+                                        font-size: 13px;
+                                        transition: all 0.3s ease;
+                                        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                                    "
+                                    onmouseover="this.style.background='#c82333'; this.style.transform='translateY(-1px)'"
+                                    onmouseout="this.style.background='#dc3545'; this.style.transform='translateY(0px)'">
+                                <i class="fas fa-sign-out-alt" style="margin-right: 5px;"></i>
+                                Dejar de Impersonar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <style>
+                    @keyframes pulse {
+                        0% { opacity: 1; }
+                        50% { opacity: 0.7; }
+                        100% { opacity: 1; }
+                    }
+                    
+                    /* Ajustar el padding del body para compensar el banner fijo */
+                    body {
+                        padding-top: 60px !important;
+                    }
+                    
+                    /* Ajustar navbar si existe */
+                    .navbar {
+                        top: 60px !important;
+                    }
+                </style>
+            `;
+
+            // Insertar el banner al inicio del body
+            document.body.insertAdjacentHTML('afterbegin', bannerHtml);
+        }
+
+        function finalizarImpersonacion() {
+            if (confirm('¿Estás seguro que deseas dejar de impersonar este usuario y regresar a la vista de SuperAdmin?')) {
+                // Mostrar indicador de carga
+                const loadingAlert = `
+                    <div id="loadingAlert" style="
+                        position: fixed; 
+                        top: 60px; 
+                        left: 20px; 
+                        right: 20px; 
+                        z-index: 10000; 
+                        background: #17a2b8; 
+                        color: white; 
+                        padding: 15px; 
+                        text-align: center; 
+                        border-radius: 8px;
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                    ">
+                        <i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i>
+                        <strong>Finalizando impersonación y restaurando sesión de SuperAdmin...</strong>
+                    </div>
+                `;
+
+                document.body.insertAdjacentHTML('afterbegin', loadingAlert);
+
+                fetch('/impersonacion/finalizar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                        .then(response => response.json())
+                        .then(data => {
+                            // Remover el indicador de carga
+                            const loadingDiv = document.getElementById('loadingAlert');
+                            if (loadingDiv) loadingDiv.remove();
+
+                            if (data.success) {
+                                // Mostrar mensaje de éxito y redirigir
+                                alert('✅ ' + (data.message || 'Impersonación finalizada exitosamente. Regresando a la vista de SuperAdmin...'));
+                                window.location.href = data.redirectUrl || '/devportal/SA/impersonar-usuario';
+                            } else {
+                                alert('❌ Error al finalizar la impersonación: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            // Remover el indicador de carga
+                            const loadingDiv = document.getElementById('loadingAlert');
+                            if (loadingDiv) loadingDiv.remove();
+
+                            console.error('Error:', error);
+                            alert('❌ Error de conexión al finalizar la impersonación. Redirigiendo para seguridad...');
+                            // En caso de error, redirigir a la vista de impersonación
+                            window.location.href = '/devportal/SA/impersonar-usuario';
+                        });
+            }
+        }
+
+        // Ejecutar cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            checkImpersonationStatus();
+        });
+    </script>
+</div>
+
+</body>
+</html>
+
+
+

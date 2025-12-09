@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${nodo.nombre + ' - ' + proyecto.nombreProyecto}">Vista de Archivo</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet">
+    
+    <!-- Marked.js for Markdown rendering (LOCAL) -->
+    <script th:src="@{/js/marked.min.js}"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <style>
+        :root {
+            --primary-color: #2596be;
+            --primary-dark: #1e7a9a;
+            --bg-dark: #0d1117;
+            --bg-darker: #010409;
+            --border-color: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .file-container {
+            max-width: 1280px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Breadcrumbs */
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            flex-wrap: wrap;
+        }
+
+        .breadcrumb-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-secondary);
+            margin: 0 0.25rem;
+        }
+
+        /* File Header */
+        .file-header {
+            background: var(--bg-darker);
+            border: 1px solid var(--border-color);
+            border-radius: 6px 6px 0 0;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .file-icon {
+            font-size: 1.5rem;
+            color: #64B5F6;
+        }
+
+        .file-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .file-stats {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-action {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            background: #21262d;
+            border-color: #8b949e;
+        }
+
+        .btn-primary-action {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary-action:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        /* Tabs */
+        .file-tabs {
+            background: var(--bg-darker);
+            border-left: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.5rem;
+            padding: 0 1.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            color: var(--text-primary);
+            border-bottom-color: #f78166;
+        }
+
+        /* File Content */
+        .file-content {
+            background: var(--bg-darker);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            overflow: hidden;
+        }
+
+        .code-container {
+            overflow-x: auto;
+            max-height: calc(100vh - 300px);
+            font-size: 0.875rem;
+        }
+
+        pre[class*="language-"] {
+            margin: 0;
+            border-radius: 0;
+            background: var(--bg-darker) !important;
+        }
+
+        pre[class*="language-"].line-numbers {
+            padding-left: 3.8em;
+        }
+
+        .line-numbers .line-numbers-rows {
+            border-right: 1px solid var(--border-color);
+            background: var(--bg-dark);
+        }
+
+        .line-numbers-rows > span:before {
+            color: var(--text-secondary);
+        }
+
+        /* Loading State */
+        .loading-state {
+            padding: 4rem 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error State */
+        .error-state {
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .error-icon {
+            font-size: 3rem;
+            color: #f85149;
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            font-size: 1.125rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .error-detail {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .file-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .file-stats {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .file-actions {
+                width: 100%;
+            }
+
+            .btn-action {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        /* Binary file preview */
+        .binary-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            padding: 3rem;
+            background: var(--bg-darker);
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+        }
+
+        /* Markdown Preview Styles */
+        #previewContainer {
+            background: #ffffff;
+            padding: 32px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .markdown-body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #24292f;
+            word-wrap: break-word;
+            max-width: 1012px;
+            margin: 0 auto;
+        }
+
+        .markdown-body h1, .markdown-body h2 {
+            border-bottom: 1px solid #d8dee4;
+            padding-bottom: 0.3em;
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        .markdown-body h1 { 
+            font-size: 2em; 
+            margin-top: 0;
+        }
+        
+        .markdown-body h2 { 
+            font-size: 1.5em; 
+        }
+        
+        .markdown-body h3 { 
+            font-size: 1.25em; 
+            margin-top: 24px; 
+            margin-bottom: 16px; 
+            font-weight: 600; 
+            line-height: 1.25;
+        }
+
+        .markdown-body h4 {
+            font-size: 1em;
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        .markdown-body h5, .markdown-body h6 {
+            font-size: 0.875em;
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        .markdown-body p {
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+        
+        .markdown-body code {
+            background-color: rgba(175, 184, 193, 0.2);
+            border-radius: 6px;
+            font-size: 85%;
+            margin: 0;
+            padding: 0.2em 0.4em;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+            color: #24292f;  /* Color oscuro para mejor contraste */
+        }
+
+        .markdown-body pre {
+            background-color: #f6f8fa;
+            border-radius: 6px;
+            font-size: 85%;
+            line-height: 1.45;
+            overflow: auto;
+            padding: 16px;
+            margin-bottom: 16px;
+            position: relative;  /* Para posicionar el botón de copiar */
+        }
+        
+        /* Botón de copiar en bloques de código */
+        .markdown-body pre .copy-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #d0d7de;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s, background-color 0.2s;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #24292f;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .markdown-body pre .copy-button svg {
+            flex-shrink: 0;
+        }
+        
+        .markdown-body pre:hover .copy-button {
+            opacity: 1;
+        }
+        
+        .markdown-body pre .copy-button:hover {
+            background-color: #f3f4f6;
+            border-color: #1f883d;
+        }
+        
+        .markdown-body pre .copy-button.copied {
+            background-color: #1f883d;
+            color: #ffffff;
+            border-color: #1f883d;
+        }
+        
+        .markdown-body pre .copy-button.copied svg {
+            fill: #ffffff;
+        }
+
+        .markdown-body pre code {
+            background-color: transparent;
+            border: 0;
+            display: inline;
+            line-height: inherit;
+            margin: 0;
+            overflow: visible;
+            padding: 0;
+            word-wrap: normal;
+            font-size: 100%;
+            color: #24292f;  /* Color oscuro para bloques de código */
+        }
+
+        .markdown-body ul, .markdown-body ol {
+            margin-top: 0;
+            margin-bottom: 16px;
+            padding-left: 2em;
+        }
+
+        .markdown-body li + li {
+            margin-top: 0.25em;
+        }
+
+        .markdown-body li > p {
+            margin-bottom: 0;
+        }
+
+        .markdown-body a {
+            color: #0969da;
+            text-decoration: none;
+        }
+        
+        .markdown-body a:hover {
+            text-decoration: underline;
+        }
+
+        .markdown-body blockquote {
+            border-left: 0.25em solid #d0d7de;
+            color: #57606a;
+            padding: 0 1em;
+            margin: 0 0 16px 0;
+        }
+
+        .markdown-body table {
+            border-spacing: 0;
+            border-collapse: collapse;
+            display: block;
+            width: max-content;
+            max-width: 100%;
+            overflow: auto;
+            margin-bottom: 16px;
+        }
+
+        .markdown-body table tr {
+            background-color: #ffffff;
+            border-top: 1px solid hsla(210, 18%, 87%, 1);
+        }
+
+        .markdown-body table tr:nth-child(2n) {
+            background-color: #f6f8fa;
+        }
+
+        .markdown-body table th,
+        .markdown-body table td {
+            padding: 6px 13px;
+            border: 1px solid #d0d7de;
+        }
+
+        .markdown-body table th {
+            font-weight: 600;
+            background-color: #f6f8fa;
+        }
+
+        .markdown-body hr {
+            height: 0.25em;
+            padding: 0;
+            margin: 24px 0;
+            background-color: #d0d7de;
+            border: 0;
+        }
+
+        .markdown-body img {
+            max-width: 100%;
+            height: auto;
+            box-sizing: content-box;
+            background-color: #ffffff;
+        }
+
+        .markdown-body strong {
+            font-weight: 600;
+        }
+
+        .markdown-body em {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <div class="file-container">
+        <!-- Breadcrumbs generados desde el servidor (mismo formato que files.html) -->
+        <nav class="breadcrumb-nav">
+            <th:block th:each="crumb, iterStat : ${breadcrumbs}">
+                <!-- Separador (excepto para el primero) -->
+                <span class="breadcrumb-separator" th:if="${!iterStat.first}">/</span>
+                
+                <!-- Item del breadcrumb -->
+                <div class="breadcrumb-item">
+                    <!-- Si es el activo (último), mostrar sin link -->
+                    <span th:if="${crumb.isActive}" 
+                          style="color: var(--text-primary); font-weight: 500;"
+                          th:text="${crumb.nombre}">Actual</span>
+                    
+                    <!-- Si no es activo, mostrar como link -->
+                    <a th:unless="${crumb.isActive}" 
+                       th:href="${crumb.url}"
+                       th:text="${crumb.nombre}">Link</a>
+                </div>
+            </th:block>
+        </nav>
+
+        <!-- File Header -->
+        <div class="file-header">
+            <div class="file-info">
+                <i class="fas fa-file-code file-icon"></i>
+                <div>
+                    <h1 class="file-title" th:text="${nodo.nombre}">SecurityConfig.java</h1>
+                    <div class="file-stats">
+                        <span><i class="fas fa-database"></i> <span id="fileSize">...</span></span>
+                        <span><i class="fas fa-code"></i> <span id="fileLines">...</span> líneas</span>
+                        <span><i class="fas fa-clock"></i> Actualizado <span th:text="${#temporals.format(nodo.actualizadoEn, 'dd MMM yyyy')}">hace 2 días</span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="file-actions">
+                <button class="btn-action" onclick="downloadFile()">
+                    <i class="fas fa-download"></i> Descargar
+                </button>
+                <button class="btn-action" onclick="viewRaw()">
+                    <i class="fas fa-file-alt"></i> Raw
+                </button>
+                <button class="btn-action btn-primary-action" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="file-tabs" id="fileTabs" style="display: none;">
+            <button class="tab active" data-tab="preview" id="previewTab" style="display: none;">
+                <i class="fas fa-eye"></i> Preview
+            </button>
+            <button class="tab" data-tab="code" id="codeTab">
+                <i class="fas fa-code"></i> Code
+            </button>
+        </div>
+
+        <!-- File Content -->
+        <div class="file-content">
+            <div id="loadingState" class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Cargando contenido del archivo...</p>
+            </div>
+
+            <div id="errorState" class="error-state" style="display: none;">
+                <i class="fas fa-exclamation-triangle error-icon"></i>
+                <div class="error-message">No se pudo cargar el archivo</div>
+                <div class="error-detail" id="errorDetail">Error desconocido</div>
+            </div>
+
+            <div id="previewContainer" style="display: none; padding: 2rem; background: white; color: #24292f; min-height: 400px;">
+                <div id="markdownPreview" class="markdown-body"></div>
+            </div>
+
+            <div id="codeContainer" class="code-container" style="display: none;">
+                <pre class="line-numbers"><code id="codeContent" class="language-java"></code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Prism.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <!-- Language support -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+    
+    <!-- JavaScript -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const PROYECTO_ID = /*[[${proyecto.proyectoId}]]*/ 0;
+        const NODO_ID = /*[[${nodo.nodoId}]]*/ 0;
+        const ROL = /*[[${rol}]]*/ 'po';
+        const USERNAME = /*[[${username}]]*/ 'user';
+
+        // Mapeo de extensiones a lenguajes de Prism
+        const languageMap = {
+            'java': 'java',
+            'js': 'javascript',
+            'ts': 'javascript',
+            'py': 'python',
+            'html': 'markup',
+            'xml': 'markup',
+            'css': 'css',
+            'scss': 'css',
+            'json': 'json',
+            'sql': 'sql',
+            'sh': 'bash',
+            'bash': 'bash',
+            'yaml': 'yaml',
+            'yml': 'yaml',
+            'md': 'markdown',
+            'txt': 'plaintext'
+        };
+
+        // Cargar contenido del archivo
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFileContent();
+        });
+
+        function loadFileContent() {
+            const url = `/api/projects/${PROYECTO_ID}/files/${NODO_ID}/content`;
+            const fileName = /*[[${nodo.nombre}]]*/ 'archivo';
+            const mimeType = /*[[${nodo.mimeType}]]*/ 'text/plain';
+            
+            fetch(url)
+                .then(response => {
+                    // Si es 404, archivo no disponible (legacy sin GCS)
+                    if (response.status === 404) {
+                        return response.json().then(data => {
+                            renderLegacyFile(data.message || 'Archivo no disponible');
+                            return null;
+                        });
+                    }
+                    
+                    // Si es 415, es un archivo binario
+                    if (response.status === 415) {
+                        renderBinaryFile(fileName, mimeType);
+                        return null;
+                    }
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data === null) return; // Ya se renderizó como binario o legacy
+                    
+                    if (!data.success) {
+                        throw new Error(data.error || 'Error desconocido');
+                    }
+                    
+                    displayCode(data);
+                })
+                .catch(error => {
+                    showError(error.message);
+                });
+        }
+
+        function renderLegacyFile(message) {
+            console.log('⚠️ Rendering legacy file message');
+            document.getElementById('loadingState').style.display = 'none';
+            
+            // Ocultar tabs para archivos legacy
+            const fileTabs = document.querySelector('.file-tabs');
+            if (fileTabs) {
+                fileTabs.style.display = 'none';
+            }
+            
+            // Ocultar estadísticas de líneas
+            const fileLinesSpan = document.getElementById('fileLines')?.closest('span');
+            if (fileLinesSpan) {
+                fileLinesSpan.style.display = 'none';
+            }
+            
+            const codeContainer = document.getElementById('codeContainer');
+            codeContainer.style.display = 'block';
+            codeContainer.innerHTML = `
+                <div class="binary-preview">
+                    <i class="fas fa-exclamation-circle fa-4x" style="color: #f85149; margin-bottom: 1rem;"></i>
+                    <p style="color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1.125rem; font-weight: 600;">Archivo no disponible</p>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; max-width: 500px; text-align: center;">${message}</p>
+                    <button class="btn-action btn-primary-action" onclick="goBack()" style="margin-top: 1rem;">
+                        <i class="fas fa-arrow-left"></i> Volver al listado
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderBinaryFile(fileName, mimeType) {
+            console.log('🔍 Rendering binary file:', fileName, 'MimeType:', mimeType);
+            document.getElementById('loadingState').style.display = 'none';
+            
+            // Ocultar tabs para archivos binarios
+            const fileTabs = document.querySelector('.file-tabs');
+            if (fileTabs) {
+                fileTabs.style.display = 'none';
+            }
+            
+            // Ocultar estadísticas de líneas (no aplica para binarios)
+            const fileLinesSpan = document.getElementById('fileLines')?.closest('span');
+            if (fileLinesSpan) {
+                fileLinesSpan.style.display = 'none';
+            }
+            
+            const codeContainer = document.getElementById('codeContainer');
+            codeContainer.style.display = 'block';
+            const extension = fileName.split('.').pop().toLowerCase();
+            const downloadUrl = `/api/projects/${PROYECTO_ID}/files/${NODO_ID}/download?inline=true`;
+            
+            // Imágenes
+            if (mimeType && mimeType.startsWith('image/')) {
+                console.log('✅ Rendering as image');
+                codeContainer.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; background: white;">
+                        <img src="${downloadUrl}" alt="${fileName}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    </div>
+                `;
+                return;
+            }
+            
+            // PDFs - más flexible en la detección
+            if ((mimeType && mimeType.includes('pdf')) || extension === 'pdf') {
+                console.log('✅ Rendering as PDF');
+                codeContainer.innerHTML = `
+                    <div style="width: 100%; height: 800px;">
+                        <iframe src="${downloadUrl}" style="width: 100%; height: 100%; border: 1px solid var(--border-color); border-radius: 6px;" type="application/pdf">
+                            <p>Tu navegador no soporta visualización de PDFs. <a href="${downloadUrl}" download>Descargar PDF</a></p>
+                        </iframe>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Otros archivos binarios
+            console.log('⚠️ Binary file type not supported for preview');
+            codeContainer.innerHTML = `
+                <div class="binary-preview">
+                    <i class="fas fa-file-archive fa-4x" style="color: var(--text-secondary); margin-bottom: 1rem;"></i>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem;">Vista previa no disponible para este tipo de archivo</p>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">Tipo: ${mimeType || 'Desconocido'}</p>
+                    <button class="btn-action" onclick="downloadFile()" style="margin-top: 1rem;">
+                        <i class="fas fa-download"></i> Descargar archivo
+                    </button>
+                </div>
+            `;
+        }
+
+        function displayCode(data) {
+            // Ocultar loading
+            document.getElementById('loadingState').style.display = 'none';
+
+            // Determinar lenguaje
+            const extension = data.extension || 'txt';
+            const language = languageMap[extension] || 'plaintext';
+            const isMarkdown = extension === 'md';
+
+            // Mostrar tabs
+            const fileTabs = document.getElementById('fileTabs');
+            const previewTab = document.getElementById('previewTab');
+            const codeTab = document.getElementById('codeTab');
+            
+            fileTabs.style.display = 'flex';
+            
+            if (isMarkdown) {
+                // Para Markdown, mostrar ambos tabs
+                previewTab.style.display = 'block';
+                previewTab.classList.add('active');
+                codeTab.classList.remove('active');
+                
+                // Renderizar Markdown preview
+                renderMarkdownPreview(data.content);
+                
+                // Guardar contenido para el tab de Code
+                window.fileContent = data;
+                window.fileLanguage = language;
+            } else {
+                // Para otros archivos, solo mostrar Code tab
+                previewTab.style.display = 'none';
+                codeTab.classList.add('active');
+                
+                // Mostrar código directamente
+                document.getElementById('codeContainer').style.display = 'block';
+            }
+
+            // Actualizar stats
+            const lines = data.content.split('\n').length;
+            document.getElementById('fileLines').textContent = lines.toLocaleString();
+            document.getElementById('fileSize').textContent = formatBytes(data.size);
+
+            if (!isMarkdown) {
+                renderCodeView(data.content, language);
+            }
+        }
+
+        function renderMarkdownPreview(markdownContent) {
+            const previewContainer = document.getElementById('previewContainer');
+            const markdownPreview = document.getElementById('markdownPreview');
+            
+            console.log('🔄 Rendering Markdown preview...');
+            console.log('Marked library loaded:', typeof marked !== 'undefined');
+            
+            // Verificar que marked está disponible
+            if (typeof marked === 'undefined') {
+                console.error('❌ marked.js no está cargado');
+                markdownPreview.innerHTML = '<p style="color: red;">Error: Librería Markdown no disponible</p>';
+                return;
+            }
+            
+            try {
+                // IMPORTANTE: Remover escapes de backslash y entidades HTML que pueden venir del archivo
+                // Convertir \## a ##, \* a *, &nbsp; a espacio, etc.
+                let cleanedContent = markdownContent
+                    .replace(/\\#/g, '#')      // \# → #
+                    .replace(/\\\*/g, '*')     // \* → *
+                    .replace(/\\_/g, '_')      // \_ → _
+                    .replace(/\\`/g, '`')      // \` → `
+                    .replace(/\\\[/g, '[')     // \[ → [
+                    .replace(/\\\]/g, ']')     // \] → ]
+                    .replace(/\\\(/g, '(')     // \( → (
+                    .replace(/\\\)/g, ')')     // \) → )
+                    .replace(/\\>/g, '>')      // \> → >
+                    .replace(/\\-/g, '-')      // \- → -
+                    .replace(/\\\|/g, '|')     // \| → |
+                    .replace(/&nbsp;/g, ' ')   // &nbsp; → espacio
+                    .replace(/&amp;/g, '&')    // &amp; → &
+                    .replace(/&lt;/g, '<')     // &lt; → <
+                    .replace(/&gt;/g, '>')     // &gt; → >
+                    .replace(/&quot;/g, '"');  // &quot; → "
+                
+                console.log('Original first 200 chars:', markdownContent.substring(0, 200));
+                console.log('Cleaned first 200 chars:', cleanedContent.substring(0, 200));
+                
+                // Usar marked v11 API: marked.parse(content, options)
+                const htmlContent = marked.parse(cleanedContent, {
+                    breaks: true,
+                    gfm: true,
+                    headerIds: true,
+                    mangle: false
+                });
+                
+                console.log('✅ Markdown rendered successfully');
+                console.log('HTML length:', htmlContent.length);
+                console.log('First 500 chars of HTML:', htmlContent.substring(0, 500));
+                markdownPreview.innerHTML = htmlContent;
+                console.log('markdownPreview element:', markdownPreview);
+                console.log('markdownPreview classes:', markdownPreview.className);
+                console.log('markdownPreview computed style:', window.getComputedStyle(markdownPreview).fontSize);
+                
+                // Agregar botones de copiar a todos los bloques de código
+                addCopyButtonsToCodeBlocks();
+            } catch (error) {
+                console.error('❌ Error rendering Markdown:', error);
+                markdownPreview.innerHTML = `<p style="color: red;">Error al renderizar Markdown: ${error.message}</p>`;
+            }
+            
+            // Mostrar preview
+            previewContainer.style.display = 'block';
+            document.getElementById('codeContainer').style.display = 'none';
+        }
+        
+        function addCopyButtonsToCodeBlocks() {
+            const codeBlocks = document.querySelectorAll('.markdown-body pre');
+            
+            codeBlocks.forEach(pre => {
+                // Evitar agregar múltiples botones
+                if (pre.querySelector('.copy-button')) return;
+                
+                const button = document.createElement('button');
+                button.className = 'copy-button';
+                button.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path></svg> Copiar';
+                button.title = 'Copiar código';
+                
+                button.addEventListener('click', async () => {
+                    const code = pre.querySelector('code');
+                    const text = code ? code.textContent : pre.textContent;
+                    
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        button.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg> Copiado';
+                        button.classList.add('copied');
+                        
+                        setTimeout(() => {
+                            button.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path></svg> Copiar';
+                            button.classList.remove('copied');
+                        }, 2000);
+                    } catch (err) {
+                        console.error('Error al copiar:', err);
+                        button.innerHTML = '✗ Error';
+                        setTimeout(() => {
+                            button.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path></svg> Copiar';
+                        }, 2000);
+                    }
+                });
+                
+                pre.appendChild(button);
+            });
+        }
+
+        function renderCodeView(content, language) {
+            // Escapar HTML
+            const escaped = content
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
+            // Insertar código
+            const codeElement = document.getElementById('codeContent');
+            codeElement.className = `language-${language}`;
+            codeElement.textContent = escaped;
+
+            // Aplicar syntax highlighting
+            Prism.highlightElement(codeElement);
+            
+            // Mostrar código
+            document.getElementById('codeContainer').style.display = 'block';
+            document.getElementById('previewContainer').style.display = 'none';
+        }
+
+        function showError(message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorDetail').textContent = message;
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function downloadFile() {
+            window.location.href = `/api/projects/${PROYECTO_ID}/files/${NODO_ID}/download`;
+        }
+
+        function viewRaw() {
+            window.open(`/api/projects/${PROYECTO_ID}/files/${NODO_ID}/download`, '_blank');
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        // Tabs functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.dataset.tab;
+                
+                // Actualizar tabs activos
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                if (tabName === 'preview') {
+                    // Mostrar preview (ya está renderizado)
+                    document.getElementById('previewContainer').style.display = 'block';
+                    document.getElementById('codeContainer').style.display = 'none';
+                } else if (tabName === 'code') {
+                    // Mostrar código
+                    if (window.fileContent && window.fileLanguage) {
+                        // Si es Markdown, necesitamos renderizar el código
+                        renderCodeView(window.fileContent.content, window.fileLanguage);
+                    }
+                    document.getElementById('previewContainer').style.display = 'none';
+                    document.getElementById('codeContainer').style.display = 'block';
+                }
+            });
+        });
+        /*]]>*/
+    </script>
+</body>
+</html>

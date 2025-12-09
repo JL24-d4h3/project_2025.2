@@ -1,0 +1,1188 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Navbar CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+
+    <title>Impersonar Usuario - DevPortal SuperAdmin</title>
+
+    <style>
+        :root {
+            --primary-color: #2596be;
+            --primary-dark: #1e7a9a;
+            --primary-light: #e3f2fd;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --border-light: #e0e0e0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        body {
+            background: #f8f9fa;
+            color: var(--text-primary);
+        }
+
+        .impersonate-container {
+            padding: 1.5rem;
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+
+        .impersonate-main {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .impersonate-header {
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            text-align: center;
+        }
+
+        .breadcrumb {
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            background: none;
+            padding: 0;
+        }
+
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-dark);
+        }
+
+        .page-title {
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-color);
+            font-size: 2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .search-section {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+        }
+
+        .search-input {
+            background-color: #f8f9fa;
+            border: 2px solid var(--border-light);
+            color: var(--text-primary);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .search-input:focus {
+            background-color: white;
+            border-color: var(--primary-color);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 0.2rem rgba(37, 150, 190, 0.25);
+            outline: none;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            z-index: 10;
+        }
+
+        .alert {
+            border-radius: var(--radius-md);
+            border: none;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-info {
+            background: #e3f2fd;
+            color: #0d47a1;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .alert-success {
+            background: #e8f5e8;
+            color: #1b5e20;
+            border-left: 4px solid #4caf50;
+        }
+
+        .alert-danger {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+        }
+
+        .alert-warning {
+            background: #fff3e0;
+            color: #e65100;
+            border-left: 4px solid #ff9800;
+        }
+
+        .active-impersonations {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            transition: all 0.3s ease;
+        }
+
+        .active-impersonations.blocked {
+            border: 3px solid #ff9800;
+            box-shadow: 0 0 20px rgba(255, 152, 0, 0.4);
+            background: #fff8f0;
+        }
+
+        .blocked-warning {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            color: #e65100;
+        }
+
+        .impersonation-item {
+            background: var(--primary-light);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            border: 1px solid var(--primary-color);
+        }
+
+        .impersonation-info {
+            flex: 1;
+        }
+
+        .impersonation-user {
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .impersonation-date {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .btn-stop {
+            background: #ff9800;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-stop:hover {
+            background: #f57c00;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .users-table-section {
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+        }
+
+        .table-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 1.5rem;
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table {
+            color: var(--text-primary);
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            border-bottom: 2px solid var(--border-light);
+            font-weight: 700;
+            color: var(--text-primary);
+            border-top: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 1rem 0.75rem;
+        }
+
+        .table td {
+            vertical-align: middle;
+            border-color: var(--border-light);
+            color: var(--text-secondary);
+            padding: 0.9rem 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .table-hover tbody tr:hover {
+            background: rgba(37, 150, 190, 0.05);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .role-badge {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            padding: 0.25rem 0.6rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.25rem;
+            display: inline-block;
+        }
+
+        .btn-impersonate {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-impersonate:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-no-impersonate {
+            background: #6c757d;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: not-allowed;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0.7;
+            transition: none;
+        }
+
+        .btn-no-impersonate:hover {
+            background: #6c757d;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-test {
+            background: #17a2b8;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-test:hover {
+            background: #138496;
+            transform: translateY(-1px);
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+        }
+
+        .info-card-title {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .user-count {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        .pagination-section {
+            padding: 1rem 1.5rem;
+            background: #f8f9fa;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .pagination {
+            margin: 0;
+        }
+
+        .pagination .page-link {
+            color: var(--primary-color);
+            border: 1px solid var(--border-light);
+            padding: 0.5rem 0.75rem;
+            margin: 0 0.125rem;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s;
+        }
+
+        .pagination .page-link:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination .page-item.active .page-link {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: var(--text-muted);
+            background: #f8f9fa;
+            border-color: var(--border-light);
+        }
+
+        .pagination-info {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .impersonate-container {
+                padding: 1rem;
+            }
+
+            .impersonate-header {
+                padding: 1rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .impersonation-item {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+
+            .table-responsive {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<!-- Navbar SA -->
+<div th:replace="~{fragments/navbar-sa :: navbar-sa}"></div>
+
+<div class="impersonate-container">
+    <!-- Banner de impersonación si aplica -->
+    <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+
+    <main class="impersonate-main">
+        <!-- Header -->
+        <div class="impersonate-header">
+            <nav class="breadcrumb">
+                <a th:href="@{'/devportal/sa/' + ${usuario.username} + '/dashboard'}">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <span class="text-muted">/</span>
+                <a th:href="@{/devportal/sa/gestionar-usuarios}">Gestión de Usuarios</a>
+                <span class="text-muted">/</span>
+                <span class="text-muted">Impersonar Usuario</span>
+            </nav>
+            <h1 class="page-title">
+                <i class="fas fa-user-secret"></i>
+                Impersonar Usuario
+            </h1>
+            <p class="text-muted mb-0">Selecciona un usuario para impersonar y acceder a su vista del portal</p>
+        </div>
+
+        <!-- Mensajes de estado -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Impersonaciones activas -->
+        <div th:if="${impersonacionesActivas != null && !impersonacionesActivas.isEmpty()}" class="active-impersonations">
+            <h5 class="info-card-title">
+                <i class="fas fa-users-cog"></i>
+                Impersonaciones Activas
+            </h5>
+            <div th:each="impersonacion : ${impersonacionesActivas}" class="impersonation-item">
+                <div class="impersonation-info">
+                    <div class="impersonation-user" th:text="${impersonacion.usuario != null ? impersonacion.usuario.username : 'Usuario desconocido'}">
+                        Usuario
+                    </div>
+                    <div class="impersonation-date" th:text="'Desde: ' + ${#temporals.format(impersonacion.fechaInicioImpersonacion, 'dd/MM/yyyy HH:mm')}">
+                        Fecha inicio
+                    </div>
+                </div>
+                <button class="btn-stop finalizar-btn"
+                        th:data-user-id="${impersonacion.usuario != null ? impersonacion.usuario.usuarioId : 0}">
+                    <i class="fas fa-stop"></i> Finalizar
+                </button>
+            </div>
+        </div>
+
+        <!-- Búsqueda, filtros y estadísticas -->
+        <div class="search-section">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-4">
+                    <div class="search-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text"
+                               class="search-input"
+                               id="searchUser"
+                               placeholder="Buscar por nombre, usuario o correo...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select id="roleFilter" class="search-input">
+                        <option value="">Todos los roles</option>
+                        <option value="DEV">Desarrollador (DEV)</option>
+                        <option value="QA">Quality Assurance (QA)</option>
+                        <option value="PO">Product Owner (PO)</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select id="statusFilter" class="search-input">
+                        <option value="">Todos los estados</option>
+                        <option value="HABILITADO">Habilitados</option>
+                        <option value="INHABILITADO">Inhabilitados</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <div class="user-count text-end">
+                        <strong id="userCount">0</strong> usuarios
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de usuarios -->
+        <div class="users-table-section">
+            <h5 class="table-header">
+                <i class="fas fa-users"></i> Lista de Usuarios Disponibles
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-hover" id="usersTable">
+                    <thead>
+                    <tr>
+                        <th scope="col">Usuario</th>
+                        <th scope="col">Nombre Completo</th>
+                        <th scope="col">Correo</th>
+                        <th scope="col">Roles</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${usuarios != null and not #lists.isEmpty(usuarios)}"
+                        th:each="usuario : ${usuarios}">
+                        <td>
+                            <strong th:text="${usuario.username}">username</strong>
+                        </td>
+                        <td th:text="${usuario.nombreUsuario + ' ' + usuario.apellidoPaterno + ' ' + usuario.apellidoMaterno}">
+                            Nombre Completo
+                        </td>
+                        <td th:text="${usuario.correo}">correo@ejemplo.com</td>
+                        <td>
+                                    <span th:if="${usuario.roles != null}"
+                                          th:each="rol : ${usuario.roles}"
+                                          th:text="${rol.nombreRol}"
+                                          class="role-badge">
+                                        ROL
+                                    </span>
+                        </td>
+                        <td>
+                                    <span th:text="${usuario.estadoUsuario != null ? usuario.estadoUsuario : 'N/A'}"
+                                          th:class="${usuario.estadoUsuario != null and usuario.estadoUsuario.name() == 'HABILITADO'} ? 'badge bg-success' : 'badge bg-danger'">
+                                        ESTADO
+                                    </span>
+                        </td>
+                        <td>
+                            <!-- Botón para usuarios habilitados que NO son SuperAdmin -->
+                            <button th:if="${usuario.estadoUsuario != null and usuario.estadoUsuario.name() == 'HABILITADO'
+                                                   and not #lists.contains(#lists.toList(usuario.roles.![nombreRol.name()]), 'SA')}"
+                                    class="btn-impersonate impersonar-btn"
+                                    th:data-user-id="${usuario.usuarioId}"
+                                    th:data-username="${usuario.username}">
+                                <i class="fas fa-user-secret"></i> Impersonar
+                            </button>
+                            <!-- Botón deshabilitado para usuarios inhabilitados -->
+                            <button th:if="${usuario.estadoUsuario != null and usuario.estadoUsuario.name() == 'INHABILITADO'}"
+                                    class="btn-no-impersonate"
+                                    disabled
+                                    title="Este usuario está inhabilitado y no puede ser impersonado">
+                                <i class="fas fa-user-slash"></i> Usuario Inhabilitado
+                            </button>
+                            <!-- Botón deshabilitado para SuperAdmins -->
+                            <button th:if="${usuario.estadoUsuario != null and usuario.estadoUsuario.name() == 'HABILITADO'
+                                                   and #lists.contains(#lists.toList(usuario.roles.![nombreRol.name()]), 'SA')}"
+                                    class="btn-no-impersonate"
+                                    disabled
+                                    title="Los SuperAdministradores no pueden ser impersonados por razones de seguridad">
+                                <i class="fas fa-ban"></i> No se puede impersonar
+                            </button>
+                        </td>
+                    </tr>
+                    <!-- Mensaje cuando no hay usuarios -->
+                    <tr th:if="${usuarios == null or #lists.isEmpty(usuarios)}">
+                        <td colspan="6" class="text-center text-muted py-5">
+                            <i class="fas fa-users fa-3x mb-3"></i>
+                            <br>
+                            <h5>No hay usuarios disponibles</h5>
+                            <p>No se encontraron usuarios para impersonar.</p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            <div class="pagination-section mt-3">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="pagination-info">
+                            <span id="paginationInfo">Mostrando 1-10 de 0 usuarios</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <nav aria-label="Navegación de usuarios">
+                            <ul class="pagination justify-content-end" id="paginationControls">
+                                <!-- Se genera dinámicamente con JavaScript -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="info-cards">
+            <div class="info-card">
+                <h6 class="info-card-title">
+                    <i class="fas fa-info-circle"></i>
+                    ¿Cómo funciona?
+                </h6>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">• Selecciona un usuario de la lista</li>
+                    <li class="mb-2">• Confirma la impersonación</li>
+                    <li class="mb-2">• Navega como ese usuario</li>
+                    <li>• Finaliza cuando termines</li>
+                </ul>
+            </div>
+            <div class="info-card">
+                <h6 class="info-card-title">
+                    <i class="fas fa-shield-alt"></i>
+                    Consideraciones de Seguridad
+                </h6>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">• Solo superadmins pueden impersonar</li>
+                    <li class="mb-2">• Todas las acciones se registran</li>
+                    <li class="mb-2">• Respeta la privacidad del usuario</li>
+                    <li>• Usa solo para soporte técnico</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal de confirmación -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">
+                    <i class="fas fa-user-secret"></i> Confirmar Impersonación
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro que deseas impersonar al usuario <strong id="usernameToImpersonate"></strong>?</p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Podrás navegar como este usuario y acceder a sus vistas del portal.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-warning" id="confirmImpersonationBtn">
+                    <i class="fas fa-user-secret"></i> Confirmar Impersonación
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-3 mb-0">Iniciando impersonación...</p>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    let currentUserId = null;
+    let currentUsername = null;
+    let allUsers = [];
+    let filteredUsers = [];
+    let currentPage = 1;
+    const usersPerPage = 10;
+
+    // Cargar usuarios al inicio
+    document.addEventListener('DOMContentLoaded', function() {
+        loadUsers();
+        setupEventListeners();
+        verificarImpersonacionesActivas(); // ✅ NUEVO: Verificar y bloquear si hay impersonaciones activas
+        console.log('Sistema de impersonación iniciado');
+    });
+
+    function loadUsers() {
+        const tableRows = document.querySelectorAll('#usersTable tbody tr');
+        allUsers = [];
+
+        tableRows.forEach(row => {
+            // Verificar que la fila tenga el número correcto de celdas (6 columnas) y no sea la fila de mensaje vacío
+            if (row.cells.length >= 6 && !row.cells[0].hasAttribute('colspan')) {
+                const userRoles = [];
+                const roleElements = row.querySelectorAll('.role-badge');
+                roleElements.forEach(el => userRoles.push(el.textContent.trim()));
+
+                // Ajustar índices: Usuario(0), Nombre(1), Correo(2), Roles(3), Estado(4), Acciones(5)
+                const statusElement = row.cells[4].querySelector('span'); // Estado está ahora en la celda 4
+                const statusText = statusElement ? statusElement.textContent.trim() : 'N/A';
+
+                // Obtener el ID del botón de impersonar
+                const actionButton = row.cells[5].querySelector('[data-user-id]');
+                const userId = actionButton ? actionButton.getAttribute('data-user-id') : '';
+
+                allUsers.push({
+                    element: row,
+                    id: userId, // Ahora obtenemos el ID del botón
+                    username: row.cells[0].textContent.trim(), // Usuario está ahora en celda 0
+                    fullName: row.cells[1].textContent.trim(), // Nombre está ahora en celda 1
+                    email: row.cells[2].textContent.trim(),    // Correo está ahora en celda 2
+                    roles: userRoles,                          // Roles está ahora en celda 3
+                    status: statusText,                        // Estado está ahora en celda 4
+                    isEnabled: statusText === 'HABILITADO'
+                });
+            }
+        });
+
+        filteredUsers = [...allUsers];
+        updateDisplayAndPagination();
+    }
+
+    function setupEventListeners() {
+        // Búsqueda
+        document.getElementById('searchUser').addEventListener('keyup', filterUsers);
+
+        // Filtro de rol
+        document.getElementById('roleFilter').addEventListener('change', filterUsers);
+
+        // Filtro de estado
+        document.getElementById('statusFilter').addEventListener('change', filterUsers);
+
+        // Eventos de botones
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.impersonar-btn')) {
+                const button = e.target.closest('.impersonar-btn');
+                const userId = button.getAttribute('data-user-id');
+                const username = button.getAttribute('data-username');
+
+                // Verificar si el usuario está habilitado
+                const userRow = button.closest('tr');
+                const statusElement = userRow.cells[4].querySelector('span'); // Estado está ahora en celda 4
+                const userStatus = statusElement ? statusElement.textContent.trim() : '';
+
+                if (userStatus !== 'HABILITADO') {
+                    showAlert('danger', 'No se puede impersonar a un usuario inhabilitado.');
+                    return;
+                }
+
+                // Verificar si el usuario es SuperAdmin
+                const roleElements = userRow.querySelectorAll('.role-badge');
+                const userRoles = Array.from(roleElements).map(el => el.textContent.trim());
+
+                if (userRoles.includes('SA')) {
+                    showAlert('danger', 'No se puede impersonar a otro SuperAdministrador por razones de seguridad.');
+                    return;
+                }
+
+                iniciarImpersonacion(userId, username);
+            }
+
+            if (e.target.closest('.finalizar-btn')) {
+                const button = e.target.closest('.finalizar-btn');
+                const userId = button.getAttribute('data-user-id');
+                finalizarImpersonacion(userId);
+            }
+
+            if (e.target.closest('.page-link')) {
+                e.preventDefault();
+                const page = parseInt(e.target.getAttribute('data-page'));
+                if (page && page !== currentPage) {
+                    currentPage = page;
+                    updateDisplayAndPagination();
+                }
+            }
+        });
+    }
+
+    function filterUsers() {
+        const searchTerm = document.getElementById('searchUser').value.toLowerCase();
+        const roleFilter = document.getElementById('roleFilter').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+
+        filteredUsers = allUsers.filter(user => {
+            // Filtro de búsqueda
+            const matchesSearch = !searchTerm ||
+                user.username.toLowerCase().includes(searchTerm) ||
+                user.fullName.toLowerCase().includes(searchTerm) ||
+                user.email.toLowerCase().includes(searchTerm);
+
+            // Filtro de rol
+            const matchesRole = !roleFilter || user.roles.includes(roleFilter);
+
+            // Filtro de estado
+            const matchesStatus = !statusFilter || user.status === statusFilter;
+
+            return matchesSearch && matchesRole && matchesStatus;
+        });
+
+        currentPage = 1;
+        updateDisplayAndPagination();
+    }
+
+    function updateDisplayAndPagination() {
+        // Ocultar todas las filas de usuarios reales (evitar ocultar la fila de "no hay usuarios")
+        const allTableRows = document.querySelectorAll('#usersTable tbody tr');
+        allTableRows.forEach(row => {
+            if (!row.cells[0].hasAttribute('colspan')) {
+                row.style.display = 'none';
+            }
+        });
+
+        // Calcular paginación
+        const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+        const startIndex = (currentPage - 1) * usersPerPage;
+        const endIndex = startIndex + usersPerPage;
+        const usersToShow = filteredUsers.slice(startIndex, endIndex);
+
+        // Mostrar usuarios de la página actual
+        usersToShow.forEach(user => {
+            user.element.style.display = 'table-row';
+        });
+
+        // Ocultar/mostrar la fila de "no hay usuarios" según corresponda
+        const emptyRow = document.querySelector('#usersTable tbody tr td[colspan]');
+        if (emptyRow) {
+            const emptyRowElement = emptyRow.closest('tr');
+            if (filteredUsers.length === 0) {
+                emptyRowElement.style.display = 'table-row';
+            } else {
+                emptyRowElement.style.display = 'none';
+            }
+        }
+
+        // Actualizar contador
+        document.getElementById('userCount').textContent = filteredUsers.length;
+
+        // Actualizar información de paginación
+        const showingStart = filteredUsers.length > 0 ? startIndex + 1 : 0;
+        const showingEnd = Math.min(endIndex, filteredUsers.length);
+        document.getElementById('paginationInfo').textContent =
+            `Mostrando ${showingStart}-${showingEnd} de ${filteredUsers.length} usuarios`;
+
+        // Generar controles de paginación
+        generatePaginationControls(totalPages);
+    }
+
+    function generatePaginationControls(totalPages) {
+        const paginationContainer = document.getElementById('paginationControls');
+        paginationContainer.innerHTML = '';
+
+        if (totalPages <= 1) return;
+
+        // Botón anterior
+        const prevDisabled = currentPage === 1 ? 'disabled' : '';
+        paginationContainer.innerHTML += `
+                <li class="page-item ${prevDisabled}">
+                    <a class="page-link" href="#" data-page="${currentPage - 1}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+            `;
+
+        // Páginas numeradas
+        const maxVisible = 5;
+        let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let end = Math.min(totalPages, start + maxVisible - 1);
+
+        if (end - start + 1 < maxVisible) {
+            start = Math.max(1, end - maxVisible + 1);
+        }
+
+        if (start > 1) {
+            paginationContainer.innerHTML += `
+                    <li class="page-item">
+                        <a class="page-link" href="#" data-page="1">1</a>
+                    </li>
+                `;
+            if (start > 2) {
+                paginationContainer.innerHTML += `
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    `;
+            }
+        }
+
+        for (let i = start; i <= end; i++) {
+            const activeClass = i === currentPage ? 'active' : '';
+            paginationContainer.innerHTML += `
+                    <li class="page-item ${activeClass}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `;
+        }
+
+        if (end < totalPages) {
+            if (end < totalPages - 1) {
+                paginationContainer.innerHTML += `
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    `;
+            }
+            paginationContainer.innerHTML += `
+                    <li class="page-item">
+                        <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
+                    </li>
+                `;
+        }
+
+        // Botón siguiente
+        const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+        paginationContainer.innerHTML += `
+                <li class="page-item ${nextDisabled}">
+                    <a class="page-link" href="#" data-page="${currentPage + 1}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            `;
+    }
+
+    function iniciarImpersonacion(usuarioId, username) {
+        currentUserId = usuarioId;
+        currentUsername = username;
+
+        document.getElementById('usernameToImpersonate').textContent = username;
+        const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        modal.show();
+    }
+
+    document.getElementById('confirmImpersonationBtn').addEventListener('click', function() {
+        if (currentUserId && currentUsername) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+            modal.hide();
+
+            showLoading();
+
+            fetch(`/devportal/sa/iniciar-impersonacion/${currentUserId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+
+                    if (data.success) {
+                        showAlert('success', `¡Impersonación iniciada! Redirigiendo al dashboard de ${data.usuarioImpersonado} (${data.rolImpersonado})...`);
+
+                        setTimeout(() => {
+                            window.location.href = data.redirectUrl;
+                        }, 1000);
+                    } else {
+                        showAlert('danger', 'Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    console.error('Error:', error);
+                    showAlert('danger', 'Error de conexión al iniciar la impersonación');
+                });
+        }
+    });
+
+    function finalizarImpersonacion(usuarioId) {
+        if (confirm('¿Estás seguro que deseas finalizar esta impersonación?')) {
+            fetch(`/devportal/sa/finalizar-impersonacion/${usuarioId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('success', data.message);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        showAlert('danger', 'Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('danger', 'Error de conexión al finalizar la impersonación');
+                });
+        }
+    }
+
+    function showAlert(type, message) {
+        const existingAlerts = document.querySelectorAll('.alert');
+        existingAlerts.forEach(alert => {
+            if (alert.classList.contains('show')) {
+                alert.remove();
+            }
+        });
+
+        const alertClass = type === 'success' ? 'alert-success' : (type === 'warning' ? 'alert-warning' : 'alert-danger');
+        const icon = type === 'success' ? 'fas fa-check-circle' : (type === 'warning' ? 'fas fa-exclamation-triangle' : 'fas fa-exclamation-circle');
+
+        const alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    <i class="${icon}"></i> ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+
+        const header = document.querySelector('.impersonate-header');
+        header.insertAdjacentHTML('afterend', alertHtml);
+
+        setTimeout(() => {
+            const alert = document.querySelector('.alert.show');
+            if (alert) {
+                alert.remove();
+            }
+        }, 5000);
+    }
+
+    /**
+     * ✅ NUEVA FUNCIÓN: Verifica si hay impersonaciones activas
+     * Si las hay, bloquea TODOS los botones de impersonar hasta que se finalicen
+     */
+    function verificarImpersonacionesActivas() {
+        console.log('🔍 Verificando impersonaciones activas...');
+        
+        const impersonacionesActivas = document.querySelectorAll('.impersonation-item');
+        
+        if (impersonacionesActivas.length > 0) {
+            console.log(`⚠️ Se detectaron ${impersonacionesActivas.length} impersonación(es) activa(s). Bloqueando botones...`);
+            
+            // 1. DESHABILITAR TODOS LOS BOTONES DE IMPERSONAR
+            const botonesImpersonar = document.querySelectorAll('.impersonar-btn');
+            botonesImpersonar.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.remove('btn-impersonate');
+                btn.classList.add('btn-no-impersonate');
+                btn.title = 'Debes finalizar la impersonación activa antes de iniciar otra';
+                btn.style.cursor = 'not-allowed';
+                btn.innerHTML = '<i class="fas fa-ban"></i> Bloqueado';
+            });
+            
+            console.log(`🚫 ${botonesImpersonar.length} botones deshabilitados`);
+            
+            // 2. RESALTAR SECCIÓN DE IMPERSONACIONES ACTIVAS
+            const seccionActivas = document.querySelector('.active-impersonations');
+            if (seccionActivas) {
+                seccionActivas.classList.add('blocked');
+                
+                // Agregar mensaje de advertencia dentro de la sección
+                const warningExists = seccionActivas.querySelector('.blocked-warning');
+                if (!warningExists) {
+                    const warningHTML = `
+                        <div class="blocked-warning">
+                            <i class="fas fa-exclamation-triangle fa-lg"></i>
+                            <span>Debes finalizar esta impersonación antes de iniciar otra</span>
+                        </div>
+                    `;
+                    const titleElement = seccionActivas.querySelector('.info-card-title');
+                    if (titleElement) {
+                        titleElement.insertAdjacentHTML('afterend', warningHTML);
+                    }
+                }
+                
+                console.log('✅ Sección de impersonaciones activas resaltada');
+            }
+            
+            // 3. MOSTRAR ALERTA GLOBAL
+            showAlert('warning', '⚠️ Tienes una impersonación activa. Debes finalizarla antes de iniciar otra.');
+            
+            console.log('✅ Bloqueo de impersonaciones aplicado correctamente');
+        } else {
+            console.log('✅ No hay impersonaciones activas. Botones disponibles.');
+        }
+    }
+
+    function showLoading() {
+        document.getElementById('loadingOverlay').style.display = 'flex';
+    }
+
+    function hideLoading() {
+        document.getElementById('loadingOverlay').style.display = 'none';
+    }
+</script>
+
+<!-- Scripts del navbar SA -->
+<div th:replace="~{fragments/navbar-sa :: navbar-sa-scripts}"></div>
+</body>
+</html>
+
+

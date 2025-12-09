@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${api.nombreApi + ' - Detalles de API - DevPortal'}">Detalles de API - DevPortal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <style>
+        :root {
+            --primary-color: #2596be;
+            --primary-dark: #1e7a9a;
+            --primary-light: #e3f2fd;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --border-light: #e0e0e0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+        }
+
+        .api-details-container { 
+            padding: 1.5rem; 
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+        
+        .api-details-main { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+        }
+        
+        .api-header { 
+            margin-bottom: 2rem;
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .breadcrumb { 
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .breadcrumb a { 
+            color: var(--primary-color); 
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .breadcrumb a:hover {
+            color: var(--primary-dark);
+        }
+        
+        .api-title-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .api-title-left {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .api-title { 
+            margin: 0 0 0.75rem 0; 
+            color: var(--text-primary);
+            font-size: 2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .api-status-badge { 
+            padding: 0.5rem 1rem; 
+            border-radius: var(--radius-sm); 
+            font-size: 0.875rem; 
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+        }
+        
+        .api-status-badge.produccion { background: #e8f5e8; color: #2e7d32; }
+        .api-status-badge.qa { background: #fff3e0; color: #f57c00; }
+        .api-status-badge.desarrollo { background: #e3f2fd; color: #1976d2; }
+        .api-status-badge.deprecated { background: #ffebee; color: #d32f2f; }
+        
+        .api-description {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        
+        .api-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .meta-item i {
+            color: var(--primary-color);
+            width: 1.25rem;
+            text-align: center;
+        }
+        
+        .api-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn-primary { 
+            background: var(--primary-color); 
+            color: white; 
+            padding: 0.75rem 1.5rem; 
+            text-decoration: none; 
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .btn-primary:disabled {
+            background: #ccc;
+            color: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-request-review {
+            background: var(--success-color);
+        }
+        
+        .btn-request-review:hover:not(:disabled) {
+            background: #218838;
+        }
+        
+        .btn-outline { 
+            border: 1px solid var(--primary-color); 
+            color: var(--primary-color); 
+            padding: 0.75rem 1.5rem; 
+            text-decoration: none; 
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            background: white;
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .versions-section { 
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .section-header { 
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            background: #f8f9fa;
+        }
+        
+        .section-title { 
+            margin: 0; 
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .versions-table-container {
+            overflow-x: auto;
+        }
+        
+        .versions-table {
+            width: 100%;
+            margin-bottom: 0;
+        }
+        
+        .versions-table th {
+            background: #f8f9fa;
+            color: var(--text-primary);
+            font-weight: 600;
+            padding: 1rem;
+            border-bottom: 2px solid var(--border-light);
+            text-align: left;
+        }
+        
+        .versions-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: middle;
+        }
+        
+        .version-number {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .version-number:hover {
+            color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        
+        .version-description {
+            color: var(--text-secondary);
+            line-height: 1.4;
+            max-width: 300px;
+        }
+        
+        .version-date {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .version-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-info {
+            background: var(--info-color);
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: #138496;
+            color: white;
+            text-decoration: none;
+        }
+        
+        /* ==================== DEPLOYMENT STYLES ==================== */
+        
+        .deployment-status-cell {
+            min-width: 200px;
+        }
+        
+        .deployment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            margin-bottom: 0.25rem;
+        }
+        
+        .badge-active {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .badge-deploying {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .badge-error {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        
+        .badge-inactive {
+            background: #f5f5f5;
+            color: #616161;
+        }
+        
+        .badge-not-deployed {
+            background: #f5f5f5;
+            color: #9e9e9e;
+        }
+        
+        .deployment-url {
+            display: block;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.813rem;
+            margin-top: 0.25rem;
+            transition: color 0.2s;
+        }
+        
+        .deployment-url:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+        
+        .deployment-url i {
+            font-size: 0.75rem;
+        }
+        
+        .deployment-date {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        
+        .deployment-date i {
+            font-size: 0.7rem;
+        }
+        
+        .btn-deploy {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-deploy:hover {
+            background: var(--primary-dark);
+            color: white;
+        }
+        
+        .btn-stop {
+            background: var(--warning-color);
+            color: #333;
+        }
+        
+        .btn-stop:hover {
+            background: #e0a800;
+            color: #333;
+        }
+        
+        .btn-restart {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .btn-restart:hover {
+            background: #218838;
+            color: white;
+        }
+        
+        .btn-retry {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-retry:hover {
+            background: #c82333;
+            color: white;
+        }
+        
+        .btn-cloud {
+            background: var(--info-color);
+            color: white;
+        }
+        
+        .btn-cloud:hover {
+            background: #138496;
+            color: white;
+            text-decoration: none;
+        }
+        
+        /* ==================== MODAL DEPLOYMENT ==================== */
+        
+        .modal-deployment .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+        }
+        
+        .modal-deployment .modal-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .modal-deployment .btn-close {
+            filter: brightness(0) invert(1);
+        }
+        
+        .deployment-info-card {
+            background: var(--primary-light);
+            border: 1px solid var(--primary-color);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .deployment-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .deployment-info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .deployment-info-label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .deployment-info-value {
+            color: var(--text-secondary);
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        
+        .docker-url-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+        
+        .docker-url-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .docker-url-input.is-invalid {
+            border-color: var(--danger-color);
+        }
+        
+        .docker-url-input.is-valid {
+            border-color: var(--success-color);
+        }
+        
+        .input-helper {
+            font-size: 0.813rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+        
+        .input-error {
+            font-size: 0.813rem;
+            color: var(--danger-color);
+            margin-top: 0.5rem;
+            display: none;
+        }
+        
+        .deployment-warning {
+            background: #fff3e0;
+            border-left: 4px solid var(--warning-color);
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            margin: 1rem 0;
+        }
+        
+        .deployment-warning i {
+            color: var(--warning-color);
+            margin-right: 0.5rem;
+        }
+        
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+            border-width: 0.15rem;
+        }
+        
+        /* ==================== MODAL LOGS ==================== */
+        
+        .modal-logs .modal-dialog {
+            max-width: 90vw;
+        }
+        
+        .modal-logs .modal-header {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+        
+        .modal-logs .modal-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .modal-logs .btn-close {
+            filter: brightness(0) invert(1);
+        }
+        
+        .logs-info {
+            background: #fff5f5;
+            border-color: #dc3545;
+        }
+        
+        .logs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-light);
+        }
+        
+        .logs-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logs-title i {
+            color: var(--text-muted);
+        }
+        
+        .logs-content {
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: var(--radius-sm);
+            padding: 0;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .logs-pre {
+            color: #d4d4d4;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.813rem;
+            line-height: 1.5;
+            margin: 0;
+            padding: 1rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            background: transparent;
+            border: none;
+        }
+        
+        .logs-content::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .logs-content::-webkit-scrollbar-track {
+            background: #2d2d2d;
+        }
+        
+        .logs-content::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 5px;
+        }
+        
+        .logs-content::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+        
+        .btn-logs {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .btn-logs:hover {
+            background: linear-gradient(135deg, #138496, #0f6674);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+        }
+        
+        .btn-logs:active {
+            transform: translateY(0);
+        }
+        
+        .btn-logs i {
+            font-size: 0.875rem;
+        }
+        
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 5rem;
+            right: 1rem;
+            z-index: 9999;
+        }
+        
+        .toast {
+            min-width: 300px;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .toast-success {
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .toast-error {
+            border-left: 4px solid var(--danger-color);
+        }
+        
+        .toast-warning {
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .pagination-section {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-light);
+            background: #f8f9fa;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .pagination-info {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .page-btn {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border-light);
+            background: white;
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        .page-btn:hover:not(.disabled) {
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .page-btn.disabled {
+            background: #f8f9fa;
+            color: var(--text-muted);
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .page-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .empty-state { 
+            text-align: center; 
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+        
+        .empty-icon { 
+            font-size: 4rem; 
+            color: var(--text-muted); 
+            margin-bottom: 1.5rem; 
+        }
+        
+        .empty-title { 
+            color: var(--text-primary); 
+            margin-bottom: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .empty-message { 
+            color: var(--text-secondary); 
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .api-details-container {
+                padding: 1rem;
+            }
+            
+            .api-header {
+                padding: 1.5rem;
+            }
+            
+            .api-title-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .api-title {
+                font-size: 1.5rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .api-meta {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .api-actions {
+                flex-direction: column;
+            }
+            
+            .versions-table {
+                font-size: 0.875rem;
+            }
+            
+            .versions-table th,
+            .versions-table td {
+                padding: 0.75rem 0.5rem;
+            }
+            
+            .pagination-section {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .version-description {
+                max-width: none;
+            }
+            
+            .version-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Banner de Impersonación -->
+    <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <div class="api-details-container">
+        <!-- Banner de impersonación si aplica -->
+        <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+        
+        <main class="api-details-main content-after-navbar">
+            <!-- Header de la API -->
+            <div class="api-header">
+                <nav class="breadcrumb">
+                    <a th:href="@{/devportal/{userRole}/{username}/dashboard(userRole=${userRole}, username=${username})}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <span>/</span>
+                    <a th:href="@{/devportal/{userRole}/{username}/apis(userRole=${userRole}, username=${username})}">
+                        APIs
+                    </a>
+                    <span>/</span>
+                    <span th:text="${api.nombreApi}">Nombre de la API</span>
+                </nav>
+                
+                <div class="api-title-section">
+                    <div class="api-title-left">
+                        <h1 class="api-title">
+                            <i class="fas fa-code" style="color: #2596be;"></i>
+                            <span th:text="${api.nombreApi}">Nombre de la API</span>
+                            <span class="api-status-badge" th:classappend="${api.estadoApi.name().toLowerCase()}" 
+                                  th:text="${api.estadoApi}">PRODUCCION</span>
+                        </h1>
+                        
+                        <p class="api-description" th:text="${api.descripcionApi ?: 'Sin descripción disponible'}">
+                            Descripción de la API...
+                        </p>
+                        
+                        <div class="api-creator mb-3">
+                            <i class="fas fa-user text-muted"></i>
+                            <span class="text-muted">Creado por: </span>
+                            <span class="fw-semibold" th:text="${apiCreator}">usuario123</span>
+                        </div>
+                        
+                        <div class="api-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-plus"></i>
+                                <span>Creada: </span>
+                                <span th:text="${api.creadoEn != null ? #temporals.format(api.creadoEn, 'dd/MM/yyyy') : 'Fecha no disponible'}">01/01/2024</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-layer-group"></i>
+                                <span th:text="${totalVersions} + ' versiones'">3 versiones</span>
+                            </div>
+                            <div class="meta-item" th:if="${!#lists.isEmpty(api.categorias)}">
+                                <i class="fas fa-tags"></i>
+                                <span th:text="${#lists.size(api.categorias)} + ' categorías'">2 categorías</span>
+                            </div>
+                            <div class="meta-item" th:if="${!#lists.isEmpty(api.etiquetas)}">
+                                <i class="fas fa-hashtag"></i>
+                                <span th:text="${#lists.size(api.etiquetas)} + ' etiquetas'">4 etiquetas</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="api-actions">
+                        <!-- Botón EDITAR: Solo visible si API está en BORRADOR y eres el creador -->
+                        <a th:href="@{/devportal/{userRole}/{username}/apis/edit/{apiId}(userRole=${userRole}, username=${username}, apiId=${api.apiId})}" 
+                           class="btn-primary" th:if="${canEdit}">
+                            <i class="fas fa-edit"></i>
+                            Editar API
+                        </a>
+                        
+                        <!-- Botón SOLICITAR REVISIÓN QA: Solo si está desplegado (ACTIVE) y en BORRADOR -->
+                        <button type="button" 
+                                class="btn-primary btn-request-review"
+                                th:if="${canEdit}"
+                                th:attr="data-api-id=${api.apiId},
+                                         data-api-name=${api.nombreApi},
+                                         data-has-active-deployment=${hasActiveDeployment},
+                                         data-active-version=${activeVersionNumber},
+                                         data-estado-api=${api.estadoApi?.name()}"
+                                th:disabled="${!hasActiveDeployment || api.estadoApi?.name() != 'BORRADOR'}">
+                            <i class="fas fa-paper-plane"></i>
+                            Solicitar Revisión QA
+                        </button>
+                        
+                        <!-- Botón CREAR NUEVA VERSIÓN: Solo visible si API está en PRODUCCION y tienes permisos -->
+                        <a th:href="@{/devportal/{userRole}/{username}/apis/update(userRole=${userRole}, username=${username}, preselectedApiId=${api.apiId})}" 
+                           class="btn-primary" th:if="${canCreateNewVersion}">
+                            <i class="fas fa-code-branch"></i>
+                            Crear Nueva Versión
+                        </a>
+                        
+                        <a th:href="@{/devportal/{userRole}/{username}/apis(userRole=${userRole}, username=${username})}" 
+                           class="btn-outline">
+                            <i class="fas fa-arrow-left"></i>
+                            Volver a APIs
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Versiones -->
+            <div class="versions-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-code-branch" style="color: #2596be;"></i>
+                        Versiones de la API
+                        <span class="text-muted">(<span th:text="${totalVersions}">0</span> total)</span>
+                    </h2>
+                </div>
+                
+                <!-- Tabla de Versiones -->
+                <div class="versions-table-container" th:if="${!#lists.isEmpty(versions)}">
+                    <table class="table versions-table">
+                        <thead>
+                            <tr>
+                                <th>Versión</th>
+                                <th>Descripción</th>
+                                <th>Creado por</th>
+                                <th>Fecha de Lanzamiento</th>
+                                <th>Estado Deployment</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="version : ${versions}">
+                                <td>
+                                    <button type="button" class="btn btn-link p-0 version-number" 
+                                            th:attr="data-version-id=${version.versionId}, data-version-number=${version.numeroVersion}"
+                                            onclick="viewContract(this)"
+                                            title="Click para ver el contrato de esta versión"
+                                            style="text-decoration: none; color: #2596be; font-weight: 600;">
+                                        <span th:text="'v' + ${version.numeroVersion}">v1.0.0</span>
+                                        <i class="fas fa-file-code ms-1" style="font-size: 0.8em;"></i>
+                                    </button>
+                                </td>
+                                <td>
+                                    <div class="version-description" th:text="${version.descripcionVersion ?: 'Sin descripción'}">
+                                        Descripción de la versión...
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="version-creator">
+                                        <i class="fas fa-user text-muted me-1"></i>
+                                        <span th:text="${version.creador != null ? version.creador.username : 'No especificado'}">usuario123</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="version-date" th:text="${version.fechaLanzamiento != null ? #temporals.format(version.fechaLanzamiento, 'dd/MM/yyyy') : 'Fecha no disponible'}">
+                                        01/01/2024
+                                    </div>
+                                </td>
+                                <td>
+                                    <!-- Estado Deployment -->
+                                    <div class="deployment-status-cell">
+                                        <!-- ACTIVE -->
+                                        <div th:if="${version.deploymentStatus != null && version.deploymentStatus.name() == 'ACTIVE'}" 
+                                             class="deployment-badge badge-active">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span>ACTIVE</span>
+                                        </div>
+                                        <a th:if="${version.deploymentStatus != null && version.deploymentStatus.name() == 'ACTIVE' && version.cloudRunUrl != null}"
+                                           th:href="${version.cloudRunUrl}" 
+                                           target="_blank" 
+                                           class="deployment-url"
+                                           th:title="${version.cloudRunUrl}">
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <span th:text="${#strings.abbreviate(version.cloudRunUrl, 30)}">https://api-xxx...</span>
+                                        </a>
+                                        <div th:if="${version.deploymentStatus != null && version.deploymentStatus.name() == 'ACTIVE' && version.fechaUltimoDeployment != null}"
+                                             class="deployment-date">
+                                            <i class="fas fa-clock"></i>
+                                            <span th:text="${#temporals.format(version.fechaUltimoDeployment, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:30</span>
+                                        </div>
+                                        
+                                        <!-- DEPLOYING -->
+                                        <div th:if="${version.deploymentStatus != null && version.deploymentStatus.name() == 'DEPLOYING'}" 
+                                             class="deployment-badge badge-deploying">
+                                            <div class="spinner-border spinner-border-sm" role="status">
+                                                <span class="visually-hidden">Desplegando...</span>
+                                            </div>
+                                            <span>DEPLOYING</span>
+                                        </div>
+                                        
+                                        <!-- ERROR con Tooltip -->
+                                        <div th:if="${version.deploymentStatus != null && version.deploymentStatus.name() == 'ERROR'}" 
+                                             class="deployment-badge badge-error"
+                                             data-bs-toggle="tooltip"
+                                             data-bs-placement="top"
+                                             data-bs-html="true"
+                                             th:attr="data-bs-title=${version.mensajeError != null ? version.mensajeError : 'Error en el deployment. Click en Ver Logs para más detalles.'}">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            <span>ERROR</span>
+                                        </div>
+                                        
+                                        <!-- INACTIVE -->
+                                        <div th:if="${version.deploymentStatus != null && version.deploymentStatus.name() == 'INACTIVE'}" 
+                                             class="deployment-badge badge-inactive">
+                                            <i class="fas fa-pause-circle"></i>
+                                            <span>INACTIVE</span>
+                                        </div>
+                                        
+                                        <!-- NO DESPLEGADO (NULL o PENDIENTE) -->
+                                        <div th:if="${version.deploymentStatus == null || version.deploymentStatus.name() == 'PENDIENTE'}" 
+                                             class="deployment-badge badge-not-deployed">
+                                            <i class="fas fa-circle"></i>
+                                            <span>No desplegado</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <!-- Acciones Deployment -->
+                                    <div class="version-actions">
+                                        <!-- Botón DEPLOY: Solo si es NULL, PENDIENTE o ERROR -->
+                                        <button th:if="${version.deploymentStatus == null || version.deploymentStatus.name() == 'PENDIENTE' || version.deploymentStatus.name() == 'ERROR'}"
+                                                type="button" 
+                                                class="btn-sm btn-deploy"
+                                                th:attr="data-version-id=${version.versionId},
+                                                         data-api-name=${api.nombreApi},
+                                                         data-version-number=${version.numeroVersion}"
+                                                onclick="openDeployModal(this)"
+                                                title="Desplegar a Cloud Run">
+                                            <i class="fas fa-rocket"></i>
+                                            Deploy
+                                        </button>
+                                        
+                                        <!-- Botón STOP: Solo si está ACTIVE -->
+                                        <button th:if="${version.deploymentStatus != null && version.deploymentStatus.name() == 'ACTIVE'}"
+                                                type="button" 
+                                                class="btn-sm btn-stop"
+                                                th:attr="data-version-id=${version.versionId}"
+                                                onclick="stopDeployment(this)"
+                                                title="Detener servicio">
+                                            <i class="fas fa-pause"></i>
+                                            Stop
+                                        </button>
+                                        
+                                        <!-- Botón RESTART: Solo si está INACTIVE -->
+                                        <button th:if="${version.deploymentStatus != null && version.deploymentStatus.name() == 'INACTIVE'}"
+                                                type="button" 
+                                                class="btn-sm btn-restart"
+                                                th:attr="data-version-id=${version.versionId}"
+                                                onclick="restartDeployment(this)"
+                                                title="Reiniciar servicio">
+                                            <i class="fas fa-play"></i>
+                                            Restart
+                                        </button>
+                                        
+                                        <!-- Botón RETRY: Solo si está ERROR -->
+                                        <button th:if="${version.deploymentStatus != null && version.deploymentStatus.name() == 'ERROR'}"
+                                                type="button" 
+                                                class="btn-sm btn-retry"
+                                                th:attr="data-version-id=${version.versionId},
+                                                         data-api-name=${api.nombreApi},
+                                                         data-version-number=${version.numeroVersion}"
+                                                onclick="openDeployModal(this)"
+                                                title="Reintentar deployment">
+                                            <i class="fas fa-redo"></i>
+                                            Retry
+                                        </button>
+                                        
+                                        <!-- Botón VER LOGS: Solo si está ERROR -->
+                                        <button th:if="${version.deploymentStatus != null && version.deploymentStatus.name() == 'ERROR'}"
+                                                type="button" 
+                                                class="btn-sm btn-logs"
+                                                th:attr="data-version-id=${version.versionId},
+                                                         data-version-number=${version.numeroVersion}"
+                                                onclick="viewDeploymentLogs(this)"
+                                                title="Ver logs del deployment">
+                                            <i class="fas fa-file-alt"></i>
+                                            Ver Logs
+                                        </button>
+                                        
+                                        <!-- Botón Ver en Cloud Run: Solo si está ACTIVE -->
+                                        <a th:if="${version.deploymentStatus != null && version.deploymentStatus.name() == 'ACTIVE' && version.cloudRunUrl != null}"
+                                           th:href="${version.cloudRunUrl}" 
+                                           target="_blank"
+                                           class="btn-sm btn-cloud"
+                                           title="Abrir en Cloud Run">
+                                            <i class="fas fa-cloud"></i>
+                                            Ver
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Estado vacío -->
+                <div class="empty-state" th:if="${#lists.isEmpty(versions)}">
+                    <div class="empty-icon">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
+                    <h3 class="empty-title">No hay versiones disponibles</h3>
+                    <p class="empty-message">Esta API aún no tiene versiones registradas.</p>
+                    <!-- Este caso no debería ocurrir normalmente porque siempre se crea una versión inicial -->
+                </div>
+                
+                <!-- Paginación -->
+                <div class="pagination-section" th:if="${totalPages > 1}">
+                    <div class="pagination-info">
+                        Mostrando versiones 
+                        <span th:text="${(currentPage * pageSize) + 1}">1</span> - 
+                        <span th:text="${Math.min((currentPage + 1) * pageSize, totalVersions)}">10</span>
+                        de <span th:text="${totalVersions}">25</span>
+                    </div>
+                    
+                    <div class="pagination-controls">
+                        <!-- Botón Anterior -->
+                        <a th:href="${hasPrevious ? baseUrl + '?page=' + (currentPage - 1) + '&size=' + pageSize : '#'}"
+                           th:class="${hasPrevious ? 'page-btn' : 'page-btn disabled'}">
+                            <i class="fas fa-chevron-left"></i>
+                            Anterior
+                        </a>
+                        
+                        <!-- Números de página -->
+                        <span th:each="pageNum : ${#numbers.sequence(Math.max(0, currentPage - 2), Math.min(totalPages - 1, currentPage + 2))}">
+                            <a th:href="${baseUrl + '?page=' + pageNum + '&size=' + pageSize}"
+                               th:class="${pageNum == currentPage ? 'page-btn active' : 'page-btn'}"
+                               th:text="${pageNum + 1}">1</a>
+                        </span>
+                        
+                        <!-- Botón Siguiente -->
+                        <a th:href="${hasNext ? baseUrl + '?page=' + (currentPage + 1) + '&size=' + pageSize : '#'}"
+                           th:class="${hasNext ? 'page-btn' : 'page-btn disabled'}">
+                            Siguiente
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para Ver Contrato -->
+    <div class="modal fade" id="contractModal" tabindex="-1" aria-labelledby="contractModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="contractModalLabel">
+                        <i class="fas fa-file-code"></i>
+                        Contrato de la API
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="contractLoadingSpinner" class="text-center p-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Cargando contrato...</p>
+                    </div>
+                    <pre id="contractContent" class="border p-3" style="display: none; background: #f8f9fa; max-height: 500px; overflow-y: auto; font-size: 0.875rem;"></pre>
+                    <div id="contractError" class="alert alert-danger" style="display: none;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span id="contractErrorMessage">Error cargando el contrato</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                        Cerrar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="downloadContractBtn" style="display: none;">
+                        <i class="fas fa-download"></i>
+                        Descargar YAML
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Deploy to Cloud Run -->
+    <div class="modal fade modal-deployment" id="deployModal" tabindex="-1" aria-labelledby="deployModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deployModalLabel">
+                        <i class="fas fa-rocket"></i>
+                        Deploy to Cloud Run
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Información de la versión -->
+                    <div class="deployment-info-card">
+                        <div class="deployment-info-row">
+                            <span class="deployment-info-label">API:</span>
+                            <span class="deployment-info-value" id="deployApiName">-</span>
+                        </div>
+                        <div class="deployment-info-row">
+                            <span class="deployment-info-label">Versión:</span>
+                            <span class="deployment-info-value" id="deployVersionNumber">-</span>
+                        </div>
+                        <div class="deployment-info-row">
+                            <span class="deployment-info-label">Version ID:</span>
+                            <span class="deployment-info-value" id="deployVersionId">-</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Warning -->
+                    <div class="deployment-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Importante:</strong> Asegúrate de que la imagen Docker esté construida y subida a 
+                        Google Container Registry antes de desplegar.
+                    </div>
+                    
+                    <!-- Input URL Docker -->
+                    <div class="mb-3">
+                        <label for="dockerImageUrl" class="form-label fw-semibold">
+                            <i class="fas fa-docker"></i>
+                            URL de la Imagen Docker <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                               class="form-control docker-url-input" 
+                               id="dockerImageUrl"
+                               placeholder="gcr.io/mi-proyecto/mi-api:v1.0.0"
+                               required>
+                        <div class="input-helper">
+                            <i class="fas fa-info-circle"></i>
+                            Formato esperado: <code>gcr.io/PROJECT_ID/IMAGE_NAME:TAG</code>
+                        </div>
+                        <div class="input-error" id="dockerUrlError">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span id="dockerUrlErrorMessage">URL inválida</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress indicator (hidden por defecto) -->
+                    <div id="deploymentProgress" style="display: none;">
+                        <div class="alert alert-info">
+                            <div class="d-flex align-items-center">
+                                <div class="spinner-border spinner-border-sm me-2" role="status">
+                                    <span class="visually-hidden">Desplegando...</span>
+                                </div>
+                                <span>Desplegando en Cloud Run... Esto puede tomar algunos minutos.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="deployCancelBtn">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="deployConfirmBtn" onclick="confirmDeployment()">
+                        <i class="fas fa-rocket"></i>
+                        Desplegar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Ver Logs de Deployment -->
+    <div class="modal fade modal-logs" id="logsModal" tabindex="-1" aria-labelledby="logsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logsModalLabel">
+                        <i class="fas fa-file-alt"></i>
+                        Logs de Deployment
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Información de la versión -->
+                    <div class="deployment-info-card logs-info">
+                        <div class="deployment-info-row">
+                            <span class="deployment-info-label">API:</span>
+                            <span class="deployment-info-value" id="logsApiName">-</span>
+                        </div>
+                        <div class="deployment-info-row">
+                            <span class="deployment-info-label">Versión:</span>
+                            <span class="deployment-info-value" id="logsVersionNumber">-</span>
+                        </div>
+                        <div class="deployment-info-row">
+                            <span class="deployment-info-label">Estado:</span>
+                            <span class="deployment-info-value">
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    ERROR
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress indicator mientras carga -->
+                    <div id="logsLoadingProgress" style="display: none;">
+                        <div class="alert alert-info">
+                            <div class="d-flex align-items-center">
+                                <div class="spinner-border spinner-border-sm me-2" role="status">
+                                    <span class="visually-hidden">Cargando logs...</span>
+                                </div>
+                                <span>Obteniendo logs de Cloud Run...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contenedor de logs -->
+                    <div id="logsContainer">
+                        <div class="logs-header">
+                            <div class="logs-title">
+                                <i class="fas fa-terminal"></i>
+                                Logs del Deployment
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copyLogsToClipboard()">
+                                <i class="fas fa-copy"></i>
+                                Copiar Logs
+                            </button>
+                        </div>
+                        <div class="logs-content">
+                            <pre id="logsTextarea" class="logs-pre"></pre>
+                        </div>
+                    </div>
+                    
+                    <!-- Error message si no se pueden cargar los logs -->
+                    <div id="logsErrorMessage" class="alert alert-danger" style="display: none;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>Error:</strong> No se pudieron cargar los logs. 
+                        <span id="logsErrorDetails"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                        Cerrar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="logsRefreshBtn" onclick="refreshLogs()">
+                        <i class="fas fa-sync-alt"></i>
+                        Actualizar Logs
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // ==================== VARIABLES GLOBALES ====================
+        let currentVersionId = null;
+        let currentVersionNumber = null;
+        let deployModalInstance = null;
+        let refreshInterval = null;
+        
+        // ==================== FUNCIONES PARA VER CONTRATO ====================
+        
+        // Función para ver contrato
+        function viewContract(button) {
+            const versionId = button.getAttribute('data-version-id');
+            const versionNumber = button.getAttribute('data-version-number');
+            
+            currentVersionId = versionId;
+            currentVersionNumber = versionNumber;
+            const modal = new bootstrap.Modal(document.getElementById('contractModal'));
+            
+            // Mostrar spinner y ocultar contenido/error
+            document.getElementById('contractLoadingSpinner').style.display = 'block';
+            document.getElementById('contractContent').style.display = 'none';
+            document.getElementById('contractError').style.display = 'none';
+            document.getElementById('downloadContractBtn').style.display = 'none';
+            
+            modal.show();
+            
+            // Cargar contrato via AJAX
+            const userRole = /*[[${userRole}]]*/ 'dev';
+            const username = /*[[${username}]]*/ 'user';
+            
+            fetch(`/devportal/${userRole}/${username}/apis/version/${versionId}/contract`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('contractLoadingSpinner').style.display = 'none';
+                
+                if (data.success && data.contract) {
+                    document.getElementById('contractContent').textContent = data.contract;
+                    document.getElementById('contractContent').style.display = 'block';
+                    document.getElementById('downloadContractBtn').style.display = 'inline-block';
+                } else {
+                    throw new Error(data.message || 'No se pudo cargar el contrato');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading contract:', error);
+                document.getElementById('contractLoadingSpinner').style.display = 'none';
+                document.getElementById('contractError').style.display = 'block';
+                document.getElementById('contractErrorMessage').textContent = error.message;
+            });
+        }
+        
+        // Función para descargar contrato
+        document.getElementById('downloadContractBtn').addEventListener('click', function() {
+            const contractContent = document.getElementById('contractContent').textContent;
+            
+            // Obtener información de la API para el nombre del archivo
+            const apiName = /*[[${api.nombreApi}]]*/ 'api';
+            const cleanApiName = apiName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            
+            // Usar el número de versión guardado
+            const versionNumber = currentVersionNumber || '1.0.0';
+            
+            // Crear el nombre del archivo
+            const fileName = `${cleanApiName}_v${versionNumber}_contract.yaml`;
+            
+            // Crear un blob con el contenido
+            const blob = new Blob([contractContent], { type: 'application/x-yaml' });
+            
+            // Crear un enlace temporal para descargar
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = fileName;
+            
+            // Añadir al DOM, hacer clic y eliminar
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Limpiar el objeto URL
+            window.URL.revokeObjectURL(link.href);
+            
+            // Cambiar texto del botón temporalmente para dar feedback
+            const btn = document.getElementById('downloadContractBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Descargado';
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-success');
+            
+            setTimeout(function() {
+                btn.innerHTML = originalText;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-primary');
+            }, 2000);
+        });
+        
+        // ==================== FUNCIONES PARA DEPLOYMENT ====================
+        
+        // Función para abrir modal de deployment
+        function openDeployModal(button) {
+            const versionId = button.getAttribute('data-version-id');
+            const apiName = button.getAttribute('data-api-name');
+            const versionNumber = button.getAttribute('data-version-number');
+            
+            // Guardar datos en el modal
+            document.getElementById('deployVersionId').textContent = versionId;
+            document.getElementById('deployApiName').textContent = apiName;
+            document.getElementById('deployVersionNumber').textContent = 'v' + versionNumber;
+            
+            // Limpiar input y errores
+            document.getElementById('dockerImageUrl').value = '';
+            document.getElementById('dockerImageUrl').classList.remove('is-invalid', 'is-valid');
+            document.getElementById('dockerUrlError').style.display = 'none';
+            document.getElementById('deploymentProgress').style.display = 'none';
+            
+            // Habilitar botones
+            document.getElementById('deployConfirmBtn').disabled = false;
+            document.getElementById('deployCancelBtn').disabled = false;
+            
+            // Mostrar modal
+            deployModalInstance = new bootstrap.Modal(document.getElementById('deployModal'));
+            deployModalInstance.show();
+        }
+        
+        // Validación en tiempo real del input Docker URL
+        document.getElementById('dockerImageUrl').addEventListener('input', function() {
+            const input = this;
+            const value = input.value.trim();
+            const errorDiv = document.getElementById('dockerUrlError');
+            const errorMsg = document.getElementById('dockerUrlErrorMessage');
+            
+            if (value === '') {
+                input.classList.remove('is-invalid', 'is-valid');
+                errorDiv.style.display = 'none';
+                return;
+            }
+            
+            // Regex para validar formato GCR (con o sin tag)
+            const gcrRegexWithTag = /^gcr\.io\/[\w-]+\/[\w-]+(:\S+)?$/;
+            
+            if (gcrRegexWithTag.test(value)) {
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+                errorDiv.style.display = 'none';
+            } else {
+                input.classList.remove('is-valid');
+                input.classList.add('is-invalid');
+                errorMsg.textContent = 'Formato inválido. Debe ser: gcr.io/PROJECT_ID/IMAGE_NAME o gcr.io/PROJECT_ID/IMAGE_NAME:TAG';
+                errorDiv.style.display = 'block';
+            }
+        });
+        
+        // Función para confirmar deployment
+        function confirmDeployment() {
+            const versionId = document.getElementById('deployVersionId').textContent;
+            let dockerImageUrl = document.getElementById('dockerImageUrl').value.trim();
+            const input = document.getElementById('dockerImageUrl');
+            const errorDiv = document.getElementById('dockerUrlError');
+            const errorMsg = document.getElementById('dockerUrlErrorMessage');
+            
+            // Validar que no esté vacío
+            if (dockerImageUrl === '') {
+                input.classList.add('is-invalid');
+                errorMsg.textContent = 'La URL de la imagen Docker es requerida';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Si no tiene tag, agregar :latest automáticamente
+            if (!dockerImageUrl.includes(':')) {
+                dockerImageUrl += ':latest';
+                console.log('🏷️ Tag no especificado, usando :latest automáticamente');
+            }
+            
+            // Validar formato (con o sin tag)
+            const gcrRegex = /^gcr\.io\/[\w-]+\/[\w-]+(:\S+)?$/;
+            if (!gcrRegex.test(dockerImageUrl)) {
+                input.classList.add('is-invalid');
+                errorMsg.textContent = 'Formato inválido. Debe ser: gcr.io/PROJECT_ID/IMAGE_NAME o gcr.io/PROJECT_ID/IMAGE_NAME:TAG';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Mostrar progress indicator
+            document.getElementById('deploymentProgress').style.display = 'block';
+            document.getElementById('deployConfirmBtn').disabled = true;
+            document.getElementById('deployCancelBtn').disabled = true;
+            
+            // Preparar request
+            const requestBody = {
+                versionId: parseInt(versionId),
+                dockerImageUrl: dockerImageUrl
+            };
+            
+            // Llamar al endpoint
+            fetch('/api/deployments/deploy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || `HTTP ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showToast('success', 'Deployment iniciado exitosamente', 
+                              'El deployment está en proceso. La página se actualizará automáticamente.');
+                    
+                    // Cerrar modal después de 2 segundos
+                    setTimeout(() => {
+                        deployModalInstance.hide();
+                        // Recargar página para mostrar nuevo estado
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    throw new Error(data.error || 'Error desconocido');
+                }
+            })
+            .catch(error => {
+                console.error('Error deploying:', error);
+                showToast('error', 'Error en deployment', error.message);
+                
+                // Ocultar progress y habilitar botones
+                document.getElementById('deploymentProgress').style.display = 'none';
+                document.getElementById('deployConfirmBtn').disabled = false;
+                document.getElementById('deployCancelBtn').disabled = false;
+            });
+        }
+        
+        // Función para detener deployment
+        function stopDeployment(button) {
+            const versionId = button.getAttribute('data-version-id');
+            
+            if (!confirm('¿Estás seguro de que deseas detener este servicio?')) {
+                return;
+            }
+            
+            button.disabled = true;
+            button.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Deteniendo...';
+            
+            fetch(`/api/deployments/${versionId}/stop`, {
+                method: 'PUT'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || `HTTP ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showToast('success', 'Servicio detenido', 'El servicio ha sido detenido correctamente.');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    throw new Error(data.error || 'Error desconocido');
+                }
+            })
+            .catch(error => {
+                console.error('Error stopping deployment:', error);
+                showToast('error', 'Error al detener', error.message);
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-pause"></i> Stop';
+            });
+        }
+        
+        // Función para reiniciar deployment
+        function restartDeployment(button) {
+            const versionId = button.getAttribute('data-version-id');
+            
+            button.disabled = true;
+            button.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div> Reiniciando...';
+            
+            fetch(`/api/deployments/${versionId}/restart`, {
+                method: 'PUT'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || `HTTP ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    showToast('success', 'Servicio reiniciado', 'El servicio ha sido reiniciado correctamente.');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    throw new Error(data.error || 'Error desconocido');
+                }
+            })
+            .catch(error => {
+                console.error('Error restarting deployment:', error);
+                showToast('error', 'Error al reiniciar', error.message);
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-play"></i> Restart';
+            });
+        }
+        
+        // Función para mostrar toasts
+        function showToast(type, title, message) {
+            const toastContainer = document.querySelector('.toast-container');
+            
+            const toastHtml = `
+                <div class="toast toast-${type}" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <i class="fas ${type === 'success' ? 'fa-check-circle text-success' : type === 'error' ? 'fa-exclamation-circle text-danger' : 'fa-info-circle text-warning'} me-2"></i>
+                        <strong class="me-auto">${title}</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            
+            const toastElement = toastContainer.lastElementChild;
+            const toast = new bootstrap.Toast(toastElement, {
+                autohide: true,
+                delay: type === 'error' ? 5000 : 3000
+            });
+            
+            toast.show();
+            
+            // Remover del DOM después de que se oculte
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
+        
+        // ==================== FUNCIONES PARA VER LOGS DE DEPLOYMENT ====================
+        
+        let currentLogsVersionId = null;
+        let logsModalInstance = null;
+        
+        // Función para ver logs de deployment
+        function viewDeploymentLogs(button) {
+            const versionId = button.getAttribute('data-version-id');
+            const versionNumber = button.getAttribute('data-version-number');
+            
+            // Guardar versionId actual
+            currentLogsVersionId = versionId;
+            
+            // Obtener modal instance
+            if (!logsModalInstance) {
+                logsModalInstance = new bootstrap.Modal(document.getElementById('logsModal'));
+            }
+            
+            // Actualizar información de la versión en el modal
+            const apiName = /*[[${api.nombreApi}]]*/ 'API';
+            document.getElementById('logsApiName').textContent = apiName;
+            document.getElementById('logsVersionNumber').textContent = versionNumber;
+            
+            // Mostrar modal
+            logsModalInstance.show();
+            
+            // Cargar logs
+            loadDeploymentLogs(versionId);
+        }
+        
+        // Función para cargar logs de deployment
+        function loadDeploymentLogs(versionId) {
+            // Mostrar loading
+            document.getElementById('logsLoadingProgress').style.display = 'block';
+            document.getElementById('logsContainer').style.display = 'none';
+            document.getElementById('logsErrorMessage').style.display = 'none';
+            
+            // Hacer fetch a la API
+            fetch(`/api/deployments/${versionId}/logs`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || `HTTP ${response.status}: ${response.statusText}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Ocultar loading
+                document.getElementById('logsLoadingProgress').style.display = 'none';
+                
+                if (data.success && data.logs) {
+                    // Mostrar logs
+                    document.getElementById('logsTextarea').textContent = data.logs;
+                    document.getElementById('logsContainer').style.display = 'block';
+                    
+                    // Auto-scroll al final
+                    const logsTextarea = document.getElementById('logsTextarea');
+                    logsTextarea.scrollTop = logsTextarea.scrollHeight;
+                } else {
+                    throw new Error(data.message || 'No se pudieron obtener los logs');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading logs:', error);
+                
+                // Ocultar loading y mostrar error
+                document.getElementById('logsLoadingProgress').style.display = 'none';
+                document.getElementById('logsErrorMessage').style.display = 'block';
+                document.getElementById('logsErrorDetails').textContent = error.message;
+            });
+        }
+        
+        // Función para refrescar logs
+        function refreshLogs() {
+            if (currentLogsVersionId) {
+                // Deshabilitar botón temporalmente
+                const refreshBtn = document.getElementById('logsRefreshBtn');
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Actualizando...';
+                
+                loadDeploymentLogs(currentLogsVersionId);
+                
+                // Re-habilitar botón después de 2 segundos
+                setTimeout(() => {
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Actualizar Logs';
+                }, 2000);
+            }
+        }
+        
+        // Función para copiar logs al portapapeles
+        function copyLogsToClipboard() {
+            const logsText = document.getElementById('logsTextarea').textContent;
+            
+            if (!logsText || logsText.trim() === '') {
+                showToast('warning', 'Sin logs', 'No hay logs para copiar.');
+                return;
+            }
+            
+            // Usar Clipboard API
+            navigator.clipboard.writeText(logsText)
+                .then(() => {
+                    showToast('success', 'Logs copiados', 'Los logs se han copiado al portapapeles correctamente.');
+                })
+                .catch(error => {
+                    console.error('Error copying logs:', error);
+                    showToast('error', 'Error al copiar', 'No se pudieron copiar los logs.');
+                });
+        }
+        
+        // ==================== AUTO-REFRESH SI HAY DEPLOYMENTS EN PROCESO ====================
+        
+        // Verificar si hay versiones en estado DEPLOYING
+        function checkDeployingVersions() {
+            const deployingBadges = document.querySelectorAll('.badge-deploying');
+            
+            if (deployingBadges.length > 0) {
+                // Hay versiones desplegándose, iniciar auto-refresh cada 30 segundos
+                if (!refreshInterval) {
+                    console.log('Detectadas versiones en deployment. Iniciando auto-refresh cada 30 segundos...');
+                    refreshInterval = setInterval(() => {
+                        console.log('Auto-refreshing page...');
+                        window.location.reload();
+                    }, 30000); // 30 segundos
+                }
+            } else {
+                // No hay versiones desplegándose, detener auto-refresh
+                if (refreshInterval) {
+                    console.log('No hay versiones en deployment. Deteniendo auto-refresh.');
+                    clearInterval(refreshInterval);
+                    refreshInterval = null;
+                }
+            }
+        }
+        
+        // Ejecutar al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar tooltips de Bootstrap
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    html: true
+                });
+            });
+            
+            // Verificar si hay deployments en proceso
+            checkDeployingVersions();
+            
+            // ==================== SOLICITAR REVISIÓN QA ====================
+            
+            const btnRequestReview = document.querySelector('.btn-request-review');
+            if (btnRequestReview) {
+                btnRequestReview.addEventListener('click', function() {
+                    const apiId = this.dataset.apiId;
+                    const apiName = this.dataset.apiName;
+                    const hasActiveDeployment = this.dataset.hasActiveDeployment === 'true';
+                    const activeVersion = this.dataset.activeVersion;
+                    const estadoApi = this.dataset.estadoApi;
+                    
+                    // Validación frontend
+                    if (!hasActiveDeployment || !activeVersion) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Deployment Requerido',
+                            html: `
+                                <p>Debes desplegar tu API en Cloud Run antes de solicitar revisión QA.</p>
+                                <p class="text-muted mt-2">
+                                    <i class="fas fa-info-circle"></i> 
+                                    El estado de deployment debe ser <strong>ACTIVE</strong>
+                                </p>
+                            `,
+                            confirmButtonText: 'Entendido',
+                            confirmButtonColor: '#2596be'
+                        });
+                        return;
+                    }
+                    
+                    if (estadoApi !== 'BORRADOR') {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'API no elegible',
+                            text: 'Solo puedes solicitar revisión de APIs en estado BORRADOR.',
+                            confirmButtonText: 'Entendido',
+                            confirmButtonColor: '#2596be'
+                        });
+                        return;
+                    }
+                    
+                    // Confirmación
+                    Swal.fire({
+                        icon: 'question',
+                        title: '¿Solicitar Revisión QA?',
+                        html: `
+                            <p>Estás a punto de solicitar la revisión de:</p>
+                            <p class="fw-bold text-primary">${apiName} v${activeVersion}</p>
+                            <p class="text-muted mt-3">
+                                <i class="fas fa-info-circle"></i> 
+                                El equipo QA revisará tu API y podrá aprobarla o rechazarla.
+                            </p>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: '<i class="fas fa-paper-plane"></i> Solicitar',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: '#28a745',
+                        cancelButtonColor: '#6c757d'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Enviar solicitud
+                            requestReview(apiId, apiName);
+                        }
+                    });
+                });
+            }
+        });
+        
+        // Función para solicitar revisión QA
+        function requestReview(apiId, apiName) {
+            const userRole = '[[${userRole}]]';
+            const username = '[[${username}]]';
+            
+            // Mostrar loading
+            Swal.fire({
+                title: 'Enviando solicitud...',
+                text: 'Por favor espera',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // AJAX request
+            fetch(`/devportal/${userRole}/${username}/apis/api-${apiId}/v-${activeVersion}/request-review`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ''
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Solicitud Enviada!',
+                        html: `
+                            <p>Tu solicitud de revisión ha sido enviada exitosamente.</p>
+                            <p class="text-muted mt-2">
+                                <i class="fas fa-clock"></i> 
+                                El equipo QA revisará <strong>${apiName}</strong> pronto.
+                            </p>
+                        `,
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        // Recargar página para ver el cambio de estado
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'No se pudo enviar la solicitud',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error requesting review:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de Conexión',
+                    text: 'No se pudo conectar con el servidor. Inténtalo de nuevo.',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#dc3545'
+                });
+            });
+        }
+        
+        // Limpiar interval al salir de la página
+        window.addEventListener('beforeunload', function() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        });
+    </script>
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+</body>
+</html>

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear API - Ejemplo con Validación OpenAPI</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CodeMirror para editor de código -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    
+    <style>
+        .CodeMirror {
+            height: 400px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .nav-tabs .nav-link.active {
+            font-weight: bold;
+        }
+        .alert {
+            margin-top: 15px;
+        }
+        .form-section {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">
+            <i class="fas fa-plus-circle text-primary"></i> Crear Nueva API
+        </h1>
+        
+        <form id="formCrearApi" onsubmit="return enviarFormularioApi(event)">
+            
+            <!-- TAB 1: Información General -->
+            <div class="form-section">
+                <h3><i class="fas fa-info-circle"></i> Información General</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="nombreApi" class="form-label">Nombre de la API *</label>
+                            <input type="text" class="form-control" id="nombreApi" name="nombre" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="versionApi" class="form-label">Versión *</label>
+                            <input type="text" class="form-control" id="versionApi" name="version" 
+                                   value="1.0.0" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="descripcionApi" class="form-label">Descripción</label>
+                    <textarea class="form-control" id="descripcionApi" name="descripcion" 
+                              rows="3"></textarea>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="categorias" class="form-label">Categorías</label>
+                            <select multiple class="form-select" id="categorias" name="categoriaIds">
+                                <option value="1">REST API</option>
+                                <option value="2">GraphQL</option>
+                                <option value="3">Microservices</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="tags" class="form-label">Tags</label>
+                            <select multiple class="form-select" id="tags" name="tagIds">
+                                <option value="1">Java</option>
+                                <option value="2">Spring Boot</option>
+                                <option value="3">Producción</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TAB 2: Contrato OpenAPI -->
+            <div class="form-section">
+                <h3><i class="fas fa-file-code"></i> Contrato OpenAPI</h3>
+                
+                <!-- Tabs para 3 formas de proporcionar contrato -->
+                <ul class="nav nav-tabs" id="contratoTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="editor-tab" data-bs-toggle="tab" 
+                                data-bs-target="#editor" type="button">
+                            <i class="fas fa-code"></i> Editor de Código
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="upload-tab" data-bs-toggle="tab" 
+                                data-bs-target="#upload" type="button">
+                            <i class="fas fa-upload"></i> Subir Archivo
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="paste-tab" data-bs-toggle="tab" 
+                                data-bs-target="#paste" type="button">
+                            <i class="fas fa-paste"></i> Pegar Código
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content mt-3" id="contratoTabContent">
+                    
+                    <!-- MODO 1: Editor de Código (CodeMirror) -->
+                    <div class="tab-pane fade show active" id="editor" role="tabpanel">
+                        <textarea id="contratoYamlEditor" name="contratoYaml"></textarea>
+                        
+                        <button type="button" class="btn btn-primary mt-3" 
+                                onclick="validarContratoEditor('contratoYamlEditor', 'editorValidationResult')">
+                            <i class="fas fa-check-circle"></i> Validar Contrato
+                        </button>
+                        
+                        <button type="button" class="btn btn-secondary mt-3" 
+                                onclick="cargarEjemploOpenAPI()">
+                            <i class="fas fa-file-import"></i> Cargar Ejemplo
+                        </button>
+                        
+                        <div id="editorValidationResult" class="alert" style="display:none;"></div>
+                    </div>
+                    
+                    <!-- MODO 2: Upload Archivo -->
+                    <div class="tab-pane fade" id="upload" role="tabpanel">
+                        <div class="mb-3">
+                            <label for="contratoFile" class="form-label">
+                                Selecciona un archivo OpenAPI (.yaml, .yml, .json)
+                            </label>
+                            <input type="file" class="form-control" id="contratoFile" 
+                                   accept=".yaml,.yml,.json"
+                                   onchange="validarContratoArchivo(event, 'uploadValidationResult')">
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            El archivo será validado automáticamente al seleccionarlo.
+                        </div>
+                        
+                        <div id="uploadValidationResult" class="alert" style="display:none;"></div>
+                    </div>
+                    
+                    <!-- MODO 3: Paste Directo -->
+                    <div class="tab-pane fade" id="paste" role="tabpanel">
+                        <div class="mb-3">
+                            <label for="contratoPaste" class="form-label">
+                                Pega tu contrato OpenAPI aquí
+                            </label>
+                            <textarea class="form-control" id="contratoPaste" rows="15"
+                                      placeholder="Pega tu contrato OpenAPI aquí (YAML o JSON)..."
+                                      oninput="validarContratoDebounce('contratoPaste', 'pasteValidationResult')"></textarea>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            El contrato se validará automáticamente mientras escribes.
+                        </div>
+                        
+                        <div id="pasteValidationResult" class="alert" style="display:none;"></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <!-- TAB 3: Documentación CMS (Placeholder) -->
+            <div class="form-section">
+                <h3><i class="fas fa-book"></i> Documentación (Opcional)</h3>
+                <div class="alert alert-secondary">
+                    <i class="fas fa-tools"></i> Sección de documentación CMS - Próximamente en FASE 4
+                </div>
+            </div>
+            
+            <!-- Botones de Acción -->
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                    <i class="fas fa-arrow-left"></i> Cancelar
+                </button>
+                
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="fas fa-save"></i> Crear API
+                </button>
+            </div>
+            
+        </form>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- CodeMirror -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/yaml/yaml.min.js"></script>
+    
+    <!-- Swagger Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/swagger-parser@10/dist/swagger-parser.min.js"></script>
+    
+    <!-- OpenAPI Validator (nuestro archivo) -->
+    <script th:src="@{/js/openapi-validator.js}"></script>
+    
+    <script>
+        // =====================================================================
+        // INICIALIZACIÓN DE CODEMIRROR
+        // =====================================================================
+        
+        let codeMirrorEditor;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const textarea = document.getElementById('contratoYamlEditor');
+            
+            codeMirrorEditor = CodeMirror.fromTextArea(textarea, {
+                mode: 'yaml',
+                theme: 'monokai',
+                lineNumbers: true,
+                lineWrapping: true,
+                autoCloseBrackets: true,
+                matchBrackets: true,
+                indentUnit: 2,
+                tabSize: 2
+            });
+            
+            // Placeholder con ejemplo básico
+            codeMirrorEditor.setValue(`openapi: 3.0.0
+info:
+  title: Mi API
+  version: 1.0.0
+  description: Descripción de mi API
+paths:
+  /ejemplo:
+    get:
+      summary: Endpoint de ejemplo
+      responses:
+        '200':
+          description: Respuesta exitosa`);
+        });
+        
+        // =====================================================================
+        // FUNCIÓN PARA CARGAR EJEMPLO COMPLETO
+        // =====================================================================
+        
+        function cargarEjemploOpenAPI() {
+            const ejemploCompleto = `openapi: 3.0.0
+info:
+  title: API de Usuarios
+  version: 1.0.0
+  description: API REST para gestión de usuarios
+  contact:
+    name: Equipo de Desarrollo
+    email: dev@example.com
+    
+servers:
+  - url: https://api.example.com/v1
+    description: Servidor de producción
+    
+paths:
+  /users:
+    get:
+      summary: Obtener lista de usuarios
+      description: Retorna todos los usuarios registrados
+      operationId: getUsers
+      tags:
+        - users
+      parameters:
+        - name: page
+          in: query
+          description: Número de página
+          required: false
+          schema:
+            type: integer
+            default: 1
+      responses:
+        '200':
+          description: Lista de usuarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    
+    post:
+      summary: Crear nuevo usuario
+      description: Crea un nuevo usuario en el sistema
+      operationId: createUser
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: Usuario creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+                
+  /users/{id}:
+    get:
+      summary: Obtener usuario por ID
+      operationId: getUserById
+      tags:
+        - users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Usuario no encontrado
+          
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - username
+        - email
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        username:
+          type: string
+          example: johndoe
+        email:
+          type: string
+          format: email
+          example: johndoe@example.com
+        fullName:
+          type: string
+          example: John Doe
+        createdAt:
+          type: string
+          format: date-time`;
+          
+            codeMirrorEditor.setValue(ejemploCompleto);
+            alert('✅ Ejemplo de OpenAPI cargado. Haz click en "Validar Contrato" para verificarlo.');
+        }
+        
+        // =====================================================================
+        // ENVÍO DEL FORMULARIO CON VALIDACIÓN
+        // =====================================================================
+        
+        async function enviarFormularioApi(event) {
+            event.preventDefault();
+            
+            // Determinar qué tab está activo
+            const activeTab = document.querySelector('#contratoTabs .nav-link.active').id;
+            let contratoContent = null;
+            let esValido = false;
+            
+            // Obtener y validar contrato según el modo activo
+            if (activeTab === 'editor-tab') {
+                // Modo: Editor CodeMirror
+                contratoContent = codeMirrorEditor.getValue();
+                esValido = await validarContratoEditor('contratoYamlEditor', 'editorValidationResult');
+                
+            } else if (activeTab === 'upload-tab') {
+                // Modo: Archivo subido
+                const contratoValidado = getContratoValidado();
+                if (contratoValidado) {
+                    contratoContent = contratoValidado.content;
+                    esValido = true;
+                } else {
+                    alert('❌ Por favor sube y valida un archivo OpenAPI antes de continuar');
+                    return false;
+                }
+                
+            } else if (activeTab === 'paste-tab') {
+                // Modo: Paste directo
+                contratoContent = document.getElementById('contratoPaste').value;
+                esValido = await validarContratoEditor('contratoPaste', 'pasteValidationResult');
+            }
+            
+            // Validar que el contrato sea válido
+            if (!esValido || !contratoContent) {
+                alert('❌ Por favor corrige los errores del contrato OpenAPI antes de continuar');
+                return false;
+            }
+            
+            // Preparar datos para enviar
+            const formData = {
+                nombre: document.getElementById('nombreApi').value,
+                version: document.getElementById('versionApi').value,
+                descripcion: document.getElementById('descripcionApi').value,
+                contratoYaml: contratoContent,
+                categoriaIds: Array.from(document.getElementById('categorias').selectedOptions).map(opt => parseInt(opt.value)),
+                tagIds: Array.from(document.getElementById('tags').selectedOptions).map(opt => parseInt(opt.value)),
+                seccionesCms: [], // Vacío por ahora (FASE 4)
+                creadoPorUsername: '[[${currentUser.username}]]' // Inyectado por Thymeleaf
+            };
+            
+            // Enviar al backend
+            try {
+                const response = await fetch('/devportal/dev/username/apis/create-v2', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ API creada exitosamente!');
+                    // Redirigir a la página de la API
+                    window.location.href = result.redirectUrl || '/devportal/dev/username/apis';
+                } else {
+                    alert('❌ Error al crear API: ' + result.message);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al crear API: ' + error.message);
+            }
+            
+            return false;
+        }
+        
+        // =====================================================================
+        // CAMBIO DE TAB - ACTUALIZAR CODEMIRROR
+        // =====================================================================
+        
+        document.querySelectorAll('#contratoTabs button').forEach(button => {
+            button.addEventListener('shown.bs.tab', function(event) {
+                // Refrescar CodeMirror cuando se vuelve al tab del editor
+                if (event.target.id === 'editor-tab' && codeMirrorEditor) {
+                    setTimeout(() => codeMirrorEditor.refresh(), 100);
+                }
+            });
+        });
+        
+    </script>
+
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+</body>
+</html>
+
+
+

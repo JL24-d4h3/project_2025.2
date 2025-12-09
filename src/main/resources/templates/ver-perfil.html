@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - DevPortal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/navbar.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-dark: #2980b9;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --dark-color: #2c3e50;
+            --light-color: #f8f9fa;
+            --border-color: #dee2e6;
+            --text-muted: #6c757d;
+        }
+        
+        body {
+            background-color: var(--light-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 0;
+        }
+        
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .form-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .profile-avatar {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        
+        .profile-avatar img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid var(--border-color);
+            object-fit: cover;
+        }
+        
+        .profile-avatar .upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .profile-avatar:hover .upload-overlay {
+            opacity: 1;
+        }
+        
+        .profile-avatar .upload-overlay i {
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .profile-header h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .profile-header .badge {
+            font-size: 0.8rem;
+            padding: 0.5rem 1rem;
+        }
+        
+        .profile-header p {
+            color: var(--text-muted);
+            margin: 0.5rem 0 0 0;
+            font-size: 0.95rem;
+        }
+        
+        .breadcrumb-nav {
+            background: none;
+            padding: 0;
+            margin-bottom: 2rem;
+        }
+        
+        .breadcrumb {
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+        }
+        
+        .breadcrumb-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: var(--text-muted);
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+        }
+        
+        .form-section h5 {
+            color: var(--dark-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-control {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            outline: none;
+        }
+        
+        .form-control[readonly] {
+            background-color: #f8f9fa;
+            color: var(--text-muted);
+        }
+        
+        .form-floating {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-floating label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .info-item {
+            background: var(--light-color);
+            border-radius: 8px;
+            padding: 1rem;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .info-item h6 {
+            color: var(--dark-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-item p {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 1rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .btn {
+            border-radius: 8px;
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        
+        .btn-warning {
+            background: var(--warning-color);
+            color: var(--dark-color);
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        /* Modal styles */
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+        
+        .password-input-group {
+            position: relative;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        .password-toggle:hover {
+            color: var(--primary-color);
+        }
+        
+        .file-upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--primary-color);
+            background: rgba(52, 152, 219, 0.05);
+        }
+        
+        .file-upload-area.dragover {
+            border-color: var(--primary-color);
+            background: rgba(52, 152, 219, 0.1);
+        }
+        
+        .file-upload-area i {
+            font-size: 3rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+        
+        .hidden-file-input {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .form-card {
+                padding: 1.5rem;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Banner de Impersonación -->
+    <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+    
+    <!-- Navbar dinámico basado en el rol -->
+    <div th:if="${currentUser != null and #lists.contains(currentUser.roles, 'SA')}" 
+         th:replace="~{fragments/navbar-sa :: navbar-sa}"></div>
+    <div th:if="${currentUser != null and (#lists.contains(currentUser.roles, 'PO') or #lists.contains(currentUser.roles, 'DEV') or #lists.contains(currentUser.roles, 'QA'))}" 
+         th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="main-container content-after-navbar">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb-nav">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a th:href="@{'/devportal/' + ${role} + '/' + ${username} + '/dashboard'}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <i class="fas fa-user"></i> Mi Perfil
+                </li>
+            </ol>
+        </nav>
+        
+        <div class="form-card">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <img th:src="${currentUser != null and currentUser.fotoPerfil != null ? currentUser.fotoPerfil : '/img/default-avatar.png'}" 
+                         alt="Foto de perfil" id="profileImage">
+                    <div class="upload-overlay" onclick="document.getElementById('profilePhotoInput').click()">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </div>
+                <h2 th:text="${currentUser != null ? currentUser.nombreUsuario + ' ' + currentUser.apellidoPaterno : 'Usuario'}">
+                    Nombre del Usuario
+                </h2>
+                <span class="badge bg-primary" th:text="${role != null ? role.toUpperCase() : 'USUARIO'}">ROLE</span>
+                <p th:text="${currentUser != null ? currentUser.correo : 'usuario@correo.com'}">
+                    usuario@correo.com
+                </p>
+            </div>
+            
+            <!-- Mostrar mensajes de error o éxito -->
+            <div th:if="${error}" class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span th:text="${error}">Error</span>
+            </div>
+            
+            <div th:if="${success}" class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${success}">Éxito</span>
+            </div>
+            
+            <!-- Información Personal (Solo lectura) -->
+            <div class="form-section">
+                <h5><i class="fas fa-user"></i> Información Personal</h5>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <h6>Nombre Completo</h6>
+                        <p th:text="${currentUser != null ? currentUser.nombreUsuario + ' ' + currentUser.apellidoPaterno + ' ' + currentUser.apellidoMaterno : 'No disponible'}">
+                            Nombre Apellido Apellido
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <h6>DNI</h6>
+                        <p th:text="${currentUser != null ? currentUser.dni : 'No disponible'}">
+                            12345678
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <h6>Fecha de Nacimiento</h6>
+                        <p th:text="${currentUser != null and currentUser.fechaNacimiento != null ? #temporals.format(currentUser.fechaNacimiento, 'dd/MM/yyyy') : 'No disponible'}">
+                            01/01/1990
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <h6>Sexo</h6>
+                        <p th:text="${currentUser != null and currentUser.sexoUsuario != null ? currentUser.sexoUsuario : 'No especificado'}">
+                            No especificado
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <h6>Username</h6>
+                        <p th:text="${currentUser != null ? currentUser.username : 'No disponible'}">
+                            username
+                        </p>
+                    </div>
+                    <div class="info-item">
+                        <h6>Fecha de Registro</h6>
+                        <p th:text="${currentUser != null and currentUser.fechaCreacion != null ? #temporals.format(currentUser.fechaCreacion, 'dd/MM/yyyy HH:mm') : 'No disponible'}">
+                            01/01/2023 10:00
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Formulario de datos editables -->
+            <form id="profileForm" th:action="@{/devportal/profile/update}" method="post">
+                <!-- Información de Contacto (Editable) -->
+                <div class="form-section">
+                    <h5><i class="fas fa-envelope"></i> Información de Contacto</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="email" class="form-control" id="correo" name="correo" 
+                                       th:value="${currentUser != null ? currentUser.correo : ''}" readonly>
+                                <label for="correo">Correo Electrónico</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="tel" class="form-control" id="telefono" name="telefono" 
+                                       th:value="${currentUser != null ? currentUser.telefono : ''}"
+                                       placeholder="Número de teléfono" maxlength="15">
+                                <label for="telefono">Teléfono</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-floating">
+                        <textarea class="form-control" id="direccionUsuario" name="direccionUsuario" 
+                                  style="min-height: 100px" placeholder="Dirección completa"
+                                  th:text="${currentUser != null ? currentUser.direccionUsuario : ''}"></textarea>
+                        <label for="direccionUsuario">Dirección</label>
+                    </div>
+                </div>
+                
+                <!-- Estado Civil (Editable) -->
+                <div class="form-section">
+                    <h5><i class="fas fa-heart"></i> Estado Civil</h5>
+                    <div class="form-floating">
+                        <select class="form-control" id="estadoCivil" name="estadoCivil">
+                            <option value="">Seleccionar estado civil</option>
+                            <option value="SOLTERO" th:selected="${currentUser != null and currentUser.estadoCivil != null and currentUser.estadoCivil.name() == 'SOLTERO'}">Soltero/a</option>
+                            <option value="CASADO" th:selected="${currentUser != null and currentUser.estadoCivil != null and currentUser.estadoCivil.name() == 'CASADO'}">Casado/a</option>
+                            <option value="VIUDO" th:selected="${currentUser != null and currentUser.estadoCivil != null and currentUser.estadoCivil.name() == 'VIUDO'}">Viudo/a</option>
+                            <option value="DIVORCIADO" th:selected="${currentUser != null and currentUser.estadoCivil != null and currentUser.estadoCivil.name() == 'DIVORCIADO'}">Divorciado/a</option>
+                        </select>
+                        <label for="estadoCivil">Estado Civil</label>
+                    </div>
+                </div>
+                
+                <!-- Acciones -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Guardar Cambios
+                    </button>
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                        <i class="fas fa-key me-2"></i>Cambiar Contraseña
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left me-2"></i>Volver
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para cambiar contraseña -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePasswordModalLabel">
+                        <i class="fas fa-key me-2"></i>Cambiar Contraseña
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="changePasswordForm">
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">Contraseña Actual</label>
+                            <div class="password-input-group">
+                                <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                                <button type="button" class="password-toggle" onclick="togglePassword('currentPassword')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">Nueva Contraseña</label>
+                            <div class="password-input-group">
+                                <input type="password" class="form-control" id="newPassword" name="newPassword" 
+                                       minlength="8" required>
+                                <button type="button" class="password-toggle" onclick="togglePassword('newPassword')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">Mínimo 8 caracteres</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirmar Nueva Contraseña</label>
+                            <div class="password-input-group">
+                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" 
+                                       minlength="8" required>
+                                <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="passwordError" class="alert alert-danger d-none"></div>
+                        <div id="passwordSuccess" class="alert alert-success d-none"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="changePassword()">
+                        <i class="fas fa-save me-2"></i>Cambiar Contraseña
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input oculto para subir foto -->
+    <input type="file" id="profilePhotoInput" class="hidden-file-input" accept="image/*" onchange="uploadProfilePhoto()">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Función para alternar visibilidad de contraseñas
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const button = field.nextElementSibling;
+            const icon = button.querySelector('i');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+        
+        // Función para cambiar contraseña
+        function changePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorDiv = document.getElementById('passwordError');
+            const successDiv = document.getElementById('passwordSuccess');
+            
+            // Limpiar mensajes anteriores
+            errorDiv.classList.add('d-none');
+            successDiv.classList.add('d-none');
+            
+            // Validaciones
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                errorDiv.textContent = 'Todos los campos son obligatorios.';
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                errorDiv.textContent = 'La nueva contraseña debe tener al menos 8 caracteres.';
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                errorDiv.textContent = 'Las contraseñas no coinciden.';
+                errorDiv.classList.remove('d-none');
+                return;
+            }
+            
+            // Enviar solicitud
+            fetch('/devportal/profile/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    currentPassword: currentPassword,
+                    newPassword: newPassword,
+                    confirmPassword: confirmPassword
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    successDiv.textContent = 'Contraseña cambiada exitosamente.';
+                    successDiv.classList.remove('d-none');
+                    
+                    // Limpiar formulario
+                    document.getElementById('changePasswordForm').reset();
+                    
+                    // Cerrar modal después de 2 segundos
+                    setTimeout(() => {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+                        modal.hide();
+                    }, 2000);
+                } else {
+                    errorDiv.textContent = data.message || 'Error al cambiar la contraseña.';
+                    errorDiv.classList.remove('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                errorDiv.textContent = 'Error de conexión. Inténtalo de nuevo.';
+                errorDiv.classList.remove('d-none');
+            });
+        }
+        
+        // Función para subir foto de perfil
+        function uploadProfilePhoto() {
+            const fileInput = document.getElementById('profilePhotoInput');
+            const file = fileInput.files[0];
+            
+            if (!file) return;
+            
+            // Validar que sea una imagen
+            if (!file.type.startsWith('image/')) {
+                alert('Por favor selecciona un archivo de imagen válido.');
+                return;
+            }
+            
+            // Validar tamaño (máximo 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('El archivo es demasiado grande. Máximo 5MB.');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('profilePhoto', file);
+            
+            // Mostrar preview inmediatamente
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('profileImage').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            
+            // Subir archivo
+            fetch('/devportal/profile/upload-photo', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar mensaje de éxito
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                    alertDiv.innerHTML = `
+                        <i class="fas fa-check-circle me-2"></i>Foto de perfil actualizada exitosamente.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.querySelector('.form-card').insertBefore(alertDiv, document.querySelector('.profile-header').nextSibling);
+                } else {
+                    alert('Error al subir la foto: ' + (data.message || 'Error desconocido'));
+                    // Restaurar imagen anterior
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error de conexión al subir la foto.');
+                // Restaurar imagen anterior
+                location.reload();
+            });
+        }
+        
+        // Validación del formulario principal
+        document.getElementById('profileForm').addEventListener('submit', function(e) {
+            const telefono = document.getElementById('telefono').value;
+            
+            // Validar teléfono si se proporciona
+            if (telefono && !/^\+?[\d\s\-\(\)]{7,15}$/.test(telefono)) {
+                e.preventDefault();
+                alert('Por favor ingresa un número de teléfono válido.');
+                return;
+            }
+        });
+        
+        // Formatear teléfono automáticamente
+        document.getElementById('telefono').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 0) {
+                // Formato peruano: 999 999 999
+                if (value.length <= 9) {
+                    value = value.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3');
+                }
+            }
+            e.target.value = value;
+        });
+        
+        // Autoajustar altura del textarea
+        document.getElementById('direccionUsuario').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    </script>
+    
+    <!-- Scripts de navbar específicos según el rol -->
+    <div th:if="${currentUser != null and #lists.contains(currentUser.roles, 'SA')}" 
+         th:replace="~{fragments/navbar-sa :: navbar-sa-scripts}"></div>
+    <div th:if="${currentUser != null and (#lists.contains(currentUser.roles, 'PO') or #lists.contains(currentUser.roles, 'DEV') or #lists.contains(currentUser.roles, 'QA'))}" 
+         th:replace="~{fragments/navbar :: navbar-scripts}"></div>
+</body>
+</html>
+
+

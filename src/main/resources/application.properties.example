@@ -1,0 +1,23 @@
+# Application Properties Template
+# Copia este archivo como application.properties y configura tus valores
+
+# Database Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/tu_base_de_datos
+spring.datasource.username=tu_usuario
+spring.datasource.password=tu_password
+
+# Google Cloud Storage
+spring.cloud.gcp.storage.project-id=tu-proyecto-gcp
+spring.cloud.gcp.storage.credentials.location=classpath:tu-key.json
+spring.cloud.gcp.storage.bucket=tu-bucket
+
+# OAuth2 Configuration
+spring.security.oauth2.client.registration.google.client-id=tu-client-id
+spring.security.oauth2.client.registration.google.client-secret=tu-client-secret
+
+# Server Configuration
+server.port=8080
+
+# Logging
+logging.level.root=INFO
+logging.level.org.project=DEBUG

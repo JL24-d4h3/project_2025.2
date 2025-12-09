@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon">
+    <title>Docy HTML</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
+    <!-- icon css-->
+    <link rel="stylesheet" href="/assets/elagent-icon/style.css">
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" href="/assets/niceselectpicker/nice-select.css">
+    <link rel="stylesheet" href="/assets/animation/animate.css">
+    <link rel="stylesheet" href="/assets/mcustomscrollbar/jquery.mCustomScrollbar.min.css">
+    <link rel="stylesheet" href="/css/style-main.css">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <script src="/js/video-active.js"></script>
+    <script src="/js/theme.js"></script>
+</head>
+
+<body data-scroll-animation="true">
+<div class="body_wrapper">
+
+
+    <!--================Topic List Area =================-->
+    <!-- <section class="topic_list_area pb_125">
+        <div class="container">
+            <div class="main_title text-center">
+                <h2 class="wow fadeInUp" data-wow-delay="0.2s">Catálogo de APIs</h2>
+                <p class="wow fadeInUp" data-wow-delay="0.4s">Explora e integra APIs útiles para mejorar tus aplicaciones.</p>
+            </div>
+            <div class="row topic_list_inner">
+                <div class="col-lg-4 col-sm-6">
+                    <div class="topic_list_item wow fadeIn" data-wow-delay="0.2s">
+                        <a href="#" class="topic-title">
+                            <h4>
+                                <img src="img/home-tow/icon/topic-icon-1.png" alt="">
+                                Autenticación y Usuarios
+                            </h4>
+                            <span class="count">(8 APIs)</span>
+                        </a>
+                        <ul class="navbar-nav">
+                            <li><a href="#"><i class="icon_document_alt"></i>APIs de inicio de sesión</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Registro de usuarios</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Reestablecimiento de contraseñas</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Gestión de perfiles de Usuario</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Gestión de sesiones</a></li>
+                        </ul>
+                        <a class="text_btn dark_btn" href="#">Ver todas las APIs <i class="arrow_right"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-6">
+                    <div class="topic_list_item wow fadeIn" data-wow-delay="0.3s">
+                        <a href="#" class="topic-title">
+                            <h4>
+                                <img src="img/home-tow/icon/topic-icon-2.png" alt="">
+                                Datos y contenido
+                            </h4>
+                            <span class="count">(12 APIs)</span>
+                        </a>
+                        <ul class="navbar-nav">
+                            <li><a href="#"><i class="icon_document_alt"></i>Obtención de contenido</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>APIS de consulta de datos</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Crear contenido</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Búsqueda de Endpoints</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Exportación de datos</a></li>
+                        </ul>
+                        <a class="text_btn dark_btn" href="#">Ver todas las APIs<i class="arrow_right"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-6">
+                    <div class="topic_list_item wow fadeIn" data-wow-delay="0.4s">
+                        <a href="#" class="topic-title">
+                            <h4>
+                                <img src="img/home-tow/icon/topic-icon-3.png" alt="">
+                                Pagos y Facturación
+                            </h4>
+                            <span class="count">(6 APIs)</span>
+                        </a>
+                        <ul class="navbar-nav">
+                            <li><a href="#"><i class="icon_document_alt"></i>Procesamiento de pagos</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Gestión de suscripciones</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Procesamiento de reembolsos</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Historial de transacciones</a></li>
+                        </ul>
+                        <a class="text_btn dark_btn" href="#">Ver todas las APIs<i class="arrow_right"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-6">
+                    <div class="topic_list_item wow fadeIn" data-wow-delay="0.5s">
+                        <a href="#" class="topic-title">
+                            <h4>
+                                <img src="img/home-tow/icon/topic-icon-4.png" alt="">
+                                Comunicaciones
+                            </h4>
+                            <span class="count">(9)</span>
+                        </a>
+                        <ul class="navbar-nav">
+                            <li><a href="#"><i class="icon_document_alt"></i>Notificaciones por correo electrónico</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Mensajería SMS</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Notificaciones Push</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Integración de chat</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>APIs de voz</a></li>
+                        </ul>
+                        <a class="text_btn dark_btn" href="#">Ver todas las APIs<i class="arrow_right"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-6">
+                    <div class="topic_list_item wow fadeIn" data-wow-delay="0.6s">
+                        <a href="#" class="topic-title">
+                            <h4>
+                                <img src="img/home-tow/icon/topic-icon-5.png" alt="">
+                                Métricas
+                            </h4>
+                            <span class="count">(7)</span>
+                        </a>
+                        <ul class="navbar-nav">
+                            <li><a href="#"><i class="icon_document_alt"></i>Métricas de uso</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Métricas de rendimiento</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Comportamiento de usuario</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Reportes personalizados</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Visualización de datos</a></li>
+                        </ul>
+                        <a class="text_btn dark_btn" href="#">Ver todas las APIs<i class="arrow_right"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-6">
+                    <div class="topic_list_item wow fadeIn" data-wow-delay="0.7s">
+                        <a href="#" class="topic-title">
+                            <h4>
+                                <img src="img/home-tow/icon/topic-icon-6.png" alt="">
+                                Integración
+                            </h4>
+                            <span class="count">(11)</span>
+                        </a>
+                        <ul class="navbar-nav">
+                            <li><a href="#"><i class="icon_document_alt"></i>Enlaces de terceros</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Gestión de Webhook</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Integración OAuth</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>Single Sign-On</a></li>
+                            <li><a href="#"><i class="icon_document_alt"></i>API Gateway</a></li>
+                        </ul>
+                        <a class="text_btn dark_btn" href="#">Ver todas las APIs<i class="arrow_right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+     -->
+    <!-- Asegúrate de tener Ionicons cargado al final del <body> -->
+    <section class="topic_list_area pb_125">
+        <div class="container">
+            <div class="main_title text-center">
+                <h2 class="wow fadeInUp" data-wow-delay="0.2s">APIs disponibles</h2>
+                <p class="wow fadeInUp" data-wow-delay="0.4s">Lorem ipsum.</p>
+            </div>
+
+            <div class="row topic_list_inner">
+                <!-- 1. Stripe Payments API -->
+                <div class="col-lg-4 col-sm-6">
+                    <div class="topic_list_item wow fadeIn" data-wow-delay="0.2s" style="min-height:360px;display:flex;flex-direction:column;">
+                        <a href="https://stripe.com/docs/api" class="topic-title">
+                            <h4>
+                                <ion-icon name="card-outline" size="large" aria-hidden="true" style="color:#635bff;"></ion-icon>&nbsp;
+                                Stripe Payments API
+                            </h4>
+                        </a>
+                        <ul class="navbar-nav">
+                            <li><span aria-hidden="true">•</span> Proveedor: Stripe</li>
+                            <li><span aria-hidden="true">•</span> Auth: Bearer (secret key)</li>
+                            <li><span aria-hidden="true">•</span> Base URL: https://api.stripe.com</li>
+                            <li><span aria-hidden="true">•</span> Endpoint clave: /v1/payment_intents</li>
+                            <li><span aria-hidden="true">•</span> Webhooks: events (pagos, reembolsos)</li>
+                        </ul>
+                        <a class="text_btn dark_btn" th:href="@{'/devportal/' + ${role} + '/' + ${username} + '/api-1-doc-1'}" style="margin-top:auto;">Ver docs <i class="arrow_right"></i></a>
+                    </div>
+                </div>
+
+                <!-- 2. Twilio Programmable SMS -->
+                <div class="col-lg-4 col-sm-6">
+                    <div class="topic_list_item wow fadeIn" data-wow-delay="0.3s" style="min-height:360px;display:flex;flex-direction:column;">
+                        <a href="https://www.twilio.com/docs/sms/api" class="topic-title">
+                            <h4>
+                                <ion-icon name="chatbubbles-outline" size="large" aria-hidden="true" style="color:#F22F46;"></ion-icon>&nbsp;
+                                Twilio SMS API
+                            </h4>
+                        </a>
+                        <ul class="navbar-nav">
+                            <li><span aria-hidden="true">•</span> Proveedor: Twilio</li>
+                            <li><span aria-hidden="true">•</span> Auth: Basic (Account SID + Auth Token)</li>
+                            <li><span aria-hidden="true">•</span> Base URL: https://api.twilio.com</li>
+                            <li><span aria-hidden="true">•</span> Endpoint: /2010-04-01/Accounts/{SID}/Messages.json</li>
+                            <li><span aria-hidden="true">•</span> Callbacks: StatusCallback para delivery</li>
+                        </ul>
+                        <a class="text_btn dark_btn" href="https://www.twilio.com/docs/sms/api" style="margin-top:auto;">Ver docs <i class="arrow_right"></i></a>
+                    </div>
+                </div>
+
+                <!-- 3. SendGrid Mail Send -->
+                <div class="col-lg-4 col-sm-6">
+                    <div class="topic_list_item wow fadeIn" data-wow-delay="0.4s" style="min-height:360px;display:flex;flex-direction:column;">
+                        <a href="https://docs.sendgrid.com/api-reference/mail-send/mail-send" class="topic-title">
+                            <h4>
+                                <ion-icon name="mail-outline" size="large" aria-hidden="true" style="color:#00B0FF;"></ion-icon>&nbsp;
+                                SendGrid Mail Send API
+                            </h4>
+                        </a>
+                        <ul class="navbar-nav">
+                            <li><span aria-hidden="true">•</span> Proveedor: SendGrid</li>
+                            <li><span aria-hidden="true">•</span> Auth: Bearer (API Key)</li>
+                            <li><span aria-hidden="true">•</span> Base URL: https://api.sendgrid.com</li>
+                            <li><span aria-hidden="true">•</span> Endpoint: /v3/mail/send</li>
+                            <li><span aria-hidden="true">•</span> Soporta: plantillas, adjuntos, categorías</li>
+                        </ul>
+                        <a class="text_btn dark_btn" href="https://docs.sendgrid.com/api-reference/mail-send/mail-send" style="margin-top:auto;">Ver docs <i class="arrow_right"></i></a>
+                    </div>
+                </div>
+
+                <!-- 4. GitHub REST API -->
+                <div class="col-lg-4 col-sm-6">
+                    <div class="topic_list_item wow fadeIn" data-wow-delay="0.5s" style="min-height:360px;display:flex;flex-direction:column;">
+                        <a href="https://docs.github.com/rest" class="topic-title">
+                            <h4>
+                                <ion-icon name="logo-github" size="large" aria-hidden="true" style="color:#ffffff;"></ion-icon>&nbsp;
+                                GitHub REST API
+                            </h4>
+                        </a>
+                        <ul class="navbar-nav">
+                            <li><span aria-hidden="true">•</span> Proveedor: GitHub</li>
+                            <li><span aria-hidden="true">•</span> Auth: Bearer (personal access token)</li>
+                            <li><span aria-hidden="true">•</span> Base URL: https://api.github.com</li>
+                            <li><span aria-hidden="true">•</span> Endpoint: /repos/{owner}/{repo}/issues</li>
+                            <li><span aria-hidden="true">•</span> Rate limit: 60 sin token / 5,000 con token (hora)</li>
+                        </ul>
+                        <a class="text_btn dark_btn" href="https://docs.github.com/rest" style="margin-top:auto;">Ver docs <i class="arrow_right"></i></a>
+                    </div>
+                </div>
+
+                <!-- 5. Google Maps Geocoding -->
+                <div class="col-lg-4 col-sm-6">
+                    <div class="topic_list_item wow fadeIn" data-wow-delay="0.6s" style="min-height:360px;display:flex;flex-direction:column;">
+                        <a href="https://developers.google.com/maps/documentation/geocoding" class="topic-title">
+                            <h4>
+                                <ion-icon name="map-outline" size="large" aria-hidden="true" style="color:#34A853;"></ion-icon>&nbsp;
+                                Google Maps Geocoding API
+                            </h4>
+                        </a>
+                        <ul class="navbar-nav">
+                            <li><span aria-hidden="true">•</span> Proveedor: Google</li>
+                            <li><span aria-hidden="true">•</span> Auth: API Key (facturación activada)</li>
+                            <li><span aria-hidden="true">•</span> Endpoint: /maps/api/geocode/json</li>
+                            <li><span aria-hidden="true">•</span> Funciones: geocoding y reverse geocoding</li>
+                            <li><span aria-hidden="true">•</span> Cuotas: por proyecto/clave</li>
+                        </ul>
+                        <a class="text_btn dark_btn" href="https://developers.google.com/maps/documentation/geocoding" style="margin-top:auto;">Ver docs <i class="arrow_right"></i></a>
+                    </div>
+                </div>
+
+                <!-- 6. Amazon S3 (Object Storage) -->
+                <div class="col-lg-4 col-sm-6">
+                    <div class="topic_list_item wow fadeIn" data-wow-delay="0.7s" style="min-height:360px;display:flex;flex-direction:column;">
+                        <a href="https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html" class="topic-title">
+                            <h4>
+                                <ion-icon name="cloud-outline" size="large" aria-hidden="true" style="color:#FF9900;"></ion-icon>&nbsp;
+                                Amazon S3 API
+                            </h4>
+                        </a>
+                        <ul class="navbar-nav">
+                            <li><span aria-hidden="true">•</span> Proveedor: AWS</li>
+                            <li><span aria-hidden="true">•</span> Auth: Signature V4 (AWS4-HMAC-SHA256)</li>
+                            <li><span aria-hidden="true">•</span> Endpoint: https://s3.{region}.amazonaws.com</li>
+                            <li><span aria-hidden="true">•</span> Operaciones: PUT/GET, List, Delete</li>
+                            <li><span aria-hidden="true">•</span> Presigned URLs para acceso temporal</li>
+                        </ul>
+                        <a class="text_btn dark_btn" href="https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html" style="margin-top:auto;">Ver docs <i class="arrow_right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!--================End Topic List Area =================-->
+
+</div>
+
+<!-- Back to top button -->
+<a id="back-to-top" title="Back to Top"></a>
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="/js/jquery-3.5.1.min.js"></script>
+<script src="/assets/bootstrap/js/popper.min.js"></script>
+<script src="/assets/bootstrap/js/bootstrap.min.js"></script>
+<script src="/js/pre-loader.js"></script>
+<script src="/assets/slick/slick.min.js"></script>
+<script src="/js/jquery.parallax-scroll.js"></script>
+<script src="/assets/niceselectpicker/jquery.nice-select.min.js"></script>
+<script src="/assets/wow/wow.min.js"></script>
+<script src="/assets/mcustomscrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+<script src="/assets/video/artplayer.js"></script>
+
+<script src="/assets/magnify-pop/jquery.magnific-popup.min.js"></script>
+<script src="/js/plugins.js"></script>
+<script src="/js/theme.js"></script>
+<script src="/js/video-active.js"></script>
+<script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script>
+<script src="/js/main.js"></script>
+</body>
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</html>

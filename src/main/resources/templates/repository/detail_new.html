@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${repository['nombre_repositorio'] + ' - DevPortal'}">Repositorio - DevPortal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-light: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --white: #ffffff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --transition: all 0.15s ease-in-out;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--gray-50);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container-fluid {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .page-header {
+            background: var(--white);
+            border-bottom: 1px solid var(--border-light);
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .breadcrumb-nav a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .breadcrumb-nav a:hover {
+            color: var(--primary-dark);
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-muted);
+        }
+
+        .repository-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .repository-info {
+            flex: 1;
+        }
+
+        .repository-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 0.5rem 0;
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .repository-title i {
+            color: var(--primary-color);
+        }
+
+        .repository-description {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin: 0 0 1.5rem 0;
+            line-height: 1.5;
+        }
+
+        .repository-meta {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .meta-icon {
+            color: var(--primary-color);
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-public {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+
+        .badge-private {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+        }
+
+        .repository-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .btn {
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            color: var(--white);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--white);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--gray-50);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0.25rem 0 0 0;
+            font-weight: 500;
+        }
+
+        /* Tabs Section */
+        .tabs-section {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+
+        .nav-tabs {
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--border-light);
+            padding: 0 2rem;
+            display: flex;
+            gap: 0;
+        }
+
+        .nav-link {
+            background: transparent;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            border-bottom: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+            background: var(--white);
+        }
+
+        .nav-link.active {
+            color: var(--primary-color);
+            background: var(--white);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-count {
+            background: var(--gray-300);
+            color: var(--text-secondary);
+            padding: 0.125rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .nav-link.active .tab-count {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+
+        .tab-content {
+            background: var(--white);
+        }
+
+        .tab-pane {
+            padding: 2rem;
+        }
+
+        /* Cards */
+        .collaborator-card,
+        .activity-card {
+            background: var(--white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: var(--transition);
+        }
+
+        .collaborator-card:hover,
+        .activity-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .collaborator-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .collaborator-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border-light);
+        }
+
+        .collaborator-details h5 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .collaborator-role {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        .activity-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+
+        .activity-content h6 {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .activity-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .activity-description {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h5 {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state p {
+            margin: 0;
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .repository-header {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .repository-actions {
+                align-self: stretch;
+            }
+
+            .repository-title {
+                font-size: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tab-pane {
+                padding: 1rem;
+            }
+
+            .nav-tabs {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Banner de Impersonación -->
+    <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="page-header">
+            <nav class="breadcrumb-nav">
+                <a th:href="@{/devportal/{role}/{username}/dashboard(role=${userRole}, username=${username})}">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <a th:href="@{/devportal/{role}/{username}/repositories(role=${userRole}, username=${username})}">
+                    Repositorios
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <span th:text="${repository['nombre_repositorio']}">Repositorio</span>
+            </nav>
+            
+            <div class="repository-header">
+                <div class="repository-info">
+                    <h1 class="repository-title">
+                        <i class="fas fa-code-branch"></i>
+                        <span th:text="${repository['nombre_repositorio']}">Nombre del Repositorio</span>
+                    </h1>
+                    
+                    <p class="repository-description" th:text="${repository['descripcion_repositorio'] ?: 'Sin descripción'}">
+                        Descripción del repositorio
+                    </p>
+                    
+                    <div class="repository-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-calendar meta-icon"></i>
+                            <span th:text="${#temporals.format(repository['fecha_creacion'], 'dd/MM/yyyy')}">01/01/2024</span>
+                        </div>
+                        
+                        <div class="meta-item" th:if="${repository['nombre_proyecto']}">
+                            <i class="fas fa-folder meta-icon"></i>
+                            <a th:href="@{/devportal/{role}/{username}/projects/P-{id}(role=${userRole}, username=${username}, id=${repository['proyecto_id']})}"
+                               th:text="${repository['nombre_proyecto']}">
+                                Proyecto
+                            </a>
+                        </div>
+                        
+                        <div class="meta-item" th:if="${repository['nombre_categoria']}">
+                            <i class="fas fa-tag meta-icon"></i>
+                            <span th:text="${repository['nombre_categoria']}">Categoría</span>
+                        </div>
+                        
+                        <div class="meta-item">
+                            <span class="badge badge-public" th:if="${repository['visibilidad_repositorio'] == 'PUBLICO'}">
+                                <i class="fas fa-globe"></i> Público
+                            </span>
+                            <span class="badge badge-private" th:if="${repository['visibilidad_repositorio'] == 'PRIVADO'}">
+                                <i class="fas fa-lock"></i> Privado
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="repository-actions">
+                    <button class="btn btn-outline-primary" data-action="clone">
+                        <i class="fas fa-clone"></i>
+                        Clonar
+                    </button>
+                    <a th:href="@{/devportal/{role}/{username}/repositories/R-{id}/edit(role=${userRole}, username=${username}, id=${repository['repositorio_id']})}" 
+                       class="btn btn-outline-primary"
+                       th:if="${privilegio == 'PROPIETARIO' or privilegio == 'ADMIN'}">
+                        <i class="fas fa-edit"></i>
+                        Editar
+                    </a>
+                    <button class="btn btn-primary" data-modal="inviteModal">
+                        <i class="fas fa-user-plus"></i>
+                        Invitar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-code-commit"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" th:text="${stats.total_commits ?: 'N/A'}">N/A</div>
+                        <div class="stat-label">Commits</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" th:text="${stats.total_branches ?: 'N/A'}">N/A</div>
+                        <div class="stat-label">Ramas</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value" th:text="${collaborators != null ? #lists.size(collaborators) : 0}">0</div>
+                        <div class="stat-label">Colaboradores</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">
+                            <span th:text="${#temporals.format(repository['fecha_creacion'], 'dd/MM')}">Reciente</span>
+                        </div>
+                        <div class="stat-label">Última Actividad</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs Section -->
+        <div class="tabs-section">
+            <ul class="nav nav-tabs" id="repositoryTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
+                        <i class="fas fa-info-circle"></i>
+                        Información
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="collaborators-tab" data-bs-toggle="tab" data-bs-target="#collaborators" type="button" role="tab">
+                        <i class="fas fa-users"></i>
+                        Colaboradores
+                        <span class="tab-count" th:text="${collaborators != null ? #lists.size(collaborators) : 0}">0</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" type="button" role="tab">
+                        <i class="fas fa-history"></i>
+                        Actividad
+                        <span class="tab-count" th:text="${actividades != null ? #lists.size(actividades) : 0}">0</span>
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="repositoryTabContent">
+                <!-- Información Tab -->
+                <div class="tab-pane fade show active" id="info" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-info-circle text-primary me-2"></i>Detalles del Repositorio</h5>
+                            <div class="mb-3">
+                                <strong>Nombre:</strong>
+                                <span th:text="${repository['nombre_repositorio']}">Nombre</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Descripción:</strong>
+                                <span th:text="${repository['descripcion_repositorio'] ?: 'Sin descripción'}">Descripción</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Rama Principal:</strong>
+                                <span th:text="${repository['rama_principal_repositorio'] ?: 'main'}">main</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Visibilidad:</strong>
+                                <span class="badge badge-public" th:if="${repository['visibilidad_repositorio'] == 'PUBLICO'}">
+                                    <i class="fas fa-globe"></i> Público
+                                </span>
+                                <span class="badge badge-private" th:if="${repository['visibilidad_repositorio'] == 'PRIVADO'}">
+                                    <i class="fas fa-lock"></i> Privado
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-calendar text-primary me-2"></i>Fechas</h5>
+                            <div class="mb-3">
+                                <strong>Fecha de Creación:</strong>
+                                <span th:text="${#temporals.format(repository['fecha_creacion'], 'dd/MM/yyyy HH:mm')}">01/01/2024 10:00</span>
+                            </div>
+                            <div class="mb-3" th:if="${repository['nombre_categoria']}">
+                                <strong>Categoría:</strong>
+                                <span th:text="${repository['nombre_categoria']}">Categoría</span>
+                            </div>
+                            <div class="mb-3" th:if="${repository['nombre_proyecto']}">
+                                <strong>Proyecto:</strong>
+                                <a th:href="@{/devportal/{role}/{username}/projects/P-{id}(role=${userRole}, username=${username}, id=${repository['proyecto_id']})}"
+                                   th:text="${repository['nombre_proyecto']}" class="text-primary">
+                                    Proyecto
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Colaboradores Tab -->
+                <div class="tab-pane fade" id="collaborators" role="tabpanel">
+                    <div th:if="${collaborators != null and #lists.size(collaborators) > 0}">
+                        <div th:each="collaborator : ${collaborators}" class="collaborator-card">
+                            <div class="collaborator-info">
+                                <img th:src="${collaborator.fotoPerfil != null ? collaborator.fotoPerfil : '/img/default-avatar.png'}" 
+                                     alt="Avatar" class="collaborator-avatar">
+                                <div class="collaborator-details">
+                                    <h5 th:text="${collaborator.nombreCompleto}">Nombre del Colaborador</h5>
+                                    <p class="collaborator-role" th:text="${collaborator.rol}">Rol</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div th:unless="${collaborators != null and #lists.size(collaborators) > 0}" class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <h5>No hay colaboradores</h5>
+                        <p>Este repositorio aún no tiene colaboradores asignados.</p>
+                    </div>
+                </div>
+                
+                <!-- Actividad Tab -->
+                <div class="tab-pane fade" id="activity" role="tabpanel">
+                    <div th:if="${actividades != null and #lists.size(actividades) > 0}">
+                        <div th:each="actividad : ${actividades}" class="activity-card">
+                            <div class="activity-header">
+                                <div class="activity-icon">
+                                    <i class="fas fa-code-commit"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <h6 th:text="${actividad.tipo}">Tipo de Actividad</h6>
+                                    <p class="activity-meta" th:text="${#temporals.format(actividad.fecha, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:00</p>
+                                </div>
+                            </div>
+                            <p class="activity-description" th:text="${actividad.descripcion}">Descripción de la actividad</p>
+                        </div>
+                    </div>
+                    
+                    <div th:unless="${actividades != null and #lists.size(actividades) > 0}" class="empty-state">
+                        <i class="fas fa-history"></i>
+                        <h5>No hay actividad reciente</h5>
+                        <p>No se ha registrado actividad en este repositorio.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+

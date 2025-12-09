@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Completa tu perfil - Telito Dev Portal</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" th:href="@{/assets/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            background: #0d1117;
+            color: #fff;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container-fluid {
+            min-height: 100vh;
+        }
+        .left-panel {
+            background: #0d1117;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .left-panel h2 {
+            font-weight: 700;
+            font-size: 2rem;
+        }
+        .left-panel p {
+            color: #b7c1c9;
+        }
+        .right-panel {
+            background: #ffffff;
+            color: #000;
+            padding: 2.4rem 3rem;
+            border-radius: 30px 0 0 30px;
+        }
+        .form-box {
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .form-control[readonly] {
+            background-color: #e9ecef;
+            opacity: 1;
+        }
+        @media (max-width: 768px) {
+            .right-panel { border-radius: 30px 30px 0 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid d-flex flex-column flex-md-row">
+    <!-- Left Panel -->
+    <div class="col-md-6 left-panel">
+        <h2>¡Casi listo!</h2>
+        <p>Solo necesitamos algunos detalles más para terminar de configurar tu cuenta en Telito Dev Portal.</p>
+        <p class="small text-muted" th:text="${'Tu información de ' + (providerName != null ? providerName : 'OAuth2') + ' se ha cargado automáticamente.'}">Tu información de OAuth2 se ha cargado automáticamente.</p>
+    </div>
+
+    <!-- Right Panel: Form -->
+    <div class="col-md-6 right-panel d-flex align-items-center">
+        <div class="form-box">
+            <h3 class="mb-4">Completa tu perfil</h3>
+            <form th:action="@{/auth/save-profile}" th:object="${usuario}" method="post" class="needs-validation" novalidate>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="nombreUsuario" class="form-label">Nombre</label>
+                        <input type="text" id="nombreUsuario" class="form-control" th:field="*{nombreUsuario}" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="apellidoPaterno" class="form-label">Apellido Paterno</label>
+                        <input type="text" id="apellidoPaterno" class="form-control" th:field="*{apellidoPaterno}" readonly>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="correo" class="form-label">Correo Electrónico</label>
+                    <input type="email" id="correo" class="form-control" th:field="*{correo}" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label for="dni" class="form-label">DNI</label>
+                    <input type="text" id="dni" class="form-control" th:field="*{dni}" required minlength="8" maxlength="8" pattern="[0-9]{8}">
+                    <div class="invalid-feedback">Por favor, ingresa un DNI válido de 8 dígitos.</div>
+                    <div id="dni-validation-result" class="form-text"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="direccionUsuario" class="form-label">Dirección</label>
+                    <input type="text" id="direccionUsuario" class="form-control" th:field="*{direccionUsuario}" required>
+                    <div class="invalid-feedback">La dirección es obligatoria.</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="telefono" class="form-label">Teléfono (Opcional)</label>
+                    <input type="tel" id="telefono" class="form-control" th:field="*{telefono}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="username" class="form-label">Nombre de Usuario</label>
+                    <input type="text" id="username" class="form-control" th:field="*{username}" required>
+                    <div class="form-text">Este será tu nombre de usuario único en el portal.</div>
+                    <div class="invalid-feedback">El nombre de usuario es obligatorio.</div>
+                    <div th:if="${error}" class="alert alert-danger mt-2" th:text="${error}"></div>
+                </div>
+
+                <!-- Hidden fields for other required attributes -->
+                <input type="hidden" th:field="*{apellidoMaterno}" />
+
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary rounded-pill">Guardar y continuar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // SISTEMA AVANZADO DE PREVENCIÓN DE NAVEGACIÓN HACIA ATRÁS
+    (function() {
+        console.log('🔒 Iniciando sistema de prevención de navegación...');
+        
+        // Función para redirigir siempre a complete-profile
+        function redirectToCompleteProfile() {
+            window.location.replace('/auth/finish-profile');
+        }
+        
+        // CAPA 1: Limpiar y reemplazar historial completamente
+        if (window.history.replaceState && window.history.pushState) {
+            // Limpiar todo el historial previo
+            window.history.replaceState(null, null, '/auth/finish-profile');
+            
+            // Crear múltiples entradas de historial para "atrapar" navegación
+            for(let i = 0; i < 10; i++) {
+                window.history.pushState(null, null, '/auth/finish-profile');
+            }
+        }
+        
+        // CAPA 2: Interceptor de popstate más agresivo
+        window.addEventListener('popstate', function(event) {
+            console.log('⚠️ INTENTO DE NAVEGACIÓN HACIA ATRÁS DETECTADO');
+            event.preventDefault();
+            event.stopPropagation();
+            
+            // Prevenir completamente la navegación
+            window.history.pushState(null, null, '/auth/finish-profile');
+            
+            // Forzar reload de la página si es necesario
+            if (window.location.pathname !== '/auth/finish-profile') {
+                redirectToCompleteProfile();
+            }
+            
+            return false;
+        });
+        
+        // CAPA 3: Interceptor de beforeunload más estricto
+        window.addEventListener('beforeunload', function(event) {
+            console.log('⚠️ Intento de salida de la página detectado');
+            // Verificar si no es una sumisión del formulario
+            if (!window.formSubmitting) {
+                event.preventDefault();
+                event.returnValue = 'Debes completar tu perfil antes de continuar. ¿Estás seguro?';
+                return 'Debes completar tu perfil antes de continuar. ¿Estás seguro?';
+            }
+        });
+        
+        // CAPA 3B: Marcar cuando el formulario se está enviando
+        document.querySelector('form').addEventListener('submit', function() {
+            window.formSubmitting = true;
+        });
+        
+        // CAPA 4: Monitor de URL constante y más frecuente
+        let urlCheckInterval = setInterval(function() {
+            if (window.location.pathname !== '/auth/finish-profile') {
+                console.log('🚫 URL incorrecta detectada: ' + window.location.pathname);
+                clearInterval(urlCheckInterval);
+                redirectToCompleteProfile();
+            }
+        }, 10); // Verificar cada 10ms para capturar cambios manuales de URL
+        
+        // CAPA 4B: Monitor adicional con visibilitychange
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && window.location.pathname !== '/auth/finish-profile') {
+                console.log('🚫 Cambio de visibilidad detectado con URL incorrecta: ' + window.location.pathname);
+                redirectToCompleteProfile();
+            }
+        });
+        
+        // CAPA 4C: Monitor de focus para detectar regreso a la pestaña
+        window.addEventListener('focus', function() {
+            if (window.location.pathname !== '/auth/finish-profile') {
+                console.log('🚫 Focus detectado con URL incorrecta: ' + window.location.pathname);
+                redirectToCompleteProfile();
+            }
+        });
+        
+        // CAPA 5: Interceptor de hashchange
+        window.addEventListener('hashchange', function(event) {
+            event.preventDefault();
+            redirectToCompleteProfile();
+        });
+        
+        // CAPA 6: Prevenir acciones del navegador con teclado
+        document.addEventListener('keydown', function(event) {
+            // Alt + Flecha Izquierda (Back)
+            if (event.altKey && event.keyCode === 37) {
+                event.preventDefault();
+                event.stopPropagation();
+                console.log('🚫 Alt+Flecha Izquierda bloqueada');
+                return false;
+            }
+            // Alt + Flecha Derecha (Forward)
+            if (event.altKey && event.keyCode === 39) {
+                event.preventDefault();
+                event.stopPropagation();
+                console.log('🚫 Alt+Flecha Derecha bloqueada');
+                return false;
+            }
+            // Backspace fuera de inputs
+            if (event.keyCode === 8 && !['INPUT', 'TEXTAREA'].includes(event.target.nodeName)) {
+                event.preventDefault();
+                event.stopPropagation();
+                console.log('🚫 Backspace bloqueado');
+                return false;
+            }
+        });
+        
+        // CAPA 7: Limpiar sesión storage que pueda contener datos de navegación
+        try {
+            sessionStorage.removeItem('navigation-history');
+            localStorage.removeItem('navigation-history');
+        } catch(e) {
+            console.log('Info: No se pudo limpiar storage');
+        }
+        
+        console.log('✅ Sistema de prevención de navegación activado');
+        
+        // Verificación final después de cargar
+        setTimeout(function() {
+            if (window.location.pathname !== '/auth/finish-profile') {
+                redirectToCompleteProfile();
+            }
+        }, 500);
+        
+    })();
+
+    // VALIDACIÓN DE FORMULARIO
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+    
+    // ===================================================================
+    // 🆔 INTEGRACIÓN RENIEC - VALIDACIÓN DNI PARA OAUTH2
+    // ===================================================================
+    // IMPORTANTE: En complete-profile.html los campos nombre/apellidos vienen 
+    // de Google/OAuth2 (readonly). Solo validamos que el DNI sea real.
+    // ===================================================================
+    
+    let dniValidado = false; // Flag para controlar envío de formulario
+    
+    function debounce(fn, delay) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => fn.apply(this, args), delay);
+        };
+    }
+    
+    function capitalizar(str) {
+        if (!str) return '';
+        return str.split(' ').map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(' ');
+    }
+    
+    function autocompletarDatosReniec(data) {
+        const nombreField = document.getElementById('nombreUsuario');
+        const apellidoPaternoField = document.getElementById('apellidoPaterno');
+        const apellidoMaternoField = document.querySelector('input[name="apellidoMaterno"]');
+        
+        // Autocompletar con datos de RENIEC (capitalizado)
+        nombreField.value = capitalizar(data.first_name || data.firstName || '');
+        apellidoPaternoField.value = capitalizar(data.first_last_name || data.firstLastName || '');
+        if (apellidoMaternoField) {
+            apellidoMaternoField.value = capitalizar(data.second_last_name || data.secondLastName || '');
+        }
+        
+        // Bloquear campos (datos oficiales RENIEC) con estilo verde
+        [nombreField, apellidoPaternoField].forEach(field => {
+            field.readOnly = true;
+            field.style.backgroundColor = '#e8f5e9';
+            field.style.border = '2px solid #4CAF50';
+            field.style.cursor = 'not-allowed';
+            field.title = '✅ Datos oficiales de RENIEC (no editables)';
+        });
+        
+        if (apellidoMaternoField) {
+            apellidoMaternoField.readOnly = true;
+        }
+        
+        console.log('✅ [RENIEC OAuth2] Campos autocompletados con datos oficiales');
+    }
+    
+    function limpiarCamposReniec() {
+        ['nombreUsuario', 'apellidoPaterno'].forEach(id => {
+            const field = document.getElementById(id);
+            if (field) {
+                field.readOnly = false;
+                field.style.backgroundColor = '';
+                field.style.border = '';
+                field.style.cursor = '';
+                field.title = '';
+            }
+        });
+    }
+    
+    function bloquearCamposReniec() {
+        ['nombreUsuario', 'apellidoPaterno'].forEach(id => {
+            const field = document.getElementById(id);
+            if (field) {
+                field.readOnly = true;
+                field.style.backgroundColor = '#ffebee';
+                field.style.border = '2px solid #f44336';
+                field.style.cursor = 'not-allowed';
+                field.title = '❌ DNI no disponible';
+            }
+        });
+    }
+    
+    function bloquearSubmit() {
+        const submitBtn = document.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.5';
+            submitBtn.style.cursor = 'not-allowed';
+            submitBtn.title = '⚠️ Debes validar tu DNI antes de continuar';
+        }
+    }
+    
+    function habilitarSubmit() {
+        const submitBtn = document.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
+            submitBtn.title = '';
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const dniInput = document.getElementById('dni');
+        const submitBtn = document.querySelector('button[type="submit"]');
+        const validationResult = document.getElementById('dni-validation-result');
+        
+        // Bloquear envío inicial hasta que DNI sea validado
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.5';
+            submitBtn.style.cursor = 'not-allowed';
+            submitBtn.title = '⚠️ Debes validar tu DNI antes de continuar';
+        }
+        
+        // Validación DNI con RENIEC
+        dniInput.addEventListener('input', debounce(async function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            e.target.value = value;
+            
+            // Resetear si está vacío
+            if (value.length === 0) {
+                validationResult.textContent = '';
+                limpiarCamposReniec();
+                dniValidado = false;
+                bloquearSubmit();
+                return;
+            }
+            
+            // Validar longitud
+            if (value.length !== 8) {
+                validationResult.textContent = '⚠️ El DNI debe tener 8 dígitos';
+                validationResult.style.color = 'red';
+                limpiarCamposReniec();
+                dniValidado = false;
+                bloquearSubmit();
+                return;
+            }
+            
+            // ✅ CONSULTAR API RENIEC
+            try {
+                validationResult.textContent = '🔍 Validando DNI con RENIEC...';
+                validationResult.style.color = 'blue';
+                
+                const response = await fetch(`/api/reniec/validate-dni?dni=${value}`);
+                const result = await response.json();
+                
+                console.log('🔍 [RENIEC OAuth2] Respuesta:', result);
+                
+                if (result.registered) {
+                    // ❌ DNI ya registrado
+                    validationResult.innerHTML = '❌ Este DNI ya está registrado en el sistema';
+                    validationResult.style.color = 'red';
+                    bloquearCamposReniec();
+                    dniValidado = false;
+                    bloquearSubmit();
+                    
+                } else if (result.inexistente) {
+                    // ❌ DNI no existe en RENIEC
+                    validationResult.innerHTML = '❌ DNI INEXISTENTE - No registrado en RENIEC';
+                    validationResult.style.color = 'red';
+                    limpiarCamposReniec();
+                    dniValidado = false;
+                    bloquearSubmit();
+                    
+                    setTimeout(() => {
+                        alert('⚠️ DNI INEXISTENTE\n\n' +
+                              'El DNI ingresado no está registrado en RENIEC.\n\n' +
+                              'Por seguridad, solo se permite el registro con DNIs reales y verificados oficialmente.');
+                    }, 300);
+                    
+                } else if (result.valid && result.data) {
+                    // ✅ DNI válido - AUTOCOMPLETAR CON DATOS DE RENIEC
+                    validationResult.textContent = '✅ DNI válido - RENIEC';
+                    validationResult.style.color = 'green';
+                    
+                    try {
+                        autocompletarDatosReniec(result.data);
+                    } catch (err) {
+                        console.error('Error autocompletado:', err);
+                    }
+                    
+                    dniValidado = true;
+                    habilitarSubmit();
+                    
+                    console.log('✅ [OAuth2] DNI validado. Datos RENIEC aplicados.');
+                    
+                } else {
+                    // ⚠️ Error de API
+                    validationResult.textContent = '⚠️ Error al validar DNI - Intenta nuevamente';
+                    validationResult.style.color = 'orange';
+                    limpiarCamposReniec();
+                    dniValidado = false;
+                    bloquearSubmit();
+                }
+                
+            } catch (error) {
+                console.error('❌ [RENIEC OAuth2] Error:', error);
+                validationResult.textContent = '⚠️ Error de conexión - Intenta nuevamente';
+                validationResult.style.color = 'orange';
+                limpiarCamposReniec();
+                dniValidado = false;
+                bloquearSubmit();
+            }
+        }, 600));
+        
+        // Restricción de solo números
+        dniInput.addEventListener('keypress', function(e) {
+            const charCode = e.which ? e.which : e.keyCode;
+            if (charCode < 48 || charCode > 57) {
+                if (![8, 46, 37, 39].includes(charCode)) {
+                    e.preventDefault();
+                }
+            }
+        });
+        
+        // Prevenir envío si DNI no está validado
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (!dniValidado) {
+                e.preventDefault();
+                alert('⚠️ Debes validar tu DNI antes de continuar');
+                return false;
+            }
+        });
+    });
+    // ===================================================================
+    // FIN INTEGRACIÓN RENIEC
+    // ===================================================================
+</script>
+
+</body>
+</html>
+
+

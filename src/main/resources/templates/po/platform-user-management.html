@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios de Plataforma - DevPortal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/navbar.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0969da;
+            --primary-dark: #0550ae;
+            --success-color: #1a7f37;
+            --danger-color: #d1242f;
+            --warning-color: #bf8700;
+            --text-primary: #1f2328;
+            --text-secondary: #656d76;
+            --border-color: #d1d9e0;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f6f8fa;
+        }
+        
+        /* Estilos para la gestión de usuarios */
+        .main-container {
+            padding: 2rem;
+            background: var(--bg-secondary);
+            min-height: 100vh;
+        }
+        
+        .header-section {
+            background: var(--bg-primary);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .header-title {
+            color: var(--text-primary);
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .header-subtitle {
+            color: var(--text-secondary);
+            margin: 0.5rem 0 0 0;
+        }
+        
+        .stats-section {
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--bg-primary);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            color: var(--primary-color);
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin: 0.5rem 0 0 0;
+        }
+
+        body {
+            background-color: var(--background-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-dark);
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .header-section {
+            background: var(--card-background);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .header-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle {
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Statistics Cards */
+        .stats-section {
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--card-background);
+            border-radius: 0.375rem;
+            padding: 1rem 0.75rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-number {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        /* Main Content */
+        .content-section {
+            background: var(--card-background);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Search and Filters */
+        .search-section {
+            background: var(--background-color);
+            border-radius: 0.375rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Table Styles */
+        .table-container {
+            border-radius: 0.375rem;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background-color: var(--background-color);
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+    </style>
+    </style>
+</head>
+<body>
+    <!-- Banner de impersonación si aplica -->
+    <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Header Section -->
+        <div class="header-section">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="header-title">
+                        <i class="fas fa-users me-2"></i>
+                        Gestión de Usuarios de Plataforma
+                    </h1>
+                    <p class="header-subtitle">Administra usuarios DEV, QA y PO de la plataforma</p>
+                </div>
+                <div>
+                    <a th:href="@{/devportal/{rol}/{username}/platform-user-management/invite-new-user(rol=${rol}, username=${username})}" 
+                       class="btn btn-outline-primary me-2">
+                        <i class="fas fa-envelope me-1"></i>
+                        Invitar Usuario
+                    </a>
+                    <a th:href="@{/devportal/{rol}/{username}/platform-user-management/create-new-user(rol=${rol}, username=${username})}" 
+                       class="btn btn-primary">
+                        <i class="fas fa-user-plus me-1"></i>
+                        Crear Usuario
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="stats-section">
+            <!-- Primera fila de métricas -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h2 class="stat-number" th:text="${metricas.totalUsuarios ?: 0}">0</h2>
+                        <p class="stat-label">Total Usuarios</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <h2 class="stat-number" th:text="${metricas.totalDEV ?: 0}">0</h2>
+                        <p class="stat-label">Desarrolladores</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-bug"></i>
+                        </div>
+                        <h2 class="stat-number" th:text="${metricas.totalQA ?: 0}">0</h2>
+                        <p class="stat-label">QA Testers</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <h2 class="stat-number" th:text="${metricas.totalPO ?: 0}">0</h2>
+                        <p class="stat-label">Product Owners</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Segunda fila de métricas -->
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <h2 class="stat-number" th:text="${metricas.usuariosHabilitados ?: 0}">0</h2>
+                        <p class="stat-label">Usuarios Habilitados</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-slash"></i>
+                        </div>
+                        <h2 class="stat-number" th:text="${metricas.usuariosInhabilitados ?: 0}">0</h2>
+                        <p class="stat-label">Usuarios Inhabilitados</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <h2 class="stat-number" th:text="${metricas.usuariosNuevosMes ?: 0}">0</h2>
+                        <p class="stat-label">Nuevos (30 días)</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-minus"></i>
+                        </div>
+                        <h2 class="stat-number" th:text="${metricas.usuariosAbandonaronMes ?: 0}">0</h2>
+                        <p class="stat-label">Abandonaron (30 días)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Section -->
+        <div class="content-section">
+            <h2 class="section-title">Lista de Usuarios</h2>
+            
+            <div class="search-section">
+                <form method="get" th:action="@{/devportal/{rol}/{username}/platform-user-management(rol=${rol}, username=${username})}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Buscar</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   th:value="${currentSearch}" placeholder="Nombre, username, email...">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="sortBy" class="form-label">Ordenar por</label>
+                            <select class="form-select" id="sortBy" name="sortBy">
+                                <option value="fechaCreacion" th:selected="${currentSort == 'fechaCreacion'}">Fecha Creación</option>
+                                <option value="username" th:selected="${currentSort == 'username'}">Username</option>
+                                <option value="nombre" th:selected="${currentSort == 'nombre'}">Nombre</option>
+                                <option value="email" th:selected="${currentSort == 'email'}">Email</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="sortDir" class="form-label">Dirección</label>
+                            <select class="form-select" id="sortDir" name="sortDir">
+                                <option value="desc" th:selected="${currentSortDir == 'desc'}">Descendente</option>
+                                <option value="asc" th:selected="${currentSortDir == 'asc'}">Ascendente</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="size" class="form-label">Por página</label>
+                            <select class="form-select" id="size" name="size">
+                                <option value="10" th:selected="${currentSize == 10}">10</option>
+                                <option value="25" th:selected="${currentSize == 25}">25</option>
+                                <option value="50" th:selected="${currentSize == 50}">50</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+            <!-- Users Table -->
+            <div class="table-container">
+                <table id="usersTable" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Información</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Fecha Creación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr th:each="usuario : ${usuariosPage.content}" th:data-user-id="${usuario.usuarioId}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" 
+                                         style="width: 40px; height: 40px;">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold" th:text="${usuario.nombreUsuario + ' ' + usuario.apellidoPaterno + ' ' + usuario.apellidoMaterno}">Nombre Usuario</div>
+                                        <div class="small text-muted" th:text="'@' + ${usuario.username}">@username</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div th:text="${usuario.email}">email@ejemplo.com</div>
+                                <div class="small text-muted" th:text="${usuario.telefono ?: 'No especificado'}">Teléfono</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary" th:each="rol : ${usuario.roles}" th:text="${rol.nombreRol}">ROL</span>
+                            </td>
+                            <td>
+                                <span class="badge" 
+                                      th:classappend="${usuario.estadoUsuario.name() == 'HABILITADO'} ? 'bg-success' : 'bg-danger'"
+                                      th:text="${usuario.estadoUsuario.name() == 'HABILITADO'} ? 'Habilitado' : 'Inhabilitado'">Estado</span>
+                            </td>
+                            <td>
+                                <span th:text="${#temporals.format(usuario.fechaCreacion, 'dd/MM/yyyy')}">01/01/2024</span>
+                                <div class="small text-muted" th:text="${#temporals.format(usuario.fechaCreacion, 'HH:mm')}">12:00</div>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a th:href="@{/devportal/{rol}/{username}/platform-user-management/view-user-{userId}-profile(rol=${rol}, username=${username}, userId=${usuario.usuarioId})}"
+                                       class="btn btn-outline-primary btn-sm" title="Ver Perfil">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm toggle-status-btn" 
+                                            th:data-user-id="${usuario.usuarioId}"
+                                            th:data-current-status="${usuario.estadoUsuario}"
+                                            th:title="${usuario.estadoUsuario == 'HABILITADO'} ? 'Desactivar' : 'Activar'">
+                                        <i th:class="${usuario.estadoUsuario == 'HABILITADO'} ? 'fas fa-user-slash' : 'fas fa-user-check'"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm delete-user-btn" 
+                                            th:data-user-id="${usuario.usuarioId}"
+                                            th:data-user-name="${usuario.nombreUsuario + ' ' + usuario.apellidoPaterno}"
+                                            title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            <!-- Pagination -->
+            <div class="d-flex justify-content-between align-items-center mt-3" th:if="${usuariosPage.totalPages > 1}">
+                <div class="text-muted">
+                    Mostrando <span th:text="${usuariosPage.size * usuariosPage.number + 1}">1</span>-<span th:text="${usuariosPage.size * usuariosPage.number + usuariosPage.numberOfElements}">10</span> 
+                    de <span th:text="${usuariosPage.totalElements}">100</span> usuarios
+                </div>
+                <nav>
+                    <ul class="pagination">
+                        <li class="page-item" th:classappend="${usuariosPage.first} ? 'disabled'">
+                            <a class="page-link" 
+                               th:href="@{/devportal/{rol}/{username}/platform-user-management(rol=${rol}, username=${username}, page=${usuariosPage.number - 1}, size=${currentSize}, sortBy=${currentSort}, sortDir=${currentSortDir}, search=${currentSearch})}">
+                                Anterior
+                            </a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, usuariosPage.totalPages - 1)}"
+                            th:classappend="${i == usuariosPage.number} ? 'active'">
+                            <a class="page-link" 
+                               th:href="@{/devportal/{rol}/{username}/platform-user-management(rol=${rol}, username=${username}, page=${i}, size=${currentSize}, sortBy=${currentSort}, sortDir=${currentSortDir}, search=${currentSearch})}"
+                               th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${usuariosPage.last} ? 'disabled'">
+                            <a class="page-link" 
+                               th:href="@{/devportal/{rol}/{username}/platform-user-management(rol=${rol}, username=${username}, page=${usuariosPage.number + 1}, size=${currentSize}, sortBy=${currentSort}, sortDir=${currentSortDir}, search=${currentSearch})}">
+                                Siguiente
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+    <!-- Modals -->
+    <!-- Create User Modal -->
+    <div class="modal fade" id="createUserModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Crear Nuevo Usuario
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="createUserForm">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="nombre" class="form-label">Nombre *</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="apellido" class="form-label">Apellido *</label>
+                                <input type="text" class="form-control" id="apellido" name="apellido" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="username" class="form-label">Username *</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="telefono" class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" id="telefono" name="telefono">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="rol" class="form-label">Rol *</label>
+                                <select class="form-select" id="rol" name="rolId" required>
+                                    <option value="">Seleccionar rol...</option>
+                                    <option th:each="rol : ${rolesDisponibles}" 
+                                            th:value="${rol.rolId}" 
+                                            th:text="${rol.nombreRol}">Rol</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>
+                            Crear Usuario
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invite User Modal -->
+    <div class="modal fade" id="inviteUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-envelope me-2"></i>
+                        Invitar Usuario
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="inviteUserForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="inviteEmail" class="form-label">Email del usuario *</label>
+                            <input type="email" class="form-control" id="inviteEmail" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inviteRol" class="form-label">Rol *</label>
+                            <select class="form-select" id="inviteRol" name="rolId" required>
+                                <option value="">Seleccionar rol...</option>
+                                <option th:each="rol : ${rolesDisponibles}" 
+                                        th:value="${rol.rolId}" 
+                                        th:text="${rol.nombreRol}">Rol</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inviteMessage" class="form-label">Mensaje personalizado (opcional)</label>
+                            <textarea class="form-control" id="inviteMessage" name="mensaje" rows="3"
+                                      placeholder="Mensaje de bienvenida personalizado..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-1"></i>
+                            Enviar Invitación
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // Global variables
+        const pathParts = window.location.pathname.split('/');
+        const baseUrl = `/devportal/${pathParts[2]}/${pathParts[3]}/platform-user-management`;
+        let searchTimeout;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 === PÁGINA CARGADA - INICIALIZANDO SISTEMA ===');
+            console.log('🌐 Base URL:', baseUrl);
+            console.log('📄 Tabla de usuarios:', document.querySelector('#usersTable'));
+            console.log('🔘 Botones delete encontrados:', document.querySelectorAll('.delete-user-btn').length);
+            console.log('🔘 Botones toggle encontrados:', document.querySelectorAll('.toggle-status-btn').length);
+            
+            setupAjaxSearch();
+            setupButtonEventListeners();
+            
+            console.log('✅ Inicialización completada');
+        });
+
+        // Setup event listeners for action buttons
+        function setupButtonEventListeners() {
+            console.log('=== setupButtonEventListeners inicializado ===');
+            
+            // Agregar listener global para debuggear todos los clicks
+            document.addEventListener('click', function(e) {
+                console.log('🖱️ Click detectado en:', e.target);
+                console.log('🖱️ Elemento clickeado:', e.target.tagName, e.target.className);
+                
+                // Toggle status buttons
+                if (e.target.closest('.toggle-status-btn')) {
+                    console.log('✅ Toggle button clicked detectado');
+                    const btn = e.target.closest('.toggle-status-btn');
+                    const userId = btn.getAttribute('data-user-id');
+                    const currentStatus = btn.getAttribute('data-current-status');
+                    console.log('Toggle button data:', { userId, currentStatus });
+                    toggleUserStatus(userId, currentStatus);
+                    return;
+                }
+                
+                // Delete user buttons - revisar múltiples clases posibles
+                const deleteBtn = e.target.closest('.delete-user-btn') || 
+                                e.target.closest('[data-user-id]') && e.target.closest('button') && 
+                                (e.target.closest('button').innerHTML.includes('trash') || 
+                                 e.target.closest('button').title.toLowerCase().includes('eliminar'));
+                
+                if (deleteBtn) {
+                    console.log('🗑️ Delete button clicked detectado');
+                    console.log('🗑️ Delete button element:', deleteBtn);
+                    const userId = deleteBtn.getAttribute('data-user-id');
+                    const userName = deleteBtn.getAttribute('data-user-name') || 'Usuario';
+                    console.log('Delete button data:', { userId, userName });
+                    showDeleteConfirmation(userId, userName);
+                    return;
+                }
+                
+                // Si el click es en un botón pero no coincide con los casos anteriores
+                if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                    const button = e.target.tagName === 'BUTTON' ? e.target : e.target.closest('button');
+                    console.log('🔴 Click en botón no manejado:', {
+                        element: button,
+                        classes: button.className,
+                        id: button.id,
+                        innerHTML: button.innerHTML,
+                        attributes: Array.from(button.attributes).map(attr => `${attr.name}="${attr.value}"`)
+                    });
+                }
+            });
+            
+            console.log('=== Event listeners configurados ===');
+        }
+
+        // Setup AJAX search functionality
+        function setupAjaxSearch() {
+            const searchInput = document.getElementById('search');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        performAjaxSearch();
+                    }, 300); // Wait 300ms after user stops typing
+                });
+            }
+        }
+
+        // Perform AJAX search
+        function performAjaxSearch() {
+            const search = document.getElementById('search').value;
+            const sortBy = document.getElementById('sortBy').value;
+            const sortDir = document.getElementById('sortDir').value;
+            const size = document.getElementById('size').value;
+
+            const params = new URLSearchParams({
+                search: search || '',
+                sortBy: sortBy,
+                sortDir: sortDir,
+                size: size,
+                page: 0
+            });
+
+            fetch(`${baseUrl}/api/search?${params}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateUsersTable(data.users);
+                    } else {
+                        showAlert(data.message, 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('Error en la búsqueda', 'danger');
+                });
+        }
+
+        // Update users table
+        function updateUsersTable(users) {
+            const tbody = document.querySelector('.table tbody');
+            if (!tbody) return;
+
+            if (users.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="fas fa-search fa-2x mb-2"></i>
+                            <div>No se encontraron usuarios</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = users.map(user => {
+                const roles = user.roles.map(rol => '<span class="badge bg-secondary me-1">' + rol.nombreRol + '</span>').join('');
+                const statusClass = user.estadoUsuario === 'HABILITADO' ? 'bg-success' : 'bg-danger';
+                const statusText = user.estadoUsuario === 'HABILITADO' ? 'Habilitado' : 'Inhabilitado';
+                const toggleTitle = user.estadoUsuario === 'HABILITADO' ? 'Inhabilitar' : 'Habilitar';
+                const toggleIcon = user.estadoUsuario === 'HABILITADO' ? 'fas fa-user-slash' : 'fas fa-user-check';
+                
+                return `
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" 
+                                 style="width: 40px; height: 40px;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold">${user.nombre} ${user.apellido}</div>
+                                <div class="small text-muted">@${user.username}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div>${user.email}</div>
+                        <div class="small text-muted">${user.telefono || 'No especificado'}</div>
+                    </td>
+                    <td>
+                        ${roles}
+                    </td>
+                    <td>
+                        <span class="badge ${statusClass}">
+                            ${statusText}
+                        </span>
+                    </td>
+                    <td>
+                        <span>${formatDate(user.fechaCreacion)}</span>
+                        <div class="small text-muted">${formatTime(user.fechaCreacion)}</div>
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a href="${baseUrl}/view-user-${user.usuarioId}-profile"
+                               class="btn btn-outline-primary btn-sm" title="Ver Perfil">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button type="button" class="btn btn-outline-secondary btn-sm toggle-status-btn" 
+                                    data-user-id="${user.usuarioId}"
+                                    data-current-status="${user.estadoUsuario}"
+                                    title="${toggleTitle}">
+                                <i class="${toggleIcon}"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-danger btn-sm delete-user-btn" 
+                                    data-user-id="${user.usuarioId}"
+                                    data-user-name="${user.nombreUsuario} ${user.apellidoPaterno}"
+                                    title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        // Toggle user status
+        function toggleUserStatus(userId, currentStatus) {
+            console.log('=== TOGGLE USER STATUS INICIADO ===');
+            console.log('📋 Parámetros recibidos:', { userId, currentStatus, type: typeof userId });
+            
+            if (!userId) {
+                console.error('❌ ERROR: userId está vacío o undefined');
+                alert('Error: ID de usuario no válido');
+                return;
+            }
+            
+            const action = currentStatus === 'HABILITADO' ? 'disable' : 'enable';
+            const confirmMessage = currentStatus === 'HABILITADO' ? 
+                '¿Inhabilitar este usuario?' : '¿Habilitar este usuario?';
+            
+            console.log('🔄 Acción a realizar:', action);
+            console.log('🌐 URL completa:', `${baseUrl}/api/${userId}/${action}`);
+            console.log('💬 Mensaje de confirmación:', confirmMessage);
+            
+            if (confirm(confirmMessage)) {
+                console.log('✅ Usuario confirmó la acción');
+                fetch(`${baseUrl}/api/${userId}/${action}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                })
+                .then(response => {
+                    console.log('Toggle response status:', response.status);
+                    console.log('Toggle response headers:', [...response.headers.entries()]);
+                    return response.text(); // Primero obtener texto para debug
+                })
+                .then(text => {
+                    console.log('Toggle response text:', text);
+                    try {
+                        const data = JSON.parse(text);
+                        console.log('Toggle response parsed:', data);
+                        
+                        if (data.success) {
+                            showAlert(data.message, 'success');
+                            
+                            // Intentar actualizar la fila específica primero
+                            try {
+                                updateUserRowStatus(userId, data.newStatus || (currentStatus === 'HABILITADO' ? 'INHABILITADO' : 'HABILITADO'));
+                            } catch (e) {
+                                console.log('Error actualizando fila, recargando tabla completa:', e);
+                                loadUsers();
+                            }
+                        } else {
+                            showAlert(data.message || 'Error al cambiar estado del usuario', 'danger');
+                        }
+                    } catch (e) {
+                        console.error('Error parsing JSON:', e);
+                        showAlert('Error en la respuesta del servidor', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error cambiando estado:', error);
+                    showAlert('Error al cambiar estado del usuario', 'danger');
+                    // Aún así, intentar recargar por si funcionó
+                    setTimeout(() => loadUsers(), 1000);
+                });
+            }
+        }
+
+        // Delete User
+        function deleteUser(userId) {
+            console.log('╔════════════════════════════════════════════════════════════════╗');
+            console.log('║          DELETE USER - FRONTEND                                ║');
+            console.log('╚════════════════════════════════════════════════════════════════╝');
+            console.log('📋 userId:', userId, '(type:', typeof userId, ')');
+            
+            if (!userId) {
+                console.error('❌ ERROR: userId inválido');
+                showAlert('Error: ID de usuario no válido', 'danger');
+                return;
+            }
+            
+            const deleteUrl = `${baseUrl}/api/${userId}`;
+            console.log('🌐 URL completa:', deleteUrl);
+            console.log('🔧 baseUrl:', baseUrl);
+            
+            // Mostrar loading en el botón
+            const deleteBtn = document.querySelector(`.delete-user-btn[data-user-id="${userId}"]`);
+            if (deleteBtn) {
+                deleteBtn.disabled = true;
+                deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                console.log('🔄 Botón en estado loading');
+            }
+            
+            console.log('📤 Enviando DELETE request...');
+            console.log('   - Method: DELETE');
+            console.log('   - Headers: Content-Type: application/json');
+            
+            fetch(deleteUrl, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            })
+            .then(response => {
+                console.log('📥 Response recibida:');
+                console.log('   - Status:', response.status);
+                console.log('   - Status Text:', response.statusText);
+                console.log('   - OK:', response.ok);
+                console.log('   - Headers:', [...response.headers.entries()]);
+                
+                if (!response.ok) {
+                    console.error('❌ Response NOT OK - Status:', response.status);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return response.json();
+            })
+            .then(data => {
+                console.log('📦 Data parseada:', data);
+                
+                if (data.success) {
+                    console.log('✅ Eliminación exitosa según response');
+                    showAlert(data.message || 'Usuario eliminado exitosamente', 'success');
+                    
+                    // Remover la fila INMEDIATAMENTE con animación
+                    console.log('🎬 Buscando fila a eliminar con selector: tr[data-user-id="' + userId + '"]');
+                    const userRow = document.querySelector(`tr[data-user-id="${userId}"]`);
+                    
+                    if (userRow) {
+                        console.log('✅ Fila encontrada, aplicando animación...');
+                        userRow.style.transition = 'all 0.2s ease-out';
+                        userRow.style.transform = 'translateX(-100%)';
+                        userRow.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            userRow.remove();
+                            console.log('✅ Fila removida del DOM');
+                            
+                            // Verificar si la tabla quedó vacía
+                            const tbody = document.getElementById('usersTableBody');
+                            if (tbody && tbody.children.length === 0) {
+                                console.log('📄 Tabla vacía, mostrando mensaje');
+                                tbody.innerHTML = `
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-5">
+                                            <i class="fas fa-users fa-3x mb-3"></i>
+                                            <p class="mb-0">No hay usuarios para mostrar</p>
+                                        </td>
+                                    </tr>
+                                `;
+                            }
+                        }, 200);
+                    } else {
+                        console.warn('⚠️ Fila NO encontrada, recargando tabla...');
+                        setTimeout(() => loadUsers(), 500);
+                    }
+                } else {
+                    console.error('❌ Success=false en response:', data);
+                    throw new Error(data.message || 'Error desconocido al eliminar usuario');
+                }
+            })
+            .catch(error => {
+                console.error('╔════════════════════════════════════════════════════════════════╗');
+                console.error('║          ERROR CAPTURADO EN FRONTEND                           ║');
+                console.error('╚════════════════════════════════════════════════════════════════╝');
+                console.error('❌ Error type:', error.name);
+                console.error('❌ Error message:', error.message);
+                console.error('❌ Error stack:', error.stack);
+                
+                showAlert('Error al eliminar usuario: ' + error.message, 'danger');
+                
+                // Restaurar botón
+                if (deleteBtn) {
+                    deleteBtn.disabled = false;
+                    deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                    console.log('🔄 Botón restaurado');
+                }
+            });
+        }
+
+        // Create User Form Handler
+        document.getElementById('createUserForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const userData = Object.fromEntries(formData);
+            
+            const pathParts = window.location.pathname.split('/');
+            const rol = pathParts[2];
+            const username = pathParts[3];
+            
+            fetch(`${baseUrl}/api/create-user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Error al crear usuario');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al crear usuario');
+            });
+        });
+
+        // Invite User Form Handler
+        document.getElementById('inviteUserForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const inviteData = Object.fromEntries(formData);
+            
+            const pathParts = window.location.pathname.split('/');
+            const rol = pathParts[2];
+            const username = pathParts[3];
+            
+            fetch(`${baseUrl}/api/invite-user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(inviteData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Invitación enviada exitosamente');
+                    this.reset();
+                    bootstrap.Modal.getInstance(document.getElementById('inviteUserModal')).hide();
+                } else {
+                    alert('Error al enviar invitación');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al enviar invitación');
+            });
+        });
+        
+        // === FUNCIONES ADICIONALES REQUERIDAS ===
+        function showDeleteConfirmation(userId, userName) {
+            console.log('=== SHOW DELETE CONFIRMATION INICIADO ===');
+            console.log('📋 Parámetros recibidos:', { userId, userName, userIdType: typeof userId });
+            
+            if (!userId) {
+                console.error('❌ ERROR: userId está vacío o undefined en showDeleteConfirmation');
+                alert('Error: No se puede eliminar - ID de usuario no válido');
+                return;
+            }
+            
+            const confirmMessage = `¿Estás seguro de que quieres eliminar al usuario "${userName}"? Esta acción no se puede deshacer.`;
+            console.log('💬 Mensaje de confirmación:', confirmMessage);
+            
+            // Usar confirm simple en lugar de modal por ahora
+            if (confirm(confirmMessage)) {
+                console.log('✅ Usuario confirmó en showDeleteConfirmation, llamando deleteUser...');
+                deleteUser(userId);
+            } else {
+                console.log('❌ Usuario canceló la eliminación');
+            }
+        }
+        
+        // Función para actualizar el estado de un usuario específico en la tabla
+        function updateUserRowStatus(userId, newStatus) {
+            console.log('=== UPDATE USER ROW STATUS INICIADO ===');
+            console.log('📋 Parámetros:', { userId, newStatus, userIdType: typeof userId });
+            
+            // Buscar la fila del usuario por el botón toggle que contiene el userId
+            const toggleButtons = document.querySelectorAll('.toggle-status-btn, .toggle-user-btn');
+            console.log('🔍 Botones toggle encontrados:', toggleButtons.length);
+            
+            for (let i = 0; i < toggleButtons.length; i++) {
+                const button = toggleButtons[i];
+                const buttonUserId = button.getAttribute('data-user-id');
+                console.log(`🔍 Botón ${i}: userId="${buttonUserId}" (comparando con "${userId}")`);
+                
+                if (buttonUserId == userId) {
+                    console.log('✅ Botón encontrado para usuario:', userId);
+                    const row = button.closest('tr');
+                    if (row) {
+                        // Actualizar badge de estado
+                        const statusCell = row.querySelector('td:nth-child(4)'); // Columna de estado
+                        if (statusCell) {
+                            const badge = statusCell.querySelector('.badge');
+                            if (badge) {
+                                if (newStatus === 'HABILITADO') {
+                                    badge.className = 'badge bg-success';
+                                    badge.textContent = 'Habilitado';
+                                } else {
+                                    badge.className = 'badge bg-danger';
+                                    badge.textContent = 'Inhabilitado';
+                                }
+                            }
+                        }
+                        
+                        // Actualizar botón toggle
+                        if (newStatus === 'HABILITADO') {
+                            button.className = 'btn btn-outline-warning btn-sm toggle-status-btn';
+                            button.title = 'Inhabilitar';
+                            button.setAttribute('data-current-status', 'HABILITADO');
+                            button.innerHTML = '<i class="fas fa-user-slash"></i>';
+                        } else {
+                            button.className = 'btn btn-outline-success btn-sm toggle-status-btn';
+                            button.title = 'Habilitar';
+                            button.setAttribute('data-current-status', 'INHABILITADO');
+                            button.innerHTML = '<i class="fas fa-user-check"></i>';
+                        }
+                        
+                        console.log('Fila del usuario actualizada exitosamente');
+                        return;
+                    }
+                }
+            }
+            
+            console.log('No se pudo encontrar la fila del usuario, recargando tabla completa');
+            // Como fallback, reload la página si no se encuentra el botón
+            setTimeout(() => location.reload(), 1000);
+        }
+        
+        // Función para remover una fila de usuario de la tabla (mejorada)
+        function removeUserRow(userId) {
+            console.log('=== REMOVE USER ROW INICIADO ===');
+            console.log('📋 Parámetros:', { userId, userIdType: typeof userId });
+            
+            // Múltiples estrategias para encontrar la fila
+            let userRow = null;
+            
+            // Estrategia 1: Buscar tr con data-user-id
+            userRow = document.querySelector(`tr[data-user-id="${userId}"]`);
+            
+            // Estrategia 2: Buscar cualquier elemento con data-user-id y subir hasta tr
+            if (!userRow) {
+                const userElement = document.querySelector(`[data-user-id="${userId}"]`);
+                if (userElement) {
+                    userRow = userElement.closest('tr');
+                }
+            }
+            
+            // Estrategia 3: Buscar en todos los botones delete
+            if (!userRow) {
+                const deleteButtons = document.querySelectorAll('.delete-user-btn');
+                for (const btn of deleteButtons) {
+                    if (btn.getAttribute('data-user-id') === String(userId)) {
+                        userRow = btn.closest('tr');
+                        break;
+                    }
+                }
+            }
+            
+            if (userRow) {
+                console.log('✅ Fila encontrada, aplicando animación rápida...');
+                userRow.style.transition = 'all 0.15s ease-out';
+                userRow.style.transform = 'translateX(-100%)';
+                userRow.style.opacity = '0';
+                userRow.style.backgroundColor = '#ffebee';
+                
+                setTimeout(() => {
+                    userRow.remove();
+                    console.log('✅ Fila del usuario removida exitosamente');
+                    
+                    // Verificar si la tabla está vacía
+                    const tableBody = document.querySelector('#usersTableBody');
+                    if (tableBody && tableBody.children.length === 0) {
+                        console.log('📄 Tabla vacía, mostrando mensaje o recargando...');
+                        loadUsers(); // Recargar para mostrar paginación correcta
+                    }
+                }, 150);
+            } else {
+                console.log('❌ No se pudo encontrar la fila del usuario, recargando tabla...');
+                loadUsers();
+            }
+        }
+        
+        // === VARIABLES GLOBALES ADICIONALES ===
+        let currentSize = 10;
+        let currentSort = /*[[${currentSort}]]*/ 'fechaCreacion';
+        let currentSortDir = /*[[${currentSortDir}]]*/ 'desc';
+        let currentSearch = /*[[${currentSearch}]]*/ '';
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+        });
+        
+        function setupEventListeners() {
+            // Búsqueda en tiempo real
+            const searchInput = document.getElementById('searchInput');
+            let searchTimeout;
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        currentSearch = this.value;
+                        currentPage = 0;
+                        loadUsers();
+                    }, 500);
+                });
+            } else {
+                console.warn('⚠️ searchInput element not found');
+            }
+            
+            // Cambios en ordenamiento
+            const sortBySelect = document.getElementById('sortBySelect');
+            if (sortBySelect) {
+                sortBySelect.addEventListener('change', function() {
+                    currentSort = this.value;
+                    currentPage = 0;
+                    loadUsers();
+                });
+            }
+            
+            const sortDirSelect = document.getElementById('sortDirSelect');
+            if (sortDirSelect) {
+                sortDirSelect.addEventListener('change', function() {
+                    currentSortDir = this.value;
+                    currentPage = 0;
+                    loadUsers();
+                });
+            }
+            
+            // Limpiar filtros
+            const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+            if (clearFiltersBtn) {
+                clearFiltersBtn.addEventListener('click', function() {
+                    if (searchInput) searchInput.value = '';
+                    if (sortBySelect) sortBySelect.value = 'fechaCreacion';
+                    if (sortDirSelect) sortDirSelect.value = 'desc';
+                    currentSearch = '';
+                    currentSort = 'fechaCreacion';
+                    currentSortDir = 'desc';
+                    currentPage = 0;
+                    loadUsers();
+                });
+            }
+            
+            // Formulario de invitación
+            document.getElementById('inviteUserForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                inviteUser();
+            });
+            
+            // Botones de acción en tabla
+            setupTableActions();
+        }
+        
+        function setupTableActions() {
+            console.log('🔧 setupTableActions inicializado - Configurando event delegation...');
+            
+            // Event delegation para botones dinámicos de la tabla
+            const tableBody = document.getElementById('usersTableBody');
+            
+            if (tableBody) {
+                // Remover listeners anteriores (si existen)
+                tableBody.removeEventListener('click', handleTableActions);
+                
+                // Agregar event delegation
+                tableBody.addEventListener('click', handleTableActions);
+                
+                console.log('✅ Event delegation configurado para botones de tabla');
+            } else {
+                console.error('❌ No se encontró usersTableBody');
+            }
+        }
+        
+        // Manejador unificado de acciones de tabla
+        function handleTableActions(event) {
+            const target = event.target.closest('button');
+            
+            if (!target) return;
+            
+            const userId = target.getAttribute('data-user-id');
+            
+            if (!userId) {
+                console.warn('⚠️ Botón sin data-user-id:', target);
+                return;
+            }
+            
+            // Botón habilitar/inhabilitar
+            if (target.classList.contains('toggle-status-btn')) {
+                console.log('🔄 Click en toggle status para usuario:', userId);
+                const currentStatus = target.getAttribute('data-current-status');
+                toggleUserStatus(parseInt(userId), currentStatus);
+            }
+            
+            // Botón eliminar
+            else if (target.classList.contains('delete-user-btn')) {
+                console.log('🗑️ Click en eliminar para usuario:', userId);
+                const userName = target.getAttribute('data-user-name');
+                
+                // Confirmación doble
+                if (confirm(`¿Estás seguro de eliminar a ${userName}?\n\nEsta acción NO se puede deshacer.`)) {
+                    if (confirm('⚠️ CONFIRMACIÓN FINAL: ¿Realmente deseas eliminar este usuario?')) {
+                        deleteUser(parseInt(userId));
+                    } else {
+                        console.log('❌ Usuario canceló la eliminación (segunda confirmación)');
+                    }
+                } else {
+                    console.log('❌ Usuario canceló la eliminación (primera confirmación)');
+                }
+            }
+        }
+        
+        function loadUsers() {
+            showLoading(true);
+            
+            const params = new URLSearchParams({
+                page: currentPage,
+                size: currentSize,
+                sortBy: currentSort,
+                sortDir: currentSortDir,
+                _t: new Date().getTime() // Prevenir cache
+            });
+            
+            if (currentSearch.trim()) {
+                params.append('search', currentSearch.trim());
+            }
+            
+            // Agregar headers para prevenir cache
+            fetch(`${baseUrl}/api/search?${params}`, {
+                method: 'GET',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            })
+                .then(response => {
+                    console.log('loadUsers response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('loadUsers data received:', data);
+                    if (data.error) {
+                        showAlert('Error al cargar usuarios: ' + data.message, 'danger');
+                    } else {
+                        updateUsersTable(data);
+                    }
+                })
+                .catch(error => {
+                    showAlert('Error de conexión', 'danger');
+                    console.error('Error:', error);
+                })
+                .finally(() => {
+                    showLoading(false);
+                });
+        }
+        
+        function loadPage(page) {
+            currentPage = page;
+            loadUsers();
+        }
+        
+        function updateUsersTable(data) {
+            console.log('updateUsersTable called with data:', data);
+            
+            const tbody = document.querySelector('#usersTable tbody');
+            if (!tbody) {
+                console.error('No se encontró el tbody de la tabla de usuarios');
+                location.reload(); // Fallback
+                return;
+            }
+            
+            // Limpiar tabla actual
+            tbody.innerHTML = '';
+            
+            // Si no hay contenido, mostrar mensaje
+            if (!data.content || data.content.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">
+                            <i class="fas fa-users-slash mb-2"></i><br>
+                            No se encontraron usuarios
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Generar filas de la tabla
+            data.content.forEach(user => {
+                const row = document.createElement('tr');
+                row.setAttribute('data-user-id', user.usuarioId); // ⭐ AGREGAR DATA-USER-ID A LA FILA
+                
+                // Username
+                const usernameCell = document.createElement('td');
+                usernameCell.textContent = user.username || 'N/A';
+                row.appendChild(usernameCell);
+                
+                // Nombre completo
+                const nameCell = document.createElement('td');
+                nameCell.textContent = (user.nombreUsuario || '') + ' ' + (user.apellidoPaterno || '');
+                row.appendChild(nameCell);
+                
+                // Email
+                const emailCell = document.createElement('td');
+                emailCell.textContent = user.correo || 'N/A';
+                row.appendChild(emailCell);
+                
+                // Roles
+                const roleCell = document.createElement('td');
+                const roleNames = user.roles && user.roles.length > 0 ? 
+                    user.roles.map(role => role.nombreRol).join(', ') : 'Sin rol';
+                roleCell.textContent = roleNames;
+                row.appendChild(roleCell);
+                
+                // Estado
+                const statusCell = document.createElement('td');
+                const statusBadge = document.createElement('span');
+                statusBadge.className = user.estadoUsuario === 'HABILITADO' ? 'badge bg-success' : 'badge bg-danger';
+                statusBadge.textContent = user.estadoUsuario === 'HABILITADO' ? 'Habilitado' : 'Inhabilitado';
+                statusCell.appendChild(statusBadge);
+                row.appendChild(statusCell);
+                
+                // Acciones
+                const actionsCell = document.createElement('td');
+                const btnGroup = document.createElement('div');
+                btnGroup.className = 'btn-group';
+                btnGroup.setAttribute('role', 'group');
+                
+                // Botón ver perfil
+                const viewBtn = document.createElement('a');
+                viewBtn.href = baseUrl + '/view-user-' + user.usuarioId + '-profile';
+                viewBtn.className = 'btn btn-sm btn-info';
+                viewBtn.title = 'Ver perfil';
+                viewBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                btnGroup.appendChild(viewBtn);
+                
+                // Botón toggle estado
+                const toggleBtn = document.createElement('button');
+                toggleBtn.setAttribute('data-user-id', user.usuarioId);
+                toggleBtn.setAttribute('data-current-status', user.estadoUsuario);
+                if (user.estadoUsuario === 'HABILITADO') {
+                    toggleBtn.className = 'btn btn-sm btn-warning toggle-status-btn';
+                    toggleBtn.title = 'Inhabilitar usuario';
+                    toggleBtn.innerHTML = '<i class="fas fa-user-slash"></i>';
+                } else {
+                    toggleBtn.className = 'btn btn-sm btn-success toggle-status-btn';
+                    toggleBtn.title = 'Habilitar usuario';
+                    toggleBtn.innerHTML = '<i class="fas fa-user-check"></i>';
+                }
+                // No usar onclick directo, dejar que el event delegation lo maneje
+                btnGroup.appendChild(toggleBtn);
+                
+                // Botón eliminar
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn btn-outline-danger btn-sm delete-user-btn';
+                deleteBtn.setAttribute('data-user-id', user.usuarioId);
+                deleteBtn.setAttribute('data-user-name', `${user.nombreUsuario} ${user.apellidoPaterno}`);
+                deleteBtn.title = 'Eliminar usuario';
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                // No usar onclick directo, dejar que el event delegation lo maneje
+                btnGroup.appendChild(deleteBtn);
+                
+                actionsCell.appendChild(btnGroup);
+                row.appendChild(actionsCell);
+                
+                tbody.appendChild(row);
+            });
+            
+            // Actualizar paginación si existe
+            updatePagination(data);
+            
+            console.log('Tabla actualizada exitosamente con', data.content.length, 'usuarios');
+        }
+        
+        function updatePagination(data) {
+            // Actualizar información de paginación
+            const pageInfo = document.querySelector('.page-info');
+            if (pageInfo) {
+                const start = data.currentPage * currentSize + 1;
+                const end = Math.min((data.currentPage + 1) * currentSize, data.totalElements);
+                pageInfo.textContent = `Mostrando ${start}-${end} de ${data.totalElements} usuarios`;
+            }
+            
+            // Actualizar botones de paginación
+            const pagination = document.querySelector('.pagination');
+            if (pagination && data.totalPages > 1) {
+                let paginationHTML = '';
+                
+                // Botón anterior
+                paginationHTML += '<li class="page-item ' + (!data.hasPrevious ? 'disabled' : '') + '">' +
+                    '<a class="page-link" href="#" onclick="loadPage(' + (data.currentPage - 1) + '); return false;">' +
+                        'Anterior' +
+                    '</a>' +
+                '</li>';
+                
+                // Páginas numeradas
+                const startPage = Math.max(0, data.currentPage - 2);
+                const endPage = Math.min(data.totalPages - 1, data.currentPage + 2);
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    paginationHTML += '<li class="page-item ' + (i === data.currentPage ? 'active' : '') + '">' +
+                        '<a class="page-link" href="#" onclick="loadPage(' + i + '); return false;">' +
+                            (i + 1) +
+                        '</a>' +
+                    '</li>';
+                }
+                
+                // Botón siguiente
+                paginationHTML += '<li class="page-item ' + (!data.hasNext ? 'disabled' : '') + '">' +
+                    '<a class="page-link" href="#" onclick="loadPage(' + (data.currentPage + 1) + '); return false;">' +
+                        'Siguiente' +
+                    '</a>' +
+                '</li>';
+                
+                pagination.innerHTML = paginationHTML;
+            }
+        }
+        
+        function inviteUser() {
+            const email = document.getElementById('inviteEmail').value;
+            const rolId = document.getElementById('inviteRole').value;
+            
+            if (!email || !rolId) {
+                showAlert('Por favor completa todos los campos', 'warning');
+                return;
+            }
+            
+            fetch(`${baseUrl}/api/invite-user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    rolId: rolId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('inviteUserModal')).hide();
+                    document.getElementById('inviteUserForm').reset();
+                    loadUsers();
+                } else {
+                    showAlert(data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                showAlert('Error al enviar invitación', 'danger');
+                console.error('Error:', error);
+            });
+        }
+        
+        // === UTILITY FUNCTIONS ===
+        function showLoading(show) {
+            // No hay overlay de loading en esta versión, pero mantenemos la función
+            console.log('Loading:', show);
+        }
+        
+        function showAlert(message, type) {
+            // Crear alerta Bootstrap
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Insertar al inicio del contenedor
+            const container = document.querySelector('.main-container');
+            if (container) {
+                container.insertAdjacentHTML('afterbegin', alertHtml);
+                
+                // Auto-remover después de 5 segundos
+                setTimeout(() => {
+                    const alert = container.querySelector('.alert');
+                    if (alert) {
+                        alert.remove();
+                    }
+                }, 5000);
+            }
+        }
+        
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES');
+        }
+        
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        }
+    </script>
+    
+    <!-- Modal de Confirmación de Eliminación -->
+    <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteUserModalLabel">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        Confirmar Eliminación
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-user-times fa-3x text-danger mb-3"></i>
+                        <h6 class="fw-bold">¿Estás seguro de que deseas eliminar este usuario?</h6>
+                        <p class="text-muted mb-2">
+                            Usuario: <strong id="deleteUserName"></strong>
+                        </p>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>¡Atención!</strong> Esta acción no se puede deshacer. 
+                            Se eliminará permanentemente toda la información del usuario.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash me-2"></i>Eliminar Usuario
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>    <!-- Chatbot Widget -->
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+
+</body>
+</html>
+
+

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iniciar sesión - Telito Dev Portal</title>
+    
+    <!-- Prevenir cache de la página de login -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <!-- Bootstrap CSS (usa tu copia local) -->
+    <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        /* Basado en el signup.html para mantener consistencia */
+        body {
+            background: #0d1117;
+            color: #fff;
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container-fluid {
+            height: 100vh;
+            padding: 0;
+        }
+
+        .left-panel {
+            background: #0d1117;
+            color: #fff;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+        }
+        .left-panel h2 {
+            font-weight: 700;
+            font-size: 2rem;
+            margin-bottom: .6rem;
+        }
+        .left-panel p {
+            color: #b7c1c9;
+            margin-bottom: 1.2rem;
+        }
+        .left-panel .illustration {
+            max-height: 320px;
+            width: auto;
+            opacity: .95;
+            margin-top: 1rem;
+        }
+
+        .right-panel {
+            background: #ffffff;
+            color: #000;
+            padding: 2.4rem 3rem;
+            border-radius: 30px 30px 0 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-box {
+            max-width: 480px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: .75rem;
+        }
+
+        .btn-social {
+            width: 100%;
+            margin-bottom: 0.7rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 600;
+            padding: .6rem;
+            transition: transform .12s ease, box-shadow .12s ease;
+        }
+        .btn-social:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(8,12,20,0.06); }
+
+        .divider {
+            text-align: center;
+            margin: 1.2rem 0;
+            position: relative;
+        }
+        .divider::before, .divider::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: #e9ecef;
+        }
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+        .divider span {
+            background: #fff;
+            padding: 0 10px;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .small-link { font-size: .95rem; color: #6c757d; }
+
+        @media (max-width: 768px) {
+            .container-fluid { display: flex; flex-direction: column; height: auto; }
+            .left-panel { order: 2; padding: 2rem; text-align: center; border-radius: 0 0 30px 30px; }
+            .right-panel { order: 1; padding: 1.6rem; border-radius: 30px 30px 0 0; }
+            .left-panel .illustration { width: 60%; max-height: 220px; margin: 0 auto; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid d-flex flex-wrap">
+    <!-- Izquierda: mensaje + ilustración (igual que en signup) -->
+    <div class="col-md-6 left-panel">
+        <h2>Bienvenido de nuevo</h2>
+        <p>Accede a TelDev Portal con tu correo o utilizando Google, Microsoft, GitHub o Facebook.</p>
+    </div>
+
+    <!-- Derecha: formulario -->
+    <div class="col-md-6 right-panel">
+        <div class="form-box">
+            <div class="text-center mb-3">
+                <h3 class="mt-2 mb-1">Inicia sesión</h3>
+                <p class="small-link">¿No tienes cuenta? <a th:href="@{/signup}" style="text-decoration:none;">Regístrate</a></p>
+            </div>
+
+            <!-- Mensajes de sistema -->
+            <!-- ✅ SOLUCIÓN PROBLEMA #2: Mensaje de error mejorado y abarcativo -->
+            <div th:if="${param.error}" class="alert alert-danger d-flex align-items-center" role="alert">
+                <i class="bi bi-exclamation-circle-fill me-2" style="font-size: 1.2rem;"></i>
+                <div>
+                    <strong>Error de autenticación:</strong> 
+<!--                    <span th:if="${param.error.toString() == '[oauth2_user_not_found]'}">OAuth2 solo está disponible para usuarios DEV registrados. Por favor, regístrate primero usando el formulario tradicional.</span>-->
+<!--                    <span th:if="${param.error.toString() == '[oauth2_dev_only]'}">OAuth2 solo está disponible para usuarios con rol DEV. Utiliza el inicio de sesión tradicional.</span>-->
+<!--                    <span th:if="${param.error.toString() == '[invalid_session]'}">Sesión inválida o expirada. Por favor, inicia sesión nuevamente.</span>-->
+<!--                    <span th:if="${param.error.toString() == '[true]'}">Las credenciales ingresadas no son válidas o la cuenta se encuentra deshabilitada. Por favor, verifica tus datos e intenta nuevamente.</span>-->
+                    <span th:unless="${param.error[0] == 'oauth2_user_not_found' or
+                          param.error[0] == 'oauth2_dev_only' or
+                          param.error[0] == 'invalid_session' or
+                          param.error[0] == 'account_disabled' or
+                          param.error[0] == 'access_denied'}">
+             Las credenciales ingresadas no son válidas o tu cuenta se encuentra deshabilitada.
+        </span>
+                </div>
+            </div>
+            
+            <!-- ✅ SOLUCIÓN PROBLEMA #1: Mensaje de éxito al completar registro -->
+            <div th:if="${param.registered}" class="alert alert-success d-flex align-items-center" role="alert">
+                <i class="bi bi-check-circle-fill me-2" style="font-size: 1.2rem;"></i>
+                <div>
+                    <strong>¡Registro completado!</strong> Tu cuenta ha sido verificada exitosamente. Ahora puedes iniciar sesión con tus credenciales.
+                </div>
+            </div>
+            
+            <div th:if="${param.logout}" class="alert alert-success d-flex align-items-center" role="alert">
+                <i class="bi bi-check-circle-fill me-2" style="font-size: 1.2rem;"></i>
+                <div>Has cerrado sesión correctamente.</div>
+            </div>
+
+            <!-- Aviso para OAuth2 -->
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle"></i>
+                <strong>OAuth2:</strong> Disponible para usuarios DEV. Si es tu primera vez, completa tu perfil después de autenticarte.
+            </div>
+
+            <!-- Botones OAuth (igual estructura que signup) -->
+            <div class="mb-3 d-grid gap-2">
+                <a th:href="@{/oauth2/authorization/google}" class="btn btn-light btn-social border">
+                    <i class="bi bi-google" style="font-size:1.1rem; color:#DB4437;"></i>
+                    <span>Continuar con Google</span>
+                </a>
+
+                <a th:href="@{/oauth2/authorization/microsoft}" class="btn btn-light btn-social border">
+                    <i class="bi bi-microsoft" style="font-size:1.1rem;"></i>
+                    <span>Continuar con Microsoft</span>
+                </a>
+
+                <a th:href="@{/oauth2/authorization/github}" class="btn btn-dark btn-social">
+                    <i class="bi bi-github" style="font-size:1.1rem;"></i>
+                    <span>Continuar con GitHub</span>
+                </a>
+
+                <a th:href="@{/oauth2/authorization/facebook}" class="btn btn-primary btn-social">
+                    <i class="bi bi-facebook" style="font-size:1.1rem;"></i>
+                    <span>Continuar con Facebook</span>
+                </a>
+            </div>
+
+            <div class="divider"><span>o</span></div>
+
+            <!-- Form clásico con el nuevo LoginRequest -->
+            <form th:action="@{/auth/login}" method="post" class="needs-validation" novalidate>
+                <!-- CSRF está deshabilitado temporalmente para pruebas -->
+                <!-- <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" /> -->
+
+                <div class="mb-3">
+                    <label for="usernameOrEmail" class="form-label">Usuario o correo electrónico</label>
+                    <input id="usernameOrEmail" name="usernameOrEmail" type="text" class="form-control"
+                           placeholder="usuario o correo@ejemplo.com" required autofocus>
+                    <div class="invalid-feedback">
+                        Por favor ingresa un usuario o correo válido.
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input id="password" name="password" type="password" class="form-control" 
+                           placeholder="••••••••" required>
+                    <div class="invalid-feedback">
+                        Ingrese su contraseña.
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="remember-me" name="remember-me">
+                        <label class="form-check-label small-link" for="remember-me">Recuérdame</label>
+                    </div>
+                    <a th:href="@{/forgot-password}" class="small-link">¿Olvidaste tu contraseña?</a>
+                </div>
+
+                <div class="d-grid mb-2">
+                    <button type="submit" class="btn btn-success rounded-pill">Iniciar sesión</button>
+                </div>
+
+                <div class="text-center mt-2 small-link text-muted">
+                    <span>¿No puedes ingresar? <a th:href="@{/support}" style="text-decoration:none;">Contáctanos</a></span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Validación Bootstrap y estado de carga
+    (function () {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation')
+        const submitButton = document.querySelector('button[type="submit"]')
+        const originalButtonText = submitButton.innerHTML
+
+        // Función para mostrar/ocultar el estado de carga
+        function setLoadingState(isLoading) {
+            submitButton.disabled = isLoading
+            submitButton.innerHTML = isLoading 
+                ? `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Iniciando sesión...`
+                : originalButtonText
+        }
+
+        Array.from(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                } else {
+                    setLoadingState(true)
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+
+        // Restaurar botón si hay error de backend
+        if (document.querySelector('.alert-danger')) {
+            setLoadingState(false)
+        }
+
+        // Limpiar mensajes de error al escribir
+        const inputs = document.querySelectorAll('input[required]')
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                input.setCustomValidity('')
+                form.classList.remove('was-validated')
+            })
+        })
+    })()
+    
+    // 🔒 PREVENIR REGRESO CON BOTÓN "ATRÁS" DEL NAVEGADOR
+    // Si el usuario ya está autenticado y llega aquí, reemplazar historial
+    (function() {
+        // Detección múltiple de navegación desde cache
+        window.addEventListener('pageshow', function(event) {
+            // Verificar si la página viene de cache (botón atrás)
+            if (event.persisted || 
+                (window.performance && window.performance.navigation.type === 2) ||
+                (window.performance && window.performance.getEntriesByType && 
+                 window.performance.getEntriesByType('navigation')[0] && 
+                 window.performance.getEntriesByType('navigation')[0].type === 'back_forward')) {
+                // Forzar recarga para verificar autenticación en servidor
+                console.log('🔄 [SIGNIN] Detectada navegación desde cache - recargando...');
+                window.location.reload(true); // true = bypass cache
+            }
+        });
+        
+        // Prevenir cache en esta página
+        window.addEventListener('beforeunload', function() {
+            // Limpiar cualquier estado antes de salir
+            if (window.history && window.history.replaceState) {
+                window.history.replaceState(null, null, window.location.href);
+            }
+        });
+        
+        // Detectar si venimos de una página autenticada (forward después de logout)
+        if (document.referrer && document.referrer.includes('/devportal/')) {
+            console.log('🔄 [SIGNIN] Detectado referrer de página autenticada - limpiando historial');
+            // Limpiar historial agresivamente
+            window.history.replaceState(null, null, window.location.href);
+        }
+    })();
+</script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Proyecto - DevPortal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/project-repository.css}">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
+</head>
+<body>
+    <!-- Impersonation Banner -->
+    <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="project-container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-content">
+                <nav class="breadcrumb-nav">
+                    <a th:href="@{/devportal/{userRole}/{username}/dashboard(userRole=${userRole}, username=${username})}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a th:href="@{/devportal/{userRole}/{username}/projects(userRole=${userRole}, username=${username})}">
+                        Proyectos
+                    </a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span th:if="${projectType == 'personal'}">Personal</span>
+                    <span th:if="${projectType == 'team'}">Equipo</span>
+                    <span th:if="${projectType == 'enterprise'}">Empresa</span>
+                    <span th:unless="${projectType}">Proyecto</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span>Crear</span>
+                </nav>
+                
+                <div class="header-actions">
+                    <div class="user-info">
+                        <img th:src="${user.fotoPerfil != null ? user.fotoPerfil : '/img/default-avatar.png'}" 
+                             alt="Avatar" class="user-avatar">
+                        <span th:text="${user.nombreUsuario}">Usuario</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Form Header -->
+            <section class="form-header">
+                <div class="form-title">
+                    <h1>
+                        <div class="icon">
+                            <i class="fas fa-user" th:if="${projectType == 'personal'}"></i>
+                            <i class="fas fa-users" th:if="${projectType == 'team'}"></i>
+                            <i class="fas fa-building" th:if="${projectType == 'enterprise'}"></i>
+                            <i class="fas fa-folder" th:unless="${projectType}"></i>
+                        </div>
+                        <span th:if="${projectType == 'personal'}">Crear Proyecto Personal</span>
+                        <span th:if="${projectType == 'team'}">Crear Proyecto de Grupo</span>
+                        <span th:if="${projectType == 'enterprise'}">Crear Proyecto Empresarial</span>
+                        <span th:unless="${projectType}">Crear Nuevo Proyecto</span>
+                    </h1>
+                    <p class="form-subtitle">
+                        <span th:if="${projectType == 'personal'}">Crea un proyecto personal para organizar tu trabajo individual.</span>
+                        <span th:if="${projectType == 'team'}">Crea un proyecto de equipo para colaborar con tu grupo de trabajo.</span>
+                        <span th:if="${projectType == 'enterprise'}">Crea un proyecto empresarial con acceso controlado por credenciales corporativas.</span>
+                        <span th:unless="${projectType}">Crea un nuevo proyecto para organizar tus repositorios y colaborar con tu equipo.</span>
+                    </p>
+                </div>
+            </section>
+            
+            <!-- Project Form -->
+            <section class="form-section">
+            <form th:action="@{/devportal/{userRole}/{username}/projects/create(userRole=${userRole}, username=${username})}"
+                method="post"
+                class="project-form">
+                    
+                    <!-- Hidden Field for Project Type -->
+                    <input type="hidden" name="projectType" th:value="${projectType ?: 'personal'}" />
+                    
+                    <!-- Error Messages -->
+                    <div class="alert alert-danger" th:if="${error}">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span th:text="${error}">Error message</span>
+                    </div>
+                    
+                    <!-- Success Messages -->
+                    <div class="alert alert-success" th:if="${success}">
+                        <i class="fas fa-check-circle"></i>
+                        <span th:text="${success}">Success message</span>
+                    </div>
+                    
+                    <!-- Basic Information -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3>
+                                <i class="fas fa-info-circle"></i>
+                                Información Básica
+                            </h3>
+                            <p>Información fundamental sobre tu proyecto.</p>
+                        </div>
+                        
+                        <div class="form-card-body">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="nombreProyecto">
+                                        Nombre del proyecto <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           id="nombreProyecto" 
+                                           name="nombreProyecto" 
+                                           class="form-control" 
+                                           required 
+                                           placeholder="Ingresa un nombre descriptivo">
+                                    <div class="form-text">
+                                        Usa un nombre claro y descriptivo que identifique tu proyecto.
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="categoriaId">Categoría</label>
+                                    <select id="categoriaId" name="categoriaId" class="form-select">
+                                        <option value="">Seleccionar categoría</option>
+                                        <option th:each="categoria : ${categories}" 
+                                                th:value="${categoria.idCategoria}"
+                                                th:text="${categoria.nombreCategoria}">
+                                            Categoría
+                                        </option>
+                                    </select>
+                                    <div class="form-text">
+                                        La categoría ayuda a organizar y encontrar tu proyecto.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="descripcionProyecto">Descripción</label>
+                                <textarea id="descripcionProyecto" 
+                                          name="descripcionProyecto" 
+                                          class="form-control" 
+                                          rows="4" 
+                                          placeholder="Describe el propósito y objetivos de tu proyecto..."></textarea>
+                                <div class="form-text">
+                                    Una buena descripción ayuda a otros a entender de qué trata tu proyecto.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3>
+                                <i class="fas fa-cog"></i>
+                                Configuración
+                            </h3>
+                            <p>Configura la visibilidad y permisos de tu proyecto.</p>
+                        </div>
+                        
+                        <div class="form-card-body">
+                            <!-- Tipo de Propietario - FIXED (NO EDITABLE) -->
+                            <div class="form-group">
+                                <label class="form-label">Tipo de Propietario</label>
+                                <div class="form-control-static">
+                                    <span th:if="${projectType == 'personal'}" class="badge bg-primary">
+                                        <i class="fas fa-user"></i> Personal
+                                    </span>
+                                    <span th:if="${projectType == 'team'}" class="badge bg-success">
+                                        <i class="fas fa-users"></i> Grupal
+                                    </span>
+                                    <span th:if="${projectType == 'enterprise'}" class="badge bg-warning">
+                                        <i class="fas fa-building"></i> Empresarial
+                                    </span>
+                                </div>
+                                <div class="form-text">
+                                    <span th:if="${projectType == 'personal'}"><strong>Personal:</strong> Proyecto tuyo exclusivamente.</span>
+                                    <span th:if="${projectType == 'team'}"><strong>Grupal:</strong> Proyecto de un grupo/equipo.</span>
+                                    <span th:if="${projectType == 'enterprise'}"><strong>Empresarial:</strong> Proyecto de una empresa.</span>
+                                </div>
+                                <!-- Hidden field to send the value -->
+                                <input type="hidden" name="propietarioProyecto" th:value="${projectType == 'personal' ? 'USUARIO' : (projectType == 'team' ? 'GRUPO' : 'EMPRESA')}" />
+                            </div>
+
+                            <!-- Propietario Name (REQUIRED for TEAM and ENTERPRISE) -->
+                            <div id="ownerNameSection" th:if="${projectType == 'team' or projectType == 'enterprise'}">
+                                <div class="form-group">
+                                    <label class="form-label" for="propietarioNombre">
+                                        <span th:if="${projectType == 'team'}">Nombre del Grupo</span>
+                                        <span th:if="${projectType == 'enterprise'}">Nombre de la Empresa</span>
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           id="propietarioNombre" 
+                                           name="propietarioNombre" 
+                                           class="form-control" 
+                                           th:if="${projectType == 'team' or projectType == 'enterprise'}"
+                                           required 
+                                           placeholder="Ej: Departamento de Desarrollo">
+                                    <div class="form-text">
+                                        <span th:if="${projectType == 'team'}">Ingresa el nombre del grupo que será propietario de este proyecto.</span>
+                                        <span th:if="${projectType == 'enterprise'}">Ingresa el nombre de la empresa que será propietaria de este proyecto.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Team/Group Selection (OPTIONAL - Only for TEAM and ENTERPRISE) -->
+                            <div id="teamSelectionSection" th:if="${projectType == 'team' or projectType == 'enterprise'}">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        Asociar a Equipos (Opcional)
+                                    </label>
+                                    <div class="teams-list">
+                                        <div th:each="equipo : ${equipos}" class="team-checkbox-item">
+                                            <div class="checkbox-wrapper">
+                                                <input type="checkbox" 
+                                                       th:id="${'equipo_' + equipo.equipoId}" 
+                                                       th:name="${'equipoIds'}" 
+                                                       th:value="${equipo.equipoId}"
+                                                       class="team-checkbox">
+                                                <label th:for="${'equipo_' + equipo.equipoId}" class="team-label" th:text="${equipo.nombreEquipo}">
+                                                    Nombre Equipo
+                                                </label>
+                                            </div>
+                                            <div class="permissions-dropdown" th:id="${'permisos_' + equipo.equipoId}" style="display: none;">
+                                                <select th:name="${'privilegioEquipo_' + equipo.equipoId}" class="form-select form-select-sm">
+                                                    <option value="LECTOR" selected>Lector (solo lectura)</option>
+                                                    <option value="EDITOR">Editor (acceso completo)</option>
+                                                    <option value="COMENTADOR">Comentador (lectura + comentarios)</option>
+                                                    <option value="ADMINISTRADOR">Administrador (gestión total)</option>
+                                                    <option value="PERSONALIZADO">Personalizado (permisos específicos)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div th:if="${equipos.isEmpty()}" class="no-teams-message">
+                                            <i class="fas fa-info-circle"></i>
+                                            <span>No hay equipos disponibles. <a href="javascript:showCreateTeamModal()">Crear uno nuevo</a></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-text">
+                                        Opcionalmente, selecciona uno o más equipos y asigna permisos a cada uno. Puedes saltar este paso y asociar equipos después.
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary mt-2" onclick="showCreateTeamModal()">
+                                        <i class="fas fa-plus"></i>
+                                        Crear Nuevo Equipo
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="visibilidadProyecto">Visibilidad</label>
+                                    <select id="visibilidadProyecto" name="visibilidadProyecto" class="form-select">
+                                        <option value="PRIVADO" selected>
+                                            <i class="fas fa-lock"></i> Privado
+                                        </option>
+                                        <option value="PUBLICO">
+                                            <i class="fas fa-globe"></i> Público
+                                        </option>
+                                    </select>
+                                    <div class="form-text">
+                                        <strong>Privado:</strong> Solo tú y tus colaboradores pueden ver este proyecto.<br>
+                                        <strong>Público:</strong> Cualquiera puede ver este proyecto.
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="accesoProyecto">Acceso</label>
+                                    <select id="accesoProyecto" name="accesoProyecto" class="form-select">
+                                        <option value="RESTRINGIDO" selected>
+                                            Restringido
+                                        </option>
+                                        <option value="ORGANIZACION">
+                                            Organización
+                                        </option>
+                                        <option value="CUALQUIER_PERSONA_CON_EL_ENLACE">
+                                            Cualquier persona con el enlace
+                                        </option>
+                                    </select>
+                                    <div class="form-text">
+                                        <strong>Restringido:</strong> Solo colaboradores invitados pueden acceder.<br>
+                                        <strong>Organización:</strong> Cualquier miembro de la organización puede acceder.<br>
+                                        <strong>Con enlace:</strong> Cualquier persona con el enlace puede acceder.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <div class="actions-left">
+                            <a th:href="@{/devportal/{userRole}/{username}/projects(userRole=${userRole}, username=${username})}" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-times"></i>
+                                Cancelar
+                            </a>
+                        </div>
+                        
+                        <div class="actions-right">
+                            <button type="button" class="btn btn-outline-primary" id="previewBtn">
+                                <i class="fas fa-eye"></i>
+                                Vista Previa
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                Crear Proyecto
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </main>
+        
+        <!-- Preview Modal -->
+        <div id="previewModal" class="modal">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h2 class="modal-title">Vista Previa del Proyecto</h2>
+                    <button type="button" class="modal-close">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="preview-container">
+                        <div class="preview-header">
+                            <div class="preview-icon">
+                                <i class="fas fa-folder"></i>
+                            </div>
+                            <div class="preview-info">
+                                <h3 id="previewName">Nombre del Proyecto</h3>
+                                <div class="preview-badges">
+                                    <span id="previewVisibility" class="badge">Visibilidad</span>
+                                    <span id="previewCategory" class="badge badge-category">Categoría</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="preview-description">
+                            <h4>Descripción</h4>
+                            <p id="previewDescriptionText">Descripción del proyecto</p>
+                        </div>
+                        
+                        <div class="preview-settings">
+                            <h4>Configuración</h4>
+                            <div class="settings-grid">
+                                <div class="setting-item">
+                                    <strong>Acceso:</strong> <span id="previewAccess">Acceso</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary modal-close">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Additional Styles for Form -->
+    <style>
+        .form-header {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            margin-bottom: 2rem;
+        }
+        
+        .form-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .form-subtitle {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 1.125rem;
+        }
+        
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .project-form {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .form-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+        
+        .form-card-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--gray-50);
+        }
+        
+        .form-card-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-card-header p {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        
+        .form-card-body {
+            padding: 2rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 1.125rem;
+            height: 1.125rem;
+            accent-color: var(--primary-color);
+        }
+        
+        .checkbox-group label {
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem;
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            position: sticky;
+            bottom: 2rem;
+        }
+        
+        .actions-left,
+        .actions-right {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            color: var(--danger-color);
+        }
+        
+        .alert-success {
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+            color: var(--success-color);
+        }
+        
+        .modal-content.large {
+            max-width: 800px;
+        }
+        
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .preview-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--gray-50);
+            border-radius: var(--radius-md);
+        }
+        
+        .preview-icon {
+            width: 4rem;
+            height: 4rem;
+            background: var(--primary-color);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.5rem;
+        }
+        
+        .preview-info h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            color: var(--text-primary);
+        }
+        
+        .preview-badges {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .preview-description,
+        .preview-settings {
+            padding: 1.5rem;
+            background: var(--gray-50);
+            border-radius: var(--radius-md);
+        }
+        
+        .preview-description h4,
+        .preview-settings h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 0 0 1rem 0;
+            color: var(--text-primary);
+        }
+        
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .setting-item {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .actions-left,
+            .actions-right {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Form Control Static */
+        .form-control-static {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--gray-50);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .form-control-static .badge {
+            font-size: 0.95rem;
+            padding: 0.5rem 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Teams List Styles */
+        .teams-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--gray-50);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-light);
+        }
+
+        .team-checkbox-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: white;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
+            transition: all 0.2s;
+        }
+
+        .team-checkbox-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .team-checkbox {
+            width: 1.125rem;
+            height: 1.125rem;
+            accent-color: var(--primary-color);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .team-label {
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            margin: 0;
+            flex: 1;
+        }
+
+        .permissions-dropdown {
+            margin-left: 2rem;
+            margin-top: 0.5rem;
+        }
+
+        .permissions-dropdown select {
+            font-size: 0.9rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .no-teams-message {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .no-teams-message a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .no-teams-message a:hover {
+            text-decoration: underline;
+        }
+
+        .mt-2 {
+            margin-top: 1rem;
+        }
+    </style>
+    
+    <!-- Create Team Modal -->
+    <div id="createTeamModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Crear Nuevo Equipo (Temporal)</h2>
+                <button type="button" class="modal-close" onclick="closeCreateTeamModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Nota:</strong> Este equipo se creará automáticamente cuando hagas clic en "Crear Proyecto". Si cancelas, no se guardará nada.
+                </div>
+                <form id="createTeamForm">
+                    <div class="form-group">
+                        <label class="form-label" for="teamName">Nombre del Equipo</label>
+                        <input type="text" id="teamName" class="form-control" placeholder="Ej: Equipo Backend, Marketing, etc." required>
+                        <div class="form-text">Proporciona un nombre descriptivo para el equipo.</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="teamDescription">Descripción</label>
+                        <textarea id="teamDescription" class="form-control" placeholder="Describe el propósito del equipo..." rows="3"></textarea>
+                        <div class="form-text">Opcional: Describe qué hace este equipo.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="teamPermission">Permisos del Equipo en el Proyecto</label>
+                        <select id="teamPermission" class="form-select">
+                            <option value="LECTOR" selected>Lector (solo lectura)</option>
+                            <option value="EDITOR">Editor (acceso completo)</option>
+                            <option value="COMENTADOR">Comentador (lectura + comentarios)</option>
+                            <option value="ADMINISTRADOR">Administrador (gestión total)</option>
+                            <option value="PERSONALIZADO">Personalizado (permisos específicos)</option>
+                        </select>
+                        <div class="form-text">Selecciona los permisos que tendrá este equipo en el proyecto.</div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeCreateTeamModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="addTeamToProject()">Agregar Equipo a Proyecto</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/project-repository.js}"></script>
+    
+    <script>
+        // Almacenar equipos temporales creados durante el formulario
+        let temporaryTeams = [];
+        let nextTemporaryTeamId = -1;
+
+        // Toggle permissions dropdown when checkbox is checked/unchecked
+        document.querySelectorAll('.team-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const teamId = this.value;
+                const permissionsDiv = document.getElementById('permisos_' + teamId);
+                if (this.checked) {
+                    permissionsDiv.style.display = 'block';
+                } else {
+                    permissionsDiv.style.display = 'none';
+                }
+            });
+        });
+
+        // Mostrar/ocultar sección de selección de equipo según el tipo
+        function handleProjectTypeChange() {
+            const projectType = document.getElementById('projectType').value;
+            const teamSelectionSection = document.getElementById('teamSelectionSection');
+            
+            if (projectType === 'team' || projectType === 'enterprise') {
+                teamSelectionSection.style.display = 'block';
+            } else {
+                teamSelectionSection.style.display = 'none';
+            }
+        }
+        
+        // Mostrar modal para crear equipo
+        function showCreateTeamModal() {
+            document.getElementById('createTeamModal').classList.add('active');
+        }
+        
+        // Cerrar modal de crear equipo
+        function closeCreateTeamModal() {
+            document.getElementById('createTeamModal').classList.remove('active');
+            document.getElementById('createTeamForm').reset();
+        }
+        
+        // Agregar equipo temporal al proyecto (sin guardar en BD)
+        function addTeamToProject() {
+            const teamName = document.getElementById('teamName').value;
+            const teamDescription = document.getElementById('teamDescription').value;
+            const teamPermission = document.getElementById('teamPermission').value;
+            
+            if (!teamName.trim()) {
+                alert('Por favor ingresa un nombre para el equipo');
+                return;
+            }
+            
+            // Crear ID temporal negativo para identificarlo
+            const tempId = nextTemporaryTeamId--;
+            
+            // Guardar en array temporal
+            const newTeam = {
+                id: tempId,
+                name: teamName,
+                description: teamDescription,
+                permission: teamPermission,
+                isTemporary: true
+            };
+            temporaryTeams.push(newTeam);
+            
+            // Agregar a la UI
+            const teamsList = document.querySelector('.teams-list');
+            const newTeamItem = document.createElement('div');
+            newTeamItem.className = 'team-checkbox-item';
+            newTeamItem.id = 'team-item-' + tempId;
+            newTeamItem.innerHTML = `
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" 
+                           id="equipo_${tempId}" 
+                           name="equipoIds" 
+                           value="${tempId}"
+                           class="team-checkbox"
+                           checked>
+                    <label for="equipo_${tempId}" class="team-label">
+                        ${teamName}
+                        <span style="font-size: 0.85rem; color: #ff9800; margin-left: 0.5rem;">(Nuevo - se creará al guardar)</span>
+                    </label>
+                </div>
+                <div class="permissions-dropdown" id="permisos_${tempId}" style="display: block;">
+                    <select name="privilegioEquipo_${tempId}" class="form-select form-select-sm">
+                        <option value="LECTOR" ${teamPermission === 'LECTOR' ? 'selected' : ''}>Lector (solo lectura)</option>
+                        <option value="EDITOR" ${teamPermission === 'EDITOR' ? 'selected' : ''}>Editor (acceso completo)</option>
+                        <option value="COMENTADOR" ${teamPermission === 'COMENTADOR' ? 'selected' : ''}>Comentador (lectura + comentarios)</option>
+                        <option value="ADMINISTRADOR" ${teamPermission === 'ADMINISTRADOR' ? 'selected' : ''}>Administrador (gestión total)</option>
+                        <option value="PERSONALIZADO" ${teamPermission === 'PERSONALIZADO' ? 'selected' : ''}>Personalizado (permisos específicos)</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeTemporaryTeam(${tempId})" style="margin-top: 0.5rem;">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            `;
+            
+            // Remover mensaje de "sin equipos" si existe
+            const noTeamsMessage = teamsList.querySelector('.no-teams-message');
+            if (noTeamsMessage) {
+                noTeamsMessage.remove();
+            }
+            
+            teamsList.appendChild(newTeamItem);
+            
+            // Agregar event listener al nuevo checkbox
+            newTeamItem.querySelector('.team-checkbox').addEventListener('change', function() {
+                const teamId = this.value;
+                const permissionsDiv = document.getElementById('permisos_' + teamId);
+                if (this.checked) {
+                    permissionsDiv.style.display = 'block';
+                } else {
+                    permissionsDiv.style.display = 'none';
+                }
+            });
+            
+            closeCreateTeamModal();
+            alert('Equipo agregado temporalmente. Se creará cuando guardes el proyecto.');
+        }
+        
+        // Eliminar equipo temporal
+        function removeTemporaryTeam(tempId) {
+            // Remover del array
+            temporaryTeams = temporaryTeams.filter(t => t.id !== tempId);
+            
+            // Remover del DOM
+            const teamItem = document.getElementById('team-item-' + tempId);
+            if (teamItem) {
+                teamItem.remove();
+            }
+            
+            // Si no hay más equipos, mostrar mensaje
+            const teamsList = document.querySelector('.teams-list');
+            if (teamsList.children.length === 0) {
+                const noTeamsMessage = document.createElement('div');
+                noTeamsMessage.className = 'no-teams-message';
+                noTeamsMessage.innerHTML = `
+                    <i class="fas fa-info-circle"></i>
+                    <span>No hay equipos disponibles. <a href="javascript:showCreateTeamModal()">Crear uno nuevo</a></span>
+                `;
+                teamsList.appendChild(noTeamsMessage);
+            }
+        }
+        
+        // Guardar equipo temporal antes de crear el proyecto
+        function saveTemporaryTeamsToForm() {
+            // Crear inputs ocultos para los equipos temporales
+            const form = document.querySelector('.project-form');
+            
+            console.log('🔍 [saveTemporaryTeamsToForm] INICIANDO - Verificando equipos temporales');
+            console.log('🔍 [saveTemporaryTeamsToForm] temporaryTeams.length = ' + temporaryTeams.length);
+            
+            // OPCIÓN 1: Si hay equipos en el array temporaryTeams (agregados vía modal)
+            if (temporaryTeams.length > 0) {
+                console.log('✅ [saveTemporaryTeamsToForm] RUTA 1: Usando array temporaryTeams');
+                temporaryTeams.forEach((team, index) => {
+                    // Input para el nombre del equipo
+                    const nameInput = document.createElement('input');
+                    nameInput.type = 'hidden';
+                    nameInput.name = 'temporaryTeamName_' + index;
+                    nameInput.value = team.name;
+                    form.appendChild(nameInput);
+                    
+                    // Input para la descripción
+                    const descInput = document.createElement('input');
+                    descInput.type = 'hidden';
+                    descInput.name = 'temporaryTeamDesc_' + index;
+                    descInput.value = team.description;
+                    form.appendChild(descInput);
+                    
+                    // Input para el permiso
+                    const permInput = document.createElement('input');
+                    permInput.type = 'hidden';
+                    permInput.name = 'temporaryTeamPermission_' + index;
+                    permInput.value = team.permission;
+                    form.appendChild(permInput);
+                });
+                
+                const countInput = document.createElement('input');
+                countInput.type = 'hidden';
+                countInput.name = 'temporaryTeamsCount';
+                countInput.value = temporaryTeams.length;
+                form.appendChild(countInput);
+                console.log('✅ [DEBUG] temporaryTeamsCount creado (array) con valor: ' + temporaryTeams.length);
+            } else {
+                console.log('✅ [saveTemporaryTeamsToForm] RUTA 2: Escaneando checkboxes para IDs negativos');
+                
+                // OPCIÓN 2: Contar equipos temporales basándose en los equipoIds negativos (seleccionados en checkboxes)
+                const equipoIdsInputs = document.querySelectorAll('input[name="equipoIds"]');
+                console.log('🔍 [DEBUG] Checkboxes encontrados en el DOM: ' + equipoIdsInputs.length);
+                
+                // También buscar en datalist si existen
+                const allInputs = document.querySelectorAll('input[name="equipoIds"]');
+                console.log('🔍 [DEBUG] Todos los inputs con name="equipoIds": ' + allInputs.length);
+                
+                let temporaryTeamIds = [];
+                let temporaryTeamIndexMap = {};
+                let temporaryTeamIndex = 0;
+                
+                equipoIdsInputs.forEach((input, idx) => {
+                    const isChecked = input.checked;
+                    const value = input.value;
+                    const isNegative = parseInt(value) < 0;
+                    console.log('🔍 [DEBUG] Checkbox ' + idx + ': value=' + value + ', checked=' + isChecked + ', isNegative=' + isNegative + ', type=' + input.type);
+                    
+                    if (isChecked && isNegative) {
+                        console.log('✅ [DEBUG] ⭐ ENCONTRADO equipo temporal SELECCIONADO: ID=' + value);
+                        // Es un equipo temporal (ID negativo)
+                        temporaryTeamIds.push(value);
+                        
+                        // Buscar el nombre y permisos del equipo
+                        const teamItem = document.getElementById('team-item-' + value);
+                        console.log('🔍 [DEBUG] Buscando elemento #team-item-' + value + ' => ' + (teamItem ? 'ENCONTRADO' : 'NO ENCONTRADO'));
+                        
+                        if (teamItem) {
+                            // Crear inputs con el nombre y descripción basados en el checkbox
+                            const nameInput = document.createElement('input');
+                            nameInput.type = 'hidden';
+                            nameInput.name = 'temporaryTeamName_' + temporaryTeamIndex;
+                            
+                            // Extraer el nombre del texto visible del checkbox
+                            const labelText = teamItem.textContent.trim();
+                            nameInput.value = labelText;
+                            form.appendChild(nameInput);
+                            console.log('📝 [DEBUG] Nombre agregado: "' + labelText + '"');
+                            
+                            // Permiso
+                            const permInput = document.createElement('input');
+                            permInput.type = 'hidden';
+                            permInput.name = 'temporaryTeamPermission_' + temporaryTeamIndex;
+                            const permSelect = document.getElementById('privilegioEquipo_' + value);
+                            permInput.value = permSelect ? permSelect.value : 'LECTOR';
+                            form.appendChild(permInput);
+                            console.log('🔐 [DEBUG] Permiso agregado: ' + permInput.value);
+                            
+                            temporaryTeamIndexMap[value] = temporaryTeamIndex;
+                            temporaryTeamIndex++;
+                        } else {
+                            console.log('⚠️ [DEBUG] teamItem NO encontrado, buscando label alternativo');
+                            // Buscar el label asociado al checkbox
+                            const label = document.querySelector('label[for="' + input.id + '"]');
+                            if (label) {
+                                const nameInput = document.createElement('input');
+                                nameInput.type = 'hidden';
+                                nameInput.name = 'temporaryTeamName_' + temporaryTeamIndex;
+                                nameInput.value = label.textContent.trim();
+                                form.appendChild(nameInput);
+                                console.log('📝 [DEBUG] Nombre extraído del label: "' + label.textContent.trim() + '"');
+                                
+                                const permInput = document.createElement('input');
+                                permInput.type = 'hidden';
+                                permInput.name = 'temporaryTeamPermission_' + temporaryTeamIndex;
+                                permInput.value = 'LECTOR';
+                                form.appendChild(permInput);
+                                
+                                temporaryTeamIndex++;
+                            }
+                        }
+                    }
+                });
+                
+                console.log('🔍 [DEBUG] Total de equipos temporales ENCONTRADOS Y SELECCIONADOS: ' + temporaryTeamIds.length);
+                console.log('🔍 [DEBUG] IDs de equipos temporales: ' + temporaryTeamIds.join(', '));
+                
+                if (temporaryTeamIds.length > 0) {
+                    const countInput = document.createElement('input');
+                    countInput.type = 'hidden';
+                    countInput.name = 'temporaryTeamsCount';
+                    countInput.value = temporaryTeamIds.length;
+                    form.appendChild(countInput);
+                    console.log('✅ [DEBUG] ⭐⭐⭐ temporaryTeamsCount CREADO (checkboxes) con valor: ' + temporaryTeamIds.length);
+                    console.log('✅ [DEBUG] Equipos temporales seleccionados: [' + temporaryTeamIds.join(', ') + ']');
+                } else {
+                    console.log('⚠️ [DEBUG] No hay equipos temporales agregados (array vacío y sin checkboxes seleccionados)');
+                    // Aun así crear el contador con valor 0 para que el backend sepa que se procesó
+                    const countInput = document.createElement('input');
+                    countInput.type = 'hidden';
+                    countInput.name = 'temporaryTeamsCount';
+                    countInput.value = 0;
+                    form.appendChild(countInput);
+                    console.log('✅ [DEBUG] temporaryTeamsCount creado (sin selecciones) con valor: 0');
+                }
+            }
+        }
+        
+        // Interceptar el envío del formulario
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ [DOMContentLoaded] DOM listo - Registrando listener del formulario');
+            const form = document.querySelector('.project-form');
+            if (!form) {
+                console.error('❌ [FORM LISTENER] No se encontró el formulario con clase .project-form');
+                return;
+            }
+            
+            form.addEventListener('submit', function(e) {
+                console.log('📤 [FORM SUBMIT] ¡Evento submit disparado! Guardando equipos temporales');
+                saveTemporaryTeamsToForm();
+                console.log('📤 [FORM SUBMIT] Finalizado saveTemporaryTeamsToForm()');
+            });
+            console.log('✅ [FORM LISTENER] Listener registrado correctamente');
+        });
+        
+        // Preview functionality
+        document.getElementById('previewBtn').addEventListener('click', function() {
+            const nombre = document.getElementById('nombreProyecto').value || 'Sin nombre';
+            const descripcion = document.getElementById('descripcionProyecto').value || 'Sin descripción';
+            const visibilidad = document.getElementById('visibilidadProyecto').value;
+            const acceso = document.getElementById('accesoProyecto').value;
+            const categoria = document.getElementById('categoriaId').selectedOptions[0]?.text || '';
+            
+            // Update preview
+            document.getElementById('previewName').textContent = nombre;
+            document.getElementById('previewDescriptionText').textContent = descripcion;
+            document.getElementById('previewAccess').textContent = acceso;
+            
+            // Update visibility badge
+            const visibilityBadge = document.getElementById('previewVisibility');
+            visibilityBadge.textContent = visibilidad === 'PUBLICO' ? 'Público' : 'Privado';
+            visibilityBadge.className = 'badge ' + (visibilidad === 'PUBLICO' ? 'badge-public' : 'badge-private');
+            
+            // Update category
+            const categoryBadge = document.getElementById('previewCategory');
+            if (categoria && categoria !== 'Seleccionar categoría') {
+                categoryBadge.textContent = categoria;
+                categoryBadge.style.display = 'inline-block';
+            } else {
+                categoryBadge.style.display = 'none';
+            }
+            
+            // Show modal
+            document.getElementById('previewModal').classList.add('active');
+        });
+    </script>    <!-- Chatbot Widget -->
+
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+
+</body>
+</html>
+
+
+
+

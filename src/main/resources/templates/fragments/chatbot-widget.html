@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Chatbot Widget Fragment -->
+<div th:fragment="chatbot-widget" th:if="${Usuario != null}">
+    
+    <!-- Cargar librerías ANTES del widget -->
+    <script src="/js/highlight.min.js" 
+            onload="console.log('[CHATBOT] Highlight.js cargado');"
+            onerror="console.error('[CHATBOT] ERROR cargando highlight.min.js');">
+    </script>
+    
+    <script src="/js/marked.min.js" 
+            onload="console.log('[CHATBOT] Marked.js cargado');"
+            onerror="console.error('[CHATBOT] ERROR cargando marked.min.js');">
+    </script>
+    
+    <!-- Botón Flotante (estilo Gemini) -->
+    <button id="chatbot-toggle-btn" class="chatbot-floating-btn" aria-label="Abrir asistente virtual">
+        <svg class="chatbot-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Icono de estrella Gemini -->
+            <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="url(#gemini-gradient)"/>
+            <defs>
+                <linearGradient id="gemini-gradient" x1="2" y1="2" x2="22" y2="22">
+                    <stop offset="0%" style="stop-color:#4285F4"/>
+                    <stop offset="25%" style="stop-color:#9B72CB"/>
+                    <stop offset="50%" style="stop-color:#D96570"/>
+                    <stop offset="75%" style="stop-color:#F2A65A"/>
+                    <stop offset="100%" style="stop-color:#4285F4"/>
+                </linearGradient>
+            </defs>
+        </svg>
+        <span class="chatbot-badge" id="chatbot-badge">0</span>
+    </button>
+
+    <!-- Overlay transparente -->
+    <div id="chatbot-overlay" class="chatbot-overlay"></div>
+
+    <!-- Sidebar Panel del Chatbot -->
+    <div id="chatbot-modal" class="chatbot-modal">
+        <div class="chatbot-container">
+            <!-- Header -->
+            <div class="chatbot-header">
+                <div class="chatbot-header-left">
+                    <div class="chatbot-avatar">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Icono de estrella Gemini -->
+                            <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="url(#gemini-gradient-header)"/>
+                            <defs>
+                                <linearGradient id="gemini-gradient-header" x1="2" y1="2" x2="22" y2="22">
+                                    <stop offset="0%" style="stop-color:#4285F4"/>
+                                    <stop offset="25%" style="stop-color:#9B72CB"/>
+                                    <stop offset="50%" style="stop-color:#D96570"/>
+                                    <stop offset="75%" style="stop-color:#F2A65A"/>
+                                    <stop offset="100%" style="stop-color:#4285F4"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div class="chatbot-header-info">
+                        <h3>Asistente TelDev</h3>
+                        <p class="chatbot-status">
+                            <span class="status-dot"></span>
+                            En línea
+                        </p>
+                    </div>
+                </div>
+                <button id="chatbot-close-btn" class="chatbot-close-btn" aria-label="Cerrar chat">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Mensajes -->
+            <div id="chatbot-messages" class="chatbot-messages">
+                <!-- Mensaje de bienvenida -->
+                <div class="message bot-message">
+                    <div class="message-avatar">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Icono de estrella Gemini -->
+                            <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="url(#gemini-gradient-msg)"/>
+                            <defs>
+                                <linearGradient id="gemini-gradient-msg" x1="2" y1="2" x2="22" y2="22">
+                                    <stop offset="0%" style="stop-color:#4285F4"/>
+                                    <stop offset="25%" style="stop-color:#9B72CB"/>
+                                    <stop offset="50%" style="stop-color:#D96570"/>
+                                    <stop offset="75%" style="stop-color:#F2A65A"/>
+                                    <stop offset="100%" style="stop-color:#4285F4"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div class="message-content">
+                        <p>¡Hola <span th:text="${Usuario.nombreUsuario}">Usuario</span>! 👋</p>
+                        <p>Soy tu asistente virtual de TelDev. Puedo ayudarte con:</p>
+                        <p>• Tus proyectos, repositorios y APIs<br>• Gestión de tickets<br>• Generar código en múltiples lenguajes<br>• Responder preguntas técnicas</p>
+                        <span class="message-time">Ahora</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input -->
+            <div class="chatbot-input-container">
+                <div class="chatbot-input-wrapper">
+                    <textarea 
+                        id="chatbot-input" 
+                        class="chatbot-input" 
+                        placeholder="Escribe tu mensaje..."
+                        rows="1"
+                    ></textarea>
+                    <button id="chatbot-send-btn" class="chatbot-send-btn" aria-label="Enviar mensaje">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+                <div class="chatbot-footer">
+                    <span class="chatbot-powered">Powered by Gemini 2.0 Flash</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estilos del Chatbot -->
+    <style>
+        /* Transición del body cuando chatbot abre */
+        body {
+            transition: margin-right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        body.chatbot-open {
+            margin-right: 420px;
+        }
+        
+        /* Botón Flotante */
+        .chatbot-floating-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 9998;
+        }
+
+        .chatbot-floating-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .chatbot-floating-btn:active {
+            transform: scale(0.95);
+        }
+
+        .chatbot-icon {
+            width: 28px;
+            height: 28px;
+            color: #ffffff;
+        }
+
+        .chatbot-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ef4444;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 10px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            border: 2px solid white;
+        }
+
+        .chatbot-badge.show {
+            display: flex;
+        }
+
+        /* Overlay transparente */
+        .chatbot-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: transparent;
+            z-index: 9998;
+            display: none;
+            pointer-events: none;
+        }
+        
+        .chatbot-overlay.show {
+            display: block;
+            pointer-events: auto;
+        }
+
+        /* Sidebar Panel del Chatbot */
+        .chatbot-modal {
+            position: fixed;
+            top: 0;
+            right: -420px;
+            width: 420px;
+            height: 100vh;
+            background: #ffffff;
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            z-index: 9999;
+            overflow: hidden;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .chatbot-modal.show {
+            right: 0;
+        }
+
+        /* Container */
+        .chatbot-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: #ffffff;
+        }
+
+        /* Header */
+        .chatbot-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background: #1e293b;
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chatbot-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chatbot-avatar {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .chatbot-avatar svg {
+            width: 24px;
+            height: 24px;
+            fill: #1e293b;
+        }
+
+        .chatbot-header-info h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .chatbot-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 4px 0 0 0;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .chatbot-close-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .chatbot-close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Mensajes */
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chatbot-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chatbot-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chatbot-messages::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .message {
+            display: flex;
+            gap: 10px;
+            animation: messageSlide 0.3s ease-out;
+        }
+
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .bot-message .message-avatar {
+            background: #1e293b;
+            color: white;
+        }
+
+        .bot-message .message-avatar svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
+        }
+
+        .user-message {
+            flex-direction: row-reverse;
+        }
+
+        .user-message .message-avatar {
+            background: #3b82f6;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .message-content {
+            max-width: 75%;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .message-content p {
+            margin: 0;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .bot-message .message-content p {
+            background: white;
+            color: #1e293b;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Estilos para contenido Markdown en mensajes del bot */
+        .bot-message .message-content > div {
+            background: white;
+            color: #1e293b;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .bot-message .message-content > div p {
+            padding: 0;
+            background: transparent;
+            box-shadow: none;
+            margin: 8px 0;
+        }
+
+        .bot-message .message-content > div p:first-child {
+            margin-top: 0;
+        }
+
+        .bot-message .message-content > div p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Estilos para bloques de código */
+        .bot-message .message-content pre {
+            background: #282c34;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+            overflow-x: auto;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .bot-message .message-content pre code {
+            background: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: #abb2bf;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* Código inline */
+        .bot-message .message-content code {
+            background: #f1f5f9;
+            color: #e91e63;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        /* Listas */
+        .bot-message .message-content ul,
+        .bot-message .message-content ol {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+
+        .bot-message .message-content li {
+            margin: 4px 0;
+        }
+
+        /* Énfasis */
+        .bot-message .message-content strong {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .bot-message .message-content em {
+            font-style: italic;
+        }
+
+        /* Enlaces */
+        .bot-message .message-content a {
+            color: #3b82f6;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .bot-message .message-content a:hover {
+            border-bottom-color: #3b82f6;
+        }
+
+        .user-message .message-content {
+            align-items: flex-end;
+        }
+
+        .user-message .message-content p {
+            background: #3b82f6;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #94a3b8;
+            padding: 0 4px;
+        }
+
+        .user-message .message-time {
+            text-align: right;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: none;
+            gap: 4px;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 12px;
+            width: fit-content;
+        }
+
+        .typing-indicator.show {
+            display: flex;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #94a3b8;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        /* Input */
+        .chatbot-input-container {
+            border-top: 1px solid #e2e8f0;
+            background: white;
+        }
+
+        .chatbot-input-wrapper {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            padding: 16px;
+        }
+
+        .chatbot-input {
+            flex: 1;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            max-height: 120px;
+            transition: border-color 0.2s;
+            background: #f8fafc;
+        }
+
+        .chatbot-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+        }
+
+        .chatbot-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .chatbot-send-btn {
+            width: 40px;
+            height: 40px;
+            background: #3b82f6;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .chatbot-send-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .chatbot-send-btn:active {
+            transform: translateY(0);
+        }
+
+        .chatbot-send-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .chatbot-footer {
+            padding: 0 16px 12px;
+            text-align: center;
+        }
+
+        .chatbot-powered {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body.chatbot-open {
+                margin-right: 0;
+            }
+            
+            .chatbot-modal {
+                width: 100%;
+                right: -100%;
+            }
+
+            .chatbot-modal.show {
+                right: 0;
+            }
+
+            .chatbot-floating-btn {
+                bottom: 16px;
+                right: 16px;
+            }
+        }
+        
+        /* Soporte para motion reducido */
+        @media (prefers-reduced-motion: reduce) {
+            body,
+            .chatbot-modal,
+            .chatbot-overlay {
+                transition: none;
+            }
+        }
+    </style>
+
+    <!-- JavaScript del Chatbot -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const chatbotConfig = {
+            apiUrl: 'https://chatbot-vertex-532585334983.us-central1.run.app',
+            userId: [[${Usuario.usuarioId}]],
+            userName: [[${Usuario.nombreUsuario}]],
+            userInitials: [[${Usuario.nombreUsuario != null ? Usuario.nombreUsuario.substring(0, 1).toUpperCase() : 'U'}]]
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Esperar a que las librerías se carguen (pueden venir de CDN o local)
+            let attempts = 0;
+            const maxAttempts = 100; // 100 intentos x 100ms = 10 segundos
+            
+            const checkLibraries = setInterval(function() {
+                attempts++;
+                
+                if (typeof marked !== 'undefined' && typeof hljs !== 'undefined') {
+                    clearInterval(checkLibraries);
+                    console.log('✅ Librerías cargadas después de', attempts * 100, 'ms');
+                    initChatbot();
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(checkLibraries);
+                    console.error('❌ Timeout: Las librerías no se cargaron después de 10 segundos');
+                    console.log('marked:', typeof marked, 'hljs:', typeof hljs);
+                    initChatbot(); // Iniciar de todos modos
+                }
+            }, 100);
+            
+            function initChatbot() {
+                const toggleBtn = document.getElementById('chatbot-toggle-btn');
+                const closeBtn = document.getElementById('chatbot-close-btn');
+                const modal = document.getElementById('chatbot-modal');
+                const overlay = document.getElementById('chatbot-overlay');
+                const sendBtn = document.getElementById('chatbot-send-btn');
+                const input = document.getElementById('chatbot-input');
+                const messagesContainer = document.getElementById('chatbot-messages');
+
+                let sessionId = `session_${chatbotConfig.userId}_${Date.now()}`;
+
+            // Abrir chatbot
+            function openChatbot() {
+                modal.classList.add('show');
+                overlay.classList.add('show');
+                document.body.classList.add('chatbot-open');
+                input.focus();
+            }
+
+            // Cerrar chatbot
+            function closeChatbot() {
+                modal.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.classList.remove('chatbot-open');
+            }
+
+            // Toggle modal
+            toggleBtn.addEventListener('click', () => {
+                if (modal.classList.contains('show')) {
+                    closeChatbot();
+                } else {
+                    openChatbot();
+                }
+            });
+
+            closeBtn.addEventListener('click', closeChatbot);
+            overlay.addEventListener('click', closeChatbot);
+
+            // Auto-resize textarea
+            input.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+
+            // Send message on Enter
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            sendBtn.addEventListener('click', sendMessage);
+
+            function sendMessage() {
+                const message = input.value.trim();
+                if (!message) return;
+
+                // Add user message
+                addMessage(message, true);
+                input.value = '';
+                input.style.height = 'auto';
+
+                // Show typing indicator
+                showTypingIndicator();
+
+                // Send to API
+                fetch(`${chatbotConfig.apiUrl}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        userId: chatbotConfig.userId,
+                        sessionId: sessionId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideTypingIndicator();
+                    if (data.success && data.response) {
+                        addMessage(data.response, false);
+                        sessionId = data.sessionId || sessionId;
+                    } else {
+                        addMessage('Lo siento, hubo un error. Por favor intenta de nuevo.', false);
+                    }
+                })
+                .catch(error => {
+                    hideTypingIndicator();
+                    console.error('Error:', error);
+                    addMessage('No pude conectarme al servidor. Verifica tu conexión.', false);
+                });
+            }
+
+            function addMessage(text, isUser) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+
+                const avatar = document.createElement('div');
+                avatar.className = 'message-avatar';
+                
+                if (isUser) {
+                    avatar.textContent = chatbotConfig.userInitials;
+                } else {
+                    avatar.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="7" y="6" width="10" height="12" rx="2" fill="currentColor"/>
+                            <circle cx="9.5" cy="10" r="1" fill="white"/>
+                            <circle cx="14.5" cy="10" r="1" fill="white"/>
+                        </svg>
+                    `;
+                }
+
+                const content = document.createElement('div');
+                content.className = 'message-content';
+
+                const textContainer = document.createElement('div');
+                
+                // Si es mensaje del bot, procesar Markdown con código
+                if (!isUser && typeof marked !== 'undefined' && typeof hljs !== 'undefined') {
+                    // Configurar marked para usar highlight.js
+                    marked.setOptions({
+                        highlight: function(code, lang) {
+                            if (lang && hljs.getLanguage(lang)) {
+                                try {
+                                    return hljs.highlight(code, { language: lang }).value;
+                                } catch (err) {
+                                    console.error('Error highlighting code:', err);
+                                }
+                            }
+                            return hljs.highlightAuto(code).value;
+                        },
+                        breaks: true,
+                        gfm: true
+                    });
+                    
+                    try {
+                        textContainer.innerHTML = marked.parse(text);
+                        console.log('✅ Markdown procesado correctamente');
+                        
+                        // Agregar botón de copiar a cada bloque de código
+                        const codeBlocks = textContainer.querySelectorAll('pre');
+                        codeBlocks.forEach(function(pre) {
+                            // Crear contenedor wrapper
+                            const wrapper = document.createElement('div');
+                            wrapper.style.position = 'relative';
+                            wrapper.style.marginBottom = '1rem';
+                            
+                            // Crear botón de copiar
+                            const copyBtn = document.createElement('button');
+                            copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copiar';
+                            copyBtn.className = 'code-copy-btn';
+                            copyBtn.style.cssText = 'position: absolute; top: 8px; right: 8px; background: #4285F4; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; z-index: 10;';
+                            
+                            copyBtn.addEventListener('click', function() {
+                                const code = pre.querySelector('code');
+                                const textToCopy = code ? code.textContent : pre.textContent;
+                                
+                                navigator.clipboard.writeText(textToCopy).then(function() {
+                                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Copiado';
+                                    copyBtn.style.background = '#1a7f37';
+                                    setTimeout(function() {
+                                        copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copiar';
+                                        copyBtn.style.background = '#4285F4';
+                                    }, 2000);
+                                }).catch(function(err) {
+                                    console.error('Error al copiar:', err);
+                                    copyBtn.innerHTML = '<i class="fas fa-times"></i> Error';
+                                    copyBtn.style.background = '#d1242f';
+                                    setTimeout(function() {
+                                        copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copiar';
+                                        copyBtn.style.background = '#4285F4';
+                                    }, 2000);
+                                });
+                            });
+                            
+                            // Reemplazar pre con wrapper que contiene pre + botón
+                            pre.parentNode.insertBefore(wrapper, pre);
+                            wrapper.appendChild(pre);
+                            wrapper.appendChild(copyBtn);
+                        });
+                    } catch (err) {
+                        console.error('Error al procesar Markdown:', err);
+                        // Fallback: mostrar texto simple
+                        const textP = document.createElement('p');
+                        textP.textContent = text;
+                        textContainer.appendChild(textP);
+                    }
+                } else {
+                    // Mensaje simple del usuario o librerías no disponibles
+                    if (!isUser) {
+                        console.warn('⚠️ Librerías Marked.js o Highlight.js no disponibles');
+                        console.log('marked:', typeof marked, 'hljs:', typeof hljs);
+                    }
+                    const textP = document.createElement('p');
+                    textP.textContent = text;
+                    textContainer.appendChild(textP);
+                }
+
+                const time = document.createElement('span');
+                time.className = 'message-time';
+                time.textContent = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+                content.appendChild(textContainer);
+                content.appendChild(time);
+
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(content);
+
+                // Remove typing indicator if exists
+                const typingIndicator = messagesContainer.querySelector('.typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            function showTypingIndicator() {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message bot-message';
+
+                const avatar = document.createElement('div');
+                avatar.className = 'message-avatar';
+                avatar.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="7" y="6" width="10" height="12" rx="2" fill="currentColor"/>
+                        <circle cx="9.5" cy="10" r="1" fill="white"/>
+                        <circle cx="14.5" cy="10" r="1" fill="white"/>
+                    </svg>
+                `;
+
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'typing-indicator show';
+                typingDiv.innerHTML = `
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                `;
+
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(typingDiv);
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            function hideTypingIndicator() {
+                const typingIndicator = messagesContainer.querySelector('.message:has(.typing-indicator)');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
+            
+            // Verificar que las librerías se cargaron correctamente
+            console.log('🤖 Chatbot TelDev inicializado');
+            console.log('📚 Librerías cargadas:');
+            console.log('  - Marked.js:', typeof marked !== 'undefined' ? '✅' : '❌');
+            console.log('  - Highlight.js:', typeof hljs !== 'undefined' ? '✅' : '❌');
+            
+            if (typeof marked === 'undefined' || typeof hljs === 'undefined') {
+                console.error('⚠️ ADVERTENCIA: Las librerías de código no se cargaron. El código no se mostrará formateado.');
+                console.log('Verifica tu conexión a internet y recarga la página.');
+            }
+            
+            } // Fin de initChatbot()
+        });
+        /*]]>*/
+    </script>
+</div>
+
+</body>
+</html>

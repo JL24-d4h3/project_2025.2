@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Logs</title>
+    <style>
+        .btn { padding: 5px 10px; margin: 5px; border: 1px solid #ccc; background: #f8f9fa; cursor: pointer; }
+        .btn-outline-danger { border-color: #dc3545; color: #dc3545; }
+        .btn-outline-secondary { border-color: #6c757d; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <h1>Test de Logs para Botones</h1>
+    
+    <table id="usersTable">
+        <tbody>
+            <tr>
+                <td>Usuario Test</td>
+                <td>test@example.com</td>
+                <td>
+                    <button type="button" class="btn btn-outline-secondary btn-sm toggle-status-btn" 
+                            data-user-id="123"
+                            data-current-status="HABILITADO"
+                            title="Desactivar">
+                        Toggle
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm delete-user-btn" 
+                            data-user-id="123"
+                            data-user-name="Usuario Test"
+                            title="Eliminar">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        const baseUrl = '/devportal/po/testuser/platform-user-management';
+        
+        // Funciones copiadas del archivo original
+        function showDeleteConfirmation(userId, userName) {
+            console.log('=== SHOW DELETE CONFIRMATION INICIADO ===');
+            console.log('📋 Parámetros recibidos:', { userId, userName, userIdType: typeof userId });
+            
+            if (!userId) {
+                console.error('❌ ERROR: userId está vacío o undefined en showDeleteConfirmation');
+                alert('Error: No se puede eliminar - ID de usuario no válido');
+                return;
+            }
+            
+            const confirmMessage = `¿Estás seguro de que quieres eliminar al usuario "${userName}"? Esta acción no se puede deshacer.`;
+            console.log('💬 Mensaje de confirmación:', confirmMessage);
+            
+            if (confirm(confirmMessage)) {
+                console.log('✅ Usuario confirmó en showDeleteConfirmation, llamando deleteUser...');
+                deleteUser(userId);
+            } else {
+                console.log('❌ Usuario canceló la eliminación');
+            }
+        }
+        
+        function deleteUser(userId) {
+            console.log('=== DELETE USER INICIADO ===');
+            console.log('📋 Parámetros recibidos:', { userId, type: typeof userId });
+            alert('DELETE USER CALLED con userId: ' + userId);
+        }
+        
+        function toggleUserStatus(userId, currentStatus) {
+            console.log('=== TOGGLE USER STATUS INICIADO ===');
+            console.log('📋 Parámetros recibidos:', { userId, currentStatus, type: typeof userId });
+            alert('TOGGLE USER STATUS CALLED con userId: ' + userId + ', status: ' + currentStatus);
+        }
+
+        function setupButtonEventListeners() {
+            console.log('=== setupButtonEventListeners inicializado ===');
+            
+            document.addEventListener('click', function(e) {
+                console.log('🖱️ Click detectado en:', e.target);
+                console.log('🖱️ Elemento clickeado:', e.target.tagName, e.target.className);
+                
+                if (e.target.closest('.toggle-status-btn')) {
+                    console.log('✅ Toggle button clicked detectado');
+                    const btn = e.target.closest('.toggle-status-btn');
+                    const userId = btn.getAttribute('data-user-id');
+                    const currentStatus = btn.getAttribute('data-current-status');
+                    console.log('Toggle button data:', { userId, currentStatus });
+                    toggleUserStatus(userId, currentStatus);
+                    return;
+                }
+                
+                const deleteBtn = e.target.closest('.delete-user-btn');
+                if (deleteBtn) {
+                    console.log('🗑️ Delete button clicked detectado');
+                    console.log('🗑️ Delete button element:', deleteBtn);
+                    const userId = deleteBtn.getAttribute('data-user-id');
+                    const userName = deleteBtn.getAttribute('data-user-name') || 'Usuario';
+                    console.log('Delete button data:', { userId, userName });
+                    showDeleteConfirmation(userId, userName);
+                    return;
+                }
+                
+                if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                    const button = e.target.tagName === 'BUTTON' ? e.target : e.target.closest('button');
+                    console.log('🔴 Click en botón no manejado:', {
+                        element: button,
+                        classes: button.className,
+                        innerHTML: button.innerHTML,
+                        attributes: Array.from(button.attributes).map(attr => `${attr.name}="${attr.value}"`)
+                    });
+                }
+            });
+            
+            console.log('=== Event listeners configurados ===');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 === PÁGINA CARGADA - INICIALIZANDO SISTEMA ===');
+            console.log('🌐 Base URL:', baseUrl);
+            console.log('📄 Tabla de usuarios:', document.querySelector('#usersTable'));
+            console.log('🔘 Botones delete encontrados:', document.querySelectorAll('.delete-user-btn').length);
+            console.log('🔘 Botones toggle encontrados:', document.querySelectorAll('.toggle-status-btn').length);
+            
+            setupButtonEventListeners();
+            
+            console.log('✅ Inicialización completada');
+        });
+    </script>
+</body>
+</html>

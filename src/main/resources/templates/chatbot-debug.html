@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Debug Chatbot Variables</title>
+</head>
+<body>
+    <h1>DEBUG: Variables de Thymeleaf</h1>
+    
+    <table border="1">
+        <tr>
+            <th>Variable</th>
+            <th>Valor</th>
+        </tr>
+        <tr>
+            <td>username</td>
+            <td th:text="${username}">N/A</td>
+        </tr>
+        <tr>
+            <td>email</td>
+            <td th:text="${email}">N/A</td>
+        </tr>
+        <tr>
+            <td>nombreCompleto</td>
+            <td th:text="${nombreCompleto}">N/A</td>
+        </tr>
+        <tr>
+            <td>rol</td>
+            <td th:text="${rol}">N/A</td>
+        </tr>
+        <tr>
+            <td>usuario.usuarioId</td>
+            <td th:text="${usuario != null ? usuario.usuarioId : 'NULL'}">N/A</td>
+        </tr>
+        <tr>
+            <td>usuario.correo</td>
+            <td th:text="${usuario != null ? usuario.correo : 'NULL'}">N/A</td>
+        </tr>
+        <tr>
+            <td>usuario.nombreUsuario</td>
+            <td th:text="${usuario != null ? usuario.nombreUsuario : 'NULL'}">N/A</td>
+        </tr>
+    </table>
+    
+    <hr>
+    
+    <h2>Test JavaScript inline</h2>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var username = [[${username}]];
+        var email = [[${email}]];
+        var userId = [[${usuario.usuarioId}]];
+        
+        console.log('Username:', username);
+        console.log('Email:', email);
+        console.log('UserId:', userId);
+        
+        document.write('<p>Username JS: ' + username + '</p>');
+        document.write('<p>Email JS: ' + email + '</p>');
+        document.write('<p>UserId JS: ' + userId + '</p>');
+        /*]]>*/
+    </script>
+</body>
+</html>

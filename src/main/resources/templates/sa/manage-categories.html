@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Categorías - Superadmin Portal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Navbar CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-dark: #212529;
+            --text-muted: #6c757d;
+            --border-color: #e9ecef;
+            --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            --shadow-hover: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            background-color: var(--background-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-dark);
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .header-section {
+            background: var(--card-background);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .header-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle {
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .type-selector {
+            background: var(--card-background);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .type-tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .type-tab {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--border-color);
+            background: white;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .type-tab:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .type-tab.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-background);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .categories-section {
+            background: var(--card-background);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-new {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-new:hover {
+            background: #218838;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .categories-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .category-card {
+            background: var(--background-color);
+            border-radius: 0.375rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .category-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .category-id {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--border-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+        }
+
+        .category-description {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .category-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            color: #1976d2;
+            border: 1px solid #90caf9;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-edit:hover {
+            background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+            color: #0d47a1;
+            border-color: #64b5f6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+        }
+
+        .btn-edit:active {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(25, 118, 210, 0.2);
+        }
+
+        .btn-edit:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+        }
+
+        .btn-delete {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .modal-content {
+            border: none;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            border-color: var(--secondary-color);
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+        }
+
+        .back-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        /* Estilos de paginación */
+        .pagination-info {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .page-item {
+            display: flex;
+        }
+
+        .page-link {
+            color: var(--text-muted);
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 0.75rem;
+            text-decoration: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 2.5rem;
+        }
+
+        .page-link:hover {
+            color: var(--primary-color);
+            background: #e3f2fd;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+
+        .page-item.active .page-link {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .page-item.disabled .page-link {
+            color: var(--text-muted);
+            background: var(--background-color);
+            border-color: var(--border-color);
+            cursor: not-allowed;
+        }
+
+        .page-item.disabled .page-link:hover {
+            transform: none;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-radius: 0.25rem;
+            background: var(--info-color);
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem 0.5rem;
+            }
+            
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-title {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+            
+            .type-tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar SA -->
+    <div th:replace="~{fragments/navbar-sa :: navbar-sa}"></div>
+
+    <!-- Banner de Impersonación -->
+    <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header-section">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="header-title">
+                    <i class="fas fa-tags"></i> Gestionar Categorías
+                </h1>
+                <a th:href="@{'/devportal/sa/' + ${usuario.username} + '/dashboard'}" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Volver al Panel
+                </a>
+            </div>
+            <p class="header-subtitle">Administra las categorías del sistema por tipo de entidad</p>
+        </div>
+
+        <!-- Type Selector -->
+        <div class="type-selector">
+            <h6 class="mb-3">Seleccionar Vista de Categorías:</h6>
+            <div class="type-tabs">
+                <a th:href="@{/devportal/sa/{username}/manage-categories(username=${usuario.username}, seccion='TODAS')}" 
+                   class="type-tab" 
+                   th:classappend="${seccionActual == 'TODAS'} ? 'active' : ''">
+                    <i class="fas fa-list"></i> Todas las Categorías
+                </a>
+                <a th:href="@{/devportal/sa/{username}/manage-categories(username=${usuario.username}, seccion='APIS')}" 
+                   class="type-tab" 
+                   th:classappend="${seccionActual == 'APIS'} ? 'active' : ''">
+                    <i class="fas fa-code"></i> APIs
+                </a>
+                <a th:href="@{/devportal/sa/{username}/manage-categories(username=${usuario.username}, seccion='PROYECTOS')}" 
+                   class="type-tab" 
+                   th:classappend="${seccionActual == 'PROYECTOS'} ? 'active' : ''">
+                    <i class="fas fa-project-diagram"></i> Proyectos
+                </a>
+                <a th:href="@{/devportal/sa/{username}/manage-categories(username=${usuario.username}, seccion='REPOSITORIOS')}" 
+                   class="type-tab" 
+                   th:classappend="${seccionActual == 'REPOSITORIOS'} ? 'active' : ''">
+                    <i class="fas fa-code-branch"></i> Repositorios
+                </a>
+                <a th:href="@{/devportal/sa/{username}/manage-categories(username=${usuario.username}, seccion='FORO')}" 
+                   class="type-tab" 
+                   th:classappend="${seccionActual == 'FORO'} ? 'active' : ''">
+                    <i class="fas fa-comments"></i> Foro
+                </a>
+                <a th:href="@{/devportal/sa/{username}/manage-categories(username=${usuario.username}, seccion='OTRO')}" 
+                   class="type-tab" 
+                   th:classappend="${seccionActual == 'OTRO'} ? 'active' : ''">
+                    <i class="fas fa-ellipsis-h"></i> Otros
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-section">
+            <div class="stat-card">
+                <div class="stat-icon" style="color: var(--primary-color);">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <h3 class="stat-number" th:text="${estadisticas != null ? estadisticas.totalCategorias : 0}">0</h3>
+                <p class="stat-label" th:if="${seccionActual == 'TODAS'}">Total de Categorías</p>
+                <p class="stat-label" th:if="${seccionActual != 'TODAS'}">Categorías de <span th:text="${seccionActual}">Sección</span></p>
+            </div>
+            
+            <div class="stat-card" th:if="${seccionActual != 'TODAS'}">
+                <div class="stat-icon" style="color: var(--info-color);">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <h3 class="stat-number" th:text="${estadisticas != null ? estadisticas.totalEntidades : 0}">0</h3>
+                <p class="stat-label">Total <span th:text="${seccionActual}">Entidades</span></p>
+            </div>
+            
+            <div class="stat-card" th:if="${seccionActual != 'TODAS'}">
+                <div class="stat-icon" style="color: var(--success-color);">
+                    <i class="fas fa-link"></i>
+                </div>
+                <h3 class="stat-number" th:text="${estadisticas != null ? estadisticas.entidadesCategorizadas : 0}">0</h3>
+                <p class="stat-label"><span th:text="${seccionActual}">Entidades</span> Categorizadas</p>
+            </div>
+            
+            <div class="stat-card" th:if="${seccionActual != 'TODAS'}">
+                <div class="stat-icon" style="color: var(--warning-color);">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <h3 class="stat-number" th:text="${estadisticas != null and estadisticas.totalEntidades > 0 ? 
+                    T(java.lang.Math).round((estadisticas.entidadesCategorizadas * 100.0) / estadisticas.totalEntidades) + '%' : '0%'}">0%</h3>
+                <p class="stat-label">Cobertura de Categorización</p>
+            </div>
+            
+            <!-- Estadísticas para vista "TODAS" -->
+            <div class="stat-card" th:if="${seccionActual == 'TODAS'}">
+                <div class="stat-icon" style="color: var(--success-color);">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h3 class="stat-number">
+                    <span th:with="apiStats=${@categoriaService.getEstadisticasPorSeccion('APIS')}" 
+                          th:text="${apiStats != null ? apiStats.totalCategorias : 0}">0</span>
+                </h3>
+                <p class="stat-label">Categorías de APIs</p>
+            </div>
+            
+            <div class="stat-card" th:if="${seccionActual == 'TODAS'}">
+                <div class="stat-icon" style="color: var(--info-color);">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <h3 class="stat-number">
+                    <span th:with="proyectoStats=${@categoriaService.getEstadisticasPorSeccion('PROYECTOS')}" 
+                          th:text="${proyectoStats != null ? proyectoStats.totalCategorias : 0}">0</span>
+                </h3>
+                <p class="stat-label">Categorías de Proyectos</p>
+            </div>
+            
+            <div class="stat-card" th:if="${seccionActual == 'TODAS'}">
+                <div class="stat-icon" style="color: var(--warning-color);">
+                    <i class="fas fa-code-branch"></i>
+                </div>
+                <h3 class="stat-number">
+                    <span th:with="repoStats=${@categoriaService.getEstadisticasPorSeccion('REPOSITORIOS')}" 
+                          th:text="${repoStats != null ? repoStats.totalCategorias : 0}">0</span>
+                </h3>
+                <p class="stat-label">Categorías de Repositorios</p>
+            </div>
+            
+            <div class="stat-card" th:if="${seccionActual == 'TODAS'}">
+                <div class="stat-icon" style="color: var(--secondary-color);">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <h3 class="stat-number">
+                    <span th:with="foroStats=${@categoriaService.getEstadisticasPorSeccion('FORO')}" 
+                          th:text="${foroStats != null ? foroStats.totalCategorias : 0}">0</span>
+                </h3>
+                <p class="stat-label">Categorías del Foro</p>
+            </div>
+        </div>
+
+        <!-- Categories Section -->
+        <div class="categories-section">
+            <div class="section-title">
+                <span th:if="${seccionActual == 'TODAS'}">
+                    <i class="fas fa-list"></i> Todas las Categorías del Sistema
+                </span>
+                <span th:if="${seccionActual != 'TODAS'}">
+                    <i class="fas fa-list"></i> Categorías de <span th:text="${seccionActual}">Sección</span>
+                </span>
+                <button class="btn-new" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+                    <i class="fas fa-plus"></i> Nueva Categoría
+                </button>
+            </div>
+            
+            <div th:if="${categorias == null or #lists.isEmpty(categorias)}" class="empty-state">
+                <i class="fas fa-tags empty-icon"></i>
+                <h5 th:if="${seccionActual == 'TODAS'}">No hay categorías registradas</h5>
+                <h5 th:if="${seccionActual != 'TODAS'}">No hay categorías de <span th:text="${seccionActual}">esta sección</span></h5>
+                <p th:if="${seccionActual == 'TODAS'}">Crea la primera categoría del sistema.</p>
+                <p th:if="${seccionActual != 'TODAS'}">Las categorías aparecerán aquí cuando se creen para <span th:text="${seccionActual.toLowerCase()}">esta sección</span>.</p>
+            </div>
+            
+            <div th:if="${categorias != null and not #lists.isEmpty(categorias)}" class="categories-grid" id="categoriesGrid">
+                <div th:each="categoria : ${categorias}" class="category-card">
+                    <div class="category-header">
+                        <div>
+                            <div class="type-badge" th:text="${categoria.seccionCategoria ?: 'SIN SECCIÓN'}">PROYECTOS</div>
+                            <h5 class="category-name" th:text="${categoria.nombreCategoria}">Nombre de la Categoría</h5>
+                        </div>
+                        <span class="category-id" th:text="'ID: ' + ${categoria.idCategoria}">ID: 1</span>
+                    </div>
+                    
+                    <p class="category-description" th:text="${categoria.descripcionCategoria}">
+                        Descripción de la categoría que explica su propósito y uso dentro del sistema.
+                    </p>
+                    
+                    <div class="category-actions">
+                        <button class="btn-edit edit-btn" 
+                                th:data-id="${categoria.idCategoria}"
+                                th:data-nombre="${categoria.nombreCategoria}"
+                                th:data-descripcion="${categoria.descripcionCategoria}"
+                                th:data-seccion="${categoria.seccionCategoria}">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn-delete delete-btn" 
+                                th:data-id="${categoria.idCategoria}"
+                                th:data-nombre="${categoria.nombreCategoria}">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Paginación -->
+            <div class="pagination-section" id="paginationSection" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center p-3 mt-3" style="background: var(--background-color); border-radius: 0.375rem; border: 1px solid var(--border-color);">
+                    <div class="pagination-info" id="paginationInfo">
+                        Mostrando 1-10 de 25 categorías
+                    </div>
+                    <nav aria-label="Navegación de páginas">
+                        <ul class="pagination mb-0" id="paginationControls">
+                            <!-- Controles de paginación se generan dinámicamente -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Crear Categoría -->
+    <div class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="createCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createCategoryModalLabel">
+                        <i class="fas fa-plus"></i> Crear Nueva Categoría
+                        <span th:if="${seccionActual != 'TODAS'}" th:text="'para ' + ${seccionActual}">para Sección</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createCategoryForm">
+                        <div class="mb-3">
+                            <label for="createNombreCategoria" class="form-label">Nombre de la Categoría</label>
+                            <input type="text" class="form-control" id="createNombreCategoria" name="nombreCategoria" 
+                                   th:placeholder="${seccionActual == 'TODAS' ? 'Ej: Pagos, Desarrollo Web, Backend...' :
+                                                    seccionActual == 'APIS' ? 'Ej: APIs de Pagos, APIs de Notificaciones...' : 
+                                                    seccionActual == 'PROYECTOS' ? 'Ej: Desarrollo Web, Aplicaciones Móviles...' :
+                                                    seccionActual == 'REPOSITORIOS' ? 'Ej: Backend, Frontend, DevOps...' :
+                                                    seccionActual == 'FORO' ? 'Ej: Ayuda, Discusiones, Anuncios...' :
+                                                    'Ej: General, Sistema, Otros...'}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="createDescripcionCategoria" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="createDescripcionCategoria" name="descripcionCategoria" 
+                                      rows="3" th:placeholder="${seccionActual == 'TODAS' ? 'Describe el propósito de esta categoría...' :
+                                                    seccionActual == 'APIS' ? 'Describe el propósito de esta categoría para APIs...' :
+                                                    seccionActual == 'PROYECTOS' ? 'Describe el propósito de esta categoría para proyectos...' :
+                                                    seccionActual == 'REPOSITORIOS' ? 'Describe el propósito de esta categoría para repositorios...' :
+                                                    seccionActual == 'FORO' ? 'Describe el propósito de esta categoría para el foro...' :
+                                                    'Describe el propósito de esta categoría...'}" required></textarea>
+                        </div>
+                        <div class="mb-3" th:if="${seccionActual == 'TODAS'}">
+                            <label for="createSeccionCategoria" class="form-label">Sección de la Categoría</label>
+                            <select class="form-control" id="createSeccionCategoria" name="seccionCategoria" required>
+                                <option value="">Seleccionar sección...</option>
+                                <option value="APIS">APIs</option>
+                                <option value="PROYECTOS">Proyectos</option>
+                                <option value="REPOSITORIOS">Repositorios</option>
+                                <option value="FORO">Foro</option>
+                                <option value="OTRO">Otros</option>
+                            </select>
+                        </div>
+                        <input type="hidden" name="seccionCategoria" th:if="${seccionActual != 'TODAS'}" th:value="${seccionActual}">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="createCategory()">
+                        <i class="fas fa-save"></i> Crear Categoría
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Categoría -->
+    <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCategoryModalLabel">
+                        <i class="fas fa-edit"></i> Editar Categoría
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editCategoryForm">
+                        <input type="hidden" id="editCategoriaId" name="categoriaId">
+                        <div class="mb-3">
+                            <label for="editNombreCategoria" class="form-label">Nombre de la Categoría</label>
+                            <input type="text" class="form-control" id="editNombreCategoria" name="nombreCategoria" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDescripcionCategoria" class="form-label">Descripción</label>
+                            <textarea class="form-control" id="editDescripcionCategoria" name="descripcionCategoria" 
+                                      rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editSeccionCategoria" class="form-label">Sección de la Categoría</label>
+                            <select class="form-control" id="editSeccionCategoria" name="seccionCategoria" required>
+                                <option value="APIS">APIs</option>
+                                <option value="PROYECTOS">Proyectos</option>
+                                <option value="REPOSITORIOS">Repositorios</option>
+                                <option value="FORO">Foro</option>
+                                <option value="OTRO">Otros</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="updateCategory()">
+                        <i class="fas fa-save"></i> Actualizar Categoría
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script th:inline="javascript">
+        const seccionActual = /*[[${seccionActual}]]*/ 'PROYECTOS';
+        
+        let allCategories = [];
+        let currentPage = 1;
+        const categoriesPerPage = 10;
+
+        // Initialize pagination on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCategories();
+            setupEventListeners();
+            setupEditDeleteButtons();
+        });
+
+        function loadCategories() {
+            const categoryCards = document.querySelectorAll('.category-card');
+            allCategories = Array.from(categoryCards);
+            updateDisplayAndPagination();
+        }
+
+        function setupEventListeners() {
+            // Configurar listener para botones de paginación
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.page-link')) {
+                    e.preventDefault();
+                    const page = parseInt(e.target.getAttribute('data-page'));
+                    if (page && page !== currentPage) {
+                        currentPage = page;
+                        updateDisplayAndPagination();
+                    }
+                }
+            });
+        }
+
+        function updateDisplayAndPagination() {
+            // Ocultar todas las categorías
+            allCategories.forEach(category => {
+                category.style.display = 'none';
+            });
+            
+            // Calcular paginación
+            const totalPages = Math.ceil(allCategories.length / categoriesPerPage);
+            const startIndex = (currentPage - 1) * categoriesPerPage;
+            const endIndex = startIndex + categoriesPerPage;
+            const categoriesToShow = allCategories.slice(startIndex, endIndex);
+            
+            // Mostrar categorías de la página actual
+            categoriesToShow.forEach(category => {
+                category.style.display = 'block';
+            });
+            
+            // Actualizar información de paginación
+            const showingStart = allCategories.length > 0 ? startIndex + 1 : 0;
+            const showingEnd = Math.min(endIndex, allCategories.length);
+            document.getElementById('paginationInfo').textContent = 
+                `Mostrando ${showingStart}-${showingEnd} de ${allCategories.length} categorías`;
+            
+            // Generar controles de paginación
+            generatePaginationControls(totalPages);
+            
+            // Mostrar/ocultar sección de paginación
+            const paginationSection = document.getElementById('paginationSection');
+            if (allCategories.length > categoriesPerPage) {
+                paginationSection.style.display = 'block';
+            } else {
+                paginationSection.style.display = 'none';
+            }
+        }
+
+        function generatePaginationControls(totalPages) {
+            const paginationContainer = document.getElementById('paginationControls');
+            paginationContainer.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // Botón anterior
+            const prevDisabled = currentPage === 1 ? 'disabled' : '';
+            paginationContainer.innerHTML += `
+                <li class="page-item ${prevDisabled}">
+                    <a class="page-link" href="#" data-page="${currentPage - 1}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+            `;
+            
+            // Páginas numeradas
+            const maxVisible = 5;
+            let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let end = Math.min(totalPages, start + maxVisible - 1);
+            
+            if (end - start + 1 < maxVisible) {
+                start = Math.max(1, end - maxVisible + 1);
+            }
+            
+            if (start > 1) {
+                paginationContainer.innerHTML += `
+                    <li class="page-item">
+                        <a class="page-link" href="#" data-page="1">1</a>
+                    </li>
+                `;
+                if (start > 2) {
+                    paginationContainer.innerHTML += `
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    `;
+                }
+            }
+            
+            for (let i = start; i <= end; i++) {
+                const activeClass = i === currentPage ? 'active' : '';
+                paginationContainer.innerHTML += `
+                    <li class="page-item ${activeClass}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `;
+            }
+            
+            if (end < totalPages) {
+                if (end < totalPages - 1) {
+                    paginationContainer.innerHTML += `
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    `;
+                }
+                paginationContainer.innerHTML += `
+                    <li class="page-item">
+                        <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
+                    </li>
+                `;
+            }
+            
+            // Botón siguiente
+            const nextDisabled = currentPage === totalPages ? 'disabled' : '';
+            paginationContainer.innerHTML += `
+                <li class="page-item ${nextDisabled}">
+                    <a class="page-link" href="#" data-page="${currentPage + 1}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            `;
+        }
+
+        function setupEditDeleteButtons() {
+            // Event listeners para botones de editar y eliminar
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const nombre = this.getAttribute('data-nombre');
+                    const descripcion = this.getAttribute('data-descripcion');
+                    const seccion = this.getAttribute('data-seccion');
+                    editCategory(id, nombre, descripcion, seccion);
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const nombre = this.getAttribute('data-nombre');
+                    deleteCategory(id, nombre);
+                });
+            });
+        }
+        
+        // Función para crear una nueva categoría
+        function createCategory() {
+            const form = document.getElementById('createCategoryForm');
+            const formData = new FormData(form);
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            fetch('/devportal/sa/crear-categoria', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: data.message,
+                        confirmButtonColor: '#007bff'
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message,
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Ha ocurrido un error inesperado',
+                    confirmButtonColor: '#dc3545'
+                });
+            });
+        }
+        
+        // Función para abrir el modal de edición
+        function editCategory(id, nombre, descripcion, seccion) {
+            document.getElementById('editCategoriaId').value = id;
+            document.getElementById('editNombreCategoria').value = nombre;
+            document.getElementById('editDescripcionCategoria').value = descripcion;
+            document.getElementById('editSeccionCategoria').value = seccion || 'OTRO';
+            
+            const modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+            modal.show();
+        }
+        
+        // Función para actualizar una categoría
+        function updateCategory() {
+            const form = document.getElementById('editCategoryForm');
+            const formData = new FormData(form);
+            const id = document.getElementById('editCategoriaId').value;
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            fetch(`/devportal/sa/editar-categoria/${id}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: data.message,
+                        confirmButtonColor: '#007bff'
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message,
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Ha ocurrido un error inesperado',
+                    confirmButtonColor: '#dc3545'
+                });
+            });
+        }
+        
+        // Función para eliminar una categoría
+        function deleteCategory(id, nombre) {
+            const seccionTexto = seccionActual === 'TODAS' ? '' : ` de ${seccionActual.toLowerCase()}`;
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: `Se eliminará la categoría "${nombre}"${seccionTexto}. Esta acción no se puede deshacer y eliminará todas sus asociaciones.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/devportal/sa/eliminar-categoria/${id}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Eliminada!',
+                                text: data.message,
+                                confirmButtonColor: '#007bff'
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: data.message,
+                                confirmButtonColor: '#dc3545'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Ha ocurrido un error inesperado',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    });
+                }
+            });
+        }
+        
+        // Limpiar formularios al cerrar modales
+        document.getElementById('createCategoryModal').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('createCategoryForm').reset();
+        });
+        
+        document.getElementById('editCategoryModal').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('editCategoryForm').reset();
+        });
+    </script>
+
+    <!-- Scripts del navbar SA -->
+    <div th:replace="~{fragments/navbar-sa :: navbar-sa-scripts}"></div>
+</body>
+</html>
+
+

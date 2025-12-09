@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf?.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf?.headerName}"/>
+    <meta name="user-role" th:content="${userRole}"/>
+    <meta name="username" th:content="${username}"/>
+    <title>APIs - DevPortal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <!-- <link th:href="@{/css/projects.css}" rel="stylesheet"> -->
+    <style>
+        :root {
+            --primary-color: #2596be;
+            --primary-dark: #1e7a9a;
+            --primary-light: #e3f2fd;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --border-light: #e0e0e0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        .projects-container { 
+            padding: 1.5rem; 
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+        
+        .projects-main { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+        }
+        
+        .projects-header { 
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .header-left {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .breadcrumb { 
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .breadcrumb a { 
+            color: var(--primary-color); 
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .breadcrumb a:hover {
+            color: var(--primary-dark);
+        }
+        
+        .page-title { 
+            margin: 0; 
+            color: var(--text-primary);
+            font-size: 1.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn-primary { 
+            background: var(--primary-color); 
+            color: white; 
+            padding: 0.75rem 1.5rem; 
+            text-decoration: none; 
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 1.5rem; 
+            margin-bottom: 2.5rem; 
+        }
+        
+        .stat-card { 
+            background: white; 
+            padding: 1.5rem; 
+            border-radius: var(--radius-lg); 
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .stat-icon { 
+            width: 3rem; 
+            height: 3rem; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        
+        .stat-icon.personal { background: #e3f2fd; color: #1976d2; }
+        .stat-icon.team { background: #f3e5f5; color: #7b1fa2; }
+        .stat-icon.total { background: #e8f5e8; color: #388e3c; }
+        
+        .stat-info {
+            text-align: left;
+            flex: 1;
+        }
+        
+        .stat-value { 
+            font-size: 2rem; 
+            font-weight: 700; 
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            line-height: 1;
+        }
+        
+        .stat-label { 
+            color: var(--text-secondary); 
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+        
+        .projects-section { 
+            margin-bottom: 3rem;
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .section-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .section-title { 
+            margin: 0; 
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .section-actions { 
+            display: flex; 
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn-outline { 
+            border: 1px solid var(--primary-color); 
+            color: var(--primary-color); 
+            padding: 0.5rem 1rem; 
+            text-decoration: none; 
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .items-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+        
+        .item-card { 
+            background: white; 
+            border-radius: var(--radius-md); 
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            padding: 1.5rem;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .item-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .item-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            margin-bottom: 1rem;
+        }
+        
+        .item-icon { 
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+        }
+        
+        .item-status-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-end;
+        }
+        
+        .item-status { 
+            padding: 0.25rem 0.75rem; 
+            border-radius: var(--radius-sm); 
+            font-size: 0.75rem; 
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+        }
+        
+        .item-status.active { background: #e8f5e8; color: #2e7d32; }
+        .item-status.paused { background: #fff3e0; color: #f57c00; }
+        .item-status.inactive { background: #ffebee; color: #d32f2f; }
+        
+        /* Estados específicos para APIs */
+        .item-status.produccion { background: #e8f5e8; color: #2e7d32; }
+        .item-status.qa { background: #fff3e0; color: #f57c00; }
+        .item-status.deprecated { background: #ffebee; color: #d32f2f; }
+        
+        /* ==================== DEPLOYMENT STATUS BADGES ==================== */
+        .deployment-status-badge {
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .deploy-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        
+        .deploy-badge i {
+            font-size: 0.8em;
+        }
+        
+        /* Badge ACTIVE - Verde */
+        .deploy-active {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+        
+        /* Badge DEPLOYING - Naranja animado */
+        .deploy-deploying {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            color: #f57c00;
+            border: 1px solid #ffcc80;
+        }
+        
+        .deploy-deploying i {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        /* Badge NOT DEPLOYED - Gris */
+        .deploy-not-deployed {
+            background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
+            color: #757575;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .deploy-not-deployed i {
+            font-size: 0.5em;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        
+        /* Hover effects para badges */
+        .item-card:hover .deploy-badge {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Estilos para categorías y etiquetas */
+        .api-categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .category-badge {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .api-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .tag-item {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .tag-item::before {
+            content: '#';
+        }
+        
+        .item-content {
+            margin-bottom: 1.5rem;
+        }
+        
+        .item-title { 
+            margin: 0 0 0.75rem 0; 
+            color: var(--text-primary);
+            font-size: 1.125rem;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+        
+        .item-description { 
+            color: var(--text-secondary); 
+            margin-bottom: 1rem;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .item-meta { 
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .meta-item { 
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem; 
+            color: var(--text-secondary);
+        }
+        
+        .meta-item i {
+            width: 1rem;
+            text-align: center;
+        }
+        
+        .item-actions { 
+            display: flex; 
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+        
+        .item-actions .btn-primary {
+            padding: 0.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            justify-content: center;
+        }
+        
+        .empty-state { 
+            text-align: center; 
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+        
+        .empty-icon { 
+            font-size: 4rem; 
+            color: var(--text-muted); 
+            margin-bottom: 1.5rem; 
+        }
+        
+        .empty-title { 
+            color: var(--text-primary); 
+            margin-bottom: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .empty-message { 
+            color: var(--text-secondary); 
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .projects-container {
+                padding: 1rem;
+            }
+            
+            .projects-header {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            
+            .header-left {
+                margin-bottom: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+            
+            .stat-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.75rem;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            
+            .items-grid {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-actions {
+                flex-direction: column;
+            }
+            
+            .btn-outline, .btn-primary {
+                justify-content: center;
+            }
+        }
+        
+        /* Dropdown styles */
+        .dropdown-menu {
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+            padding: 0.5rem 0;
+            min-width: 200px;
+        }
+        
+        .dropdown-item {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-item:hover {
+            background: #f8f9fa;
+            color: #2c5aa0;
+        }
+        
+        .dropdown-item i {
+            width: 1.25rem;
+            text-align: center;
+        }
+        
+        /* Filter buttons */
+        .btn-group {
+            display: flex;
+            gap: 0;
+        }
+        
+        .filter-btn {
+            border-radius: 0 !important;
+            border-right: none;
+        }
+        
+        .filter-btn:first-child {
+            border-radius: var(--radius-sm) 0 0 var(--radius-sm) !important;
+        }
+        
+        .filter-btn:last-child {
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+            border-right: 1px solid var(--primary-color);
+        }
+        
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        /* Pagination */
+        .pagination-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            gap: 1rem;
+        }
+        
+        .pagination {
+            display: flex;
+            gap: 0.5rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .page-item {
+            list-style: none;
+        }
+        
+        .page-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 2.5rem;
+            height: 2.5rem;
+            padding: 0.5rem;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .page-link:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .page-item.active .page-link {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        
+        .page-item.disabled .page-link {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .api-item[style*="display: none"] {
+            display: none !important;
+        }
+        
+        .d-none {
+            display: none !important;
+        }
+        
+        /* Responsive para filtros */
+        @media (max-width: 768px) {
+            .btn-group {
+                flex-wrap: wrap;
+            }
+            
+            .filter-btn {
+                border-radius: var(--radius-sm) !important;
+                border-right: 1px solid var(--primary-color);
+                flex: 1 1 calc(50% - 0.375rem);
+            }
+        }
+        
+        /* ==================== ESTILOS PARA SOLICITUDES QA (FASE 3.4) ==================== */
+        .solicitud-card {
+            background: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            padding: 1.5rem;
+            transition: all 0.2s;
+            position: relative;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .solicitud-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .solicitud-card.aprobada {
+            border-left-color: #4caf50;
+        }
+        
+        .solicitud-card.rechazada {
+            border-left-color: #f44336;
+        }
+        
+        .solicitud-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .solicitud-info {
+            flex: 1;
+        }
+        
+        .solicitud-api-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .solicitud-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .solicitud-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .solicitud-estado {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .solicitud-estado.pendiente {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .solicitud-estado.en-revision {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .solicitud-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            justify-content: flex-end;
+        }
+        
+        .btn-success {
+            background: #4caf50;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-success:hover {
+            background: #388e3c;
+            transform: translateY(-1px);
+        }
+        
+        .btn-danger {
+            background: #f44336;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-danger:hover {
+            background: #d32f2f;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #757575;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-secondary:hover {
+            background: #616161;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Banner de Impersonación -->
+    <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <div class="projects-container">
+        <!-- Banner de impersonación si aplica -->
+        <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+
+        <main class="projects-main content-after-navbar">
+            <!-- Header -->
+            <div class="projects-header">
+                <div class="header-left">
+                    <div class="breadcrumb">
+                        <a th:href="@{/devportal/{userRole}/{username}/dashboard(userRole=${userRole}, username=${username})}">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                        <i class="fas fa-chevron-right"></i>
+                        <span>APIs</span>
+                    </div>
+                    
+                    <h2 class="page-title">
+                        <i class="fas fa-code" style="color: #2596be;"></i>
+                        Mis APIs
+                    </h2>
+                </div>
+                
+                <div class="header-actions">
+                    <div class="dropdown">
+                        <button class="btn-primary dropdown-toggle" type="button" id="overviewCreateProjectDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-plus"></i>
+                            Nueva API
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="overviewCreateProjectDropdown">
+                            <li>
+                                <a class="dropdown-item" th:href="@{/devportal/{userRole}/{username}/apis/create(userRole=${userRole}, username=${username})}">
+                                    <i class="fas fa-plus-circle"></i>
+                                    Crear API nueva
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" th:href="@{/devportal/{userRole}/{username}/apis/update(userRole=${userRole}, username=${username})}">
+                                    <i class="fas fa-edit"></i>
+                                    Actualizar API existente
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon personal">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" th:text="${createdApisCount ?: 0}">0</div>
+                        <div class="stat-label">APIs Creadas</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon team">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" th:text="${apisInDraftCount ?: 0}">0</div>
+                        <div class="stat-label">APIs en Borrador</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon total">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" th:text="${apisInReviewCount ?: 0}">0</div>
+                        <div class="stat-label">APIs en Revisión</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon personal">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value" th:text="${apisPublishedCount ?: 0}">0</div>
+                        <div class="stat-label">APIs Publicadas</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección: APIs que he creado -->
+            <div class="projects-section">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-code" style="color: #2596be;"></i>
+                        APIs que he creado
+                        <span class="text-muted">(<span th:text="${createdApisCount ?: 0}">0</span>)</span>
+                    </h3>
+                    <div class="section-actions">
+                        <div class="btn-group" role="group" aria-label="Filtros de estado">
+                            <button type="button" class="btn-outline filter-btn active" data-filter="all">
+                                <i class="fas fa-list"></i> Todas
+                            </button>
+                            <button type="button" class="btn-outline filter-btn" data-filter="BORRADOR">
+                                <i class="fas fa-file-alt"></i> Borrador
+                            </button>
+                            <button type="button" class="btn-outline filter-btn" data-filter="QA">
+                                <i class="fas fa-clock"></i> QA
+                            </button>
+                            <button type="button" class="btn-outline filter-btn" data-filter="PRODUCCION">
+                                <i class="fas fa-check-circle"></i> Producción
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="items-grid" th:if="${#lists.size(userCreatedApis) > 0}" id="myApisGrid">
+                    <div class="item-card api-item" th:each="api : ${userCreatedApis}" 
+                         th:attr="data-api-id=${api.apiId}, data-status=${api.estadoApi.name()}">
+                        <div class="item-header">
+                            <div class="item-icon">
+                                <i class="fas fa-code" style="color: #2596be"></i>
+                            </div>
+                            <div class="item-status-group">
+                                <div class="item-status" th:classappend="${api.estadoApi.name().toLowerCase()}">
+                                    <span th:text="${api.estadoApi ?: 'DESCONOCIDO'}">PRODUCCION</span>
+                                </div>
+                                
+                                <!-- Badge de Deployment Status -->
+                                <div class="deployment-status-badge" 
+                                     th:if="${!#lists.isEmpty(api.versiones)}"
+                                     th:with="hasActive=${api.versiones.?[deploymentStatus != null && deploymentStatus.name() == 'ACTIVE'].size() > 0},
+                                              hasDeploying=${api.versiones.?[deploymentStatus != null && deploymentStatus.name() == 'DEPLOYING'].size() > 0}">
+                                    <!-- Badge ACTIVE (verde) -->
+                                    <span class="deploy-badge deploy-active" th:if="${hasActive}">
+                                        <i class="fas fa-check-circle"></i> Deployed
+                                    </span>
+                                    <!-- Badge DEPLOYING (naranja) -->
+                                    <span class="deploy-badge deploy-deploying" th:if="${!hasActive && hasDeploying}">
+                                        <i class="fas fa-spinner fa-pulse"></i> Deploying
+                                    </span>
+                                    <!-- Badge NOT DEPLOYED (gris) -->
+                                    <span class="deploy-badge deploy-not-deployed" th:if="${!hasActive && !hasDeploying}">
+                                        <i class="fas fa-circle"></i> Not deployed
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="item-content">
+                            <h4 class="item-title" th:text="${api.nombreApi ?: 'Sin nombre'}">Nombre de la API</h4>
+                            <p class="item-description" th:text="${api.descripcionApi ?: 'Sin descripción'}">Descripción de la API...</p>
+                            
+                            <!-- Categorías -->
+                            <div class="api-categories" th:if="${!#lists.isEmpty(api.categorias)}">
+                                <span class="category-badge" th:each="categoria : ${#lists.size(api.categorias) > 2 ? #lists.subList(api.categorias, 0, 2) : api.categorias}" 
+                                      th:text="${categoria.nombreCategoria}">Categoría</span>
+                                <span class="category-badge" th:if="${#lists.size(api.categorias) > 2}">
+                                    +<span th:text="${#lists.size(api.categorias) - 2}">1</span> más
+                                </span>
+                            </div>
+                            
+                            <!-- Etiquetas -->
+                            <div class="api-tags" th:if="${!#lists.isEmpty(api.etiquetas)}">
+                                <span class="tag-item" th:each="etiqueta : ${#lists.size(api.etiquetas) > 4 ? #lists.subList(api.etiquetas, 0, 4) : api.etiquetas}" 
+                                      th:text="${etiqueta.nombreTag}">etiqueta</span>
+                                <span class="tag-item" th:if="${#lists.size(api.etiquetas) > 4}">
+                                    +<span th:text="${#lists.size(api.etiquetas) - 4}">2</span> más
+                                </span>
+                            </div>
+                            
+                            <div class="item-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span th:text="${#lists.size(api.versiones)} + ' versiones'">3 versiones</span>
+                                </div>
+                                <div class="meta-item" th:if="${api.creadoEn}">
+                                    <i class="fas fa-calendar"></i>
+                                    <span th:text="${#temporals.format(api.creadoEn, 'dd/MM/yyyy')}">01/01/2024</span>
+                                </div>
+                                <div class="meta-item" th:if="${!#lists.isEmpty(api.versiones)}">
+                                    <i class="fas fa-code-branch"></i>
+                                    <span th:text="'v' + ${#lists.isEmpty(api.versiones) ? '1.0.0' : api.versiones[0].numeroVersion}">v1.0.0</span>
+                                </div>
+                                <div class="meta-item" th:if="${!#lists.isEmpty(api.credenciales)}">
+                                    <i class="fas fa-key"></i>
+                                    <span>Credenciales</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="item-actions">
+                            <a th:href="@{/devportal/{userRole}/{username}/apis/api-{apiId}(userRole=${userRole != null ? userRole : 'dev'}, username=${username}, apiId=${api.apiId})}"
+                               class="btn-primary" title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Paginación -->
+                <div class="pagination-wrapper" th:if="${#lists.size(userCreatedApis) > 0}" id="paginationWrapper">
+                    <ul class="pagination" id="pagination">
+                        <!-- Se genera dinámicamente con JavaScript -->
+                    </ul>
+                </div>
+                
+                <!-- Empty state cuando no hay APIs después de filtrar -->
+                <div class="empty-state" id="emptyFilterState" style="display: none;">
+                    <div class="empty-icon">
+                        <i class="fas fa-filter"></i>
+                    </div>
+                    <h3 class="empty-title">No se encontraron APIs</h3>
+                    <p class="empty-message">No hay APIs con el estado seleccionado. Prueba con otro filtro.</p>
+                </div>
+                
+                <!-- Empty state cuando no hay APIs creadas -->
+                <div class="empty-state" th:if="${#lists.isEmpty(userCreatedApis)}">
+                    <div class="empty-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3 class="empty-title">No tienes APIs aún</h3>
+                    <p class="empty-message">Crea tu primera API o actualiza una API ya existente para comenzar.</p>
+                    <a th:href="@{/devportal/{userRole}/{username}/apis/create(userRole=${userRole}, username=${username})}"
+                       class="btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Crear API
+                    </a>
+                </div>
+            </div>
+
+            <!-- ==================== SECCIÓN CONDICIONAL SEGÚN ROL (FASE 3.4) ==================== -->
+            
+            <!-- PARA USUARIOS QA: Mostrar APIs Pendientes de Revisión -->
+            <div class="projects-section" th:if="${isQA}">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-clipboard-check" style="color: #ff9800;"></i>
+                        APIs Pendientes de Revisión
+                        <span class="text-muted">(<span th:text="${solicitudesPendientesCount ?: 0}">0</span>)</span>
+                    </h3>
+                    <div class="section-actions">
+                        <button class="btn-outline" id="refreshSolicitudes">
+                            <i class="fas fa-sync-alt"></i>
+                            Actualizar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="items-grid" th:if="${solicitudesPendientes != null && #lists.size(solicitudesPendientes) > 0}">
+                    <div class="solicitud-card" th:each="solicitud : ${solicitudesPendientes}" 
+                         th:classappend="${solicitud.estado.name().toLowerCase()}"
+                         th:attr="data-solicitud-id=${solicitud.solicitudPublicacionId},
+                                  data-api-id=${solicitud.api?.apiId},
+                                  data-version=${solicitud.versionApi?.numeroVersion}">
+                        
+                        <div class="solicitud-header">
+                            <div class="solicitud-info">
+                                <h4 class="solicitud-api-name">
+                                    <i class="fas fa-code" style="color: #2596be;"></i>
+                                    <span th:text="${solicitud.api?.nombreApi ?: 'Sin nombre'}">Nombre API</span>
+                                </h4>
+                                <p class="item-description" th:text="${solicitud.api?.descripcionApi ?: 'Sin descripción'}">Descripción...</p>
+                            </div>
+                            <div class="solicitud-estado" th:classappend="${solicitud.estado.name().toLowerCase()}">
+                                <i class="fas fa-clock"></i>
+                                <span th:text="${solicitud.estado}">PENDIENTE</span>
+                            </div>
+                        </div>
+                        
+                        <div class="solicitud-meta">
+                            <div class="solicitud-meta-item">
+                                <i class="fas fa-user"></i>
+                                <span>Solicitado por: <strong th:text="${solicitud.generadoPor?.username}">usuario</strong></span>
+                            </div>
+                            <div class="solicitud-meta-item">
+                                <i class="fas fa-code-branch"></i>
+                                <span>Versión: <strong th:text="${solicitud.versionApi?.numeroVersion}">1.0.0</strong></span>
+                            </div>
+                            <div class="solicitud-meta-item" th:if="${solicitud.creadoEn}">
+                                <i class="fas fa-calendar"></i>
+                                <span th:text="${#temporals.format(solicitud.creadoEn, 'dd/MM/yyyy HH:mm')}">12/11/2025 10:30</span>
+                            </div>
+                        </div>
+                        
+                        <div class="solicitud-actions">
+                            <button class="btn-success btn-aprobar" 
+                                    th:attr="data-solicitud-id=${solicitud.solicitudPublicacionId},
+                                             data-api-name=${solicitud.api?.nombreApi}">
+                                <i class="fas fa-check"></i>
+                                Aprobar
+                            </button>
+                            <button class="btn-danger btn-rechazar"
+                                    th:attr="data-solicitud-id=${solicitud.solicitudPublicacionId},
+                                             data-api-name=${solicitud.api?.nombreApi}">
+                                <i class="fas fa-times"></i>
+                                Rechazar
+                            </button>
+                            <a th:href="@{/devportal/{userRole}/{username}/apis/api-{apiId}(userRole=${userRole}, username=${username}, apiId=${solicitud.api?.apiId})}"
+                               class="btn-outline" title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                                Ver API
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="empty-state" th:if="${solicitudesPendientes == null || #lists.isEmpty(solicitudesPendientes)}">
+                    <div class="empty-icon">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <h3 class="empty-title">No hay solicitudes pendientes</h3>
+                    <p class="empty-message">¡Excelente! No hay APIs esperando tu revisión en este momento.</p>
+                </div>
+            </div>
+            
+            <!-- PARA USUARIOS PROVIDER: Mostrar Mis APIs en Revisión QA -->
+            <div class="projects-section" th:if="${isProvider && !isQA}">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-hourglass-half" style="color: #ff9800;"></i>
+                        Mis APIs en Revisión QA
+                        <span class="text-muted">(<span th:text="${solicitudesEnRevisionCount ?: 0}">0</span>)</span>
+                    </h3>
+                    <div class="section-actions">
+                        <button class="btn-outline" id="refreshMisSolicitudes">
+                            <i class="fas fa-sync-alt"></i>
+                            Actualizar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="items-grid" th:if="${misSolicitudesEnRevision != null && #lists.size(misSolicitudesEnRevision) > 0}">
+                    <div class="solicitud-card" th:each="solicitud : ${misSolicitudesEnRevision}" 
+                         th:classappend="${solicitud.estado.name().toLowerCase()}"
+                         th:attr="data-solicitud-id=${solicitud.solicitudPublicacionId},
+                                  data-api-id=${solicitud.api?.apiId},
+                                  data-version=${solicitud.versionApi?.numeroVersion}">
+                        
+                        <div class="solicitud-header">
+                            <div class="solicitud-info">
+                                <h4 class="solicitud-api-name">
+                                    <i class="fas fa-code" style="color: #2596be;"></i>
+                                    <span th:text="${solicitud.api?.nombreApi ?: 'Sin nombre'}">Nombre API</span>
+                                </h4>
+                                <p class="item-description" th:text="${solicitud.api?.descripcionApi ?: 'Sin descripción'}">Descripción...</p>
+                            </div>
+                            <div class="solicitud-estado" th:classappend="${solicitud.estado.name().toLowerCase()}">
+                                <i class="fas fa-clock" th:if="${solicitud.estado.name() == 'PENDIENTE'}"></i>
+                                <i class="fas fa-eye" th:if="${solicitud.estado.name() == 'EN_REVISION'}"></i>
+                                <span th:text="${solicitud.estado}">PENDIENTE</span>
+                            </div>
+                        </div>
+                        
+                        <div class="solicitud-meta">
+                            <div class="solicitud-meta-item">
+                                <i class="fas fa-code-branch"></i>
+                                <span>Versión: <strong th:text="${solicitud.versionApi?.numeroVersion}">1.0.0</strong></span>
+                            </div>
+                            <div class="solicitud-meta-item" th:if="${solicitud.creadoEn}">
+                                <i class="fas fa-calendar"></i>
+                                <span>Solicitado: <strong th:text="${#temporals.format(solicitud.creadoEn, 'dd/MM/yyyy HH:mm')}">12/11/2025 10:30</strong></span>
+                            </div>
+                            <div class="solicitud-meta-item" th:if="${solicitud.aprobadoPor != null}">
+                                <i class="fas fa-user-check"></i>
+                                <span>Revisando: <strong th:text="${solicitud.aprobadoPor?.username}">qa_user</strong></span>
+                            </div>
+                        </div>
+                        
+                        <div class="solicitud-actions">
+                            <button class="btn-secondary btn-cancelar" 
+                                    th:attr="data-solicitud-id=${solicitud.solicitudPublicacionId},
+                                             data-api-name=${solicitud.api?.nombreApi}">
+                                <i class="fas fa-ban"></i>
+                                Cancelar Solicitud
+                            </button>
+                            <a th:href="@{/devportal/{userRole}/{username}/apis/api-{apiId}(userRole=${userRole}, username=${username}, apiId=${solicitud.api?.apiId})}"
+                               class="btn-outline" title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                                Ver API
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="empty-state" th:if="${misSolicitudesEnRevision == null || #lists.isEmpty(misSolicitudesEnRevision)}">
+                    <div class="empty-icon">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <h3 class="empty-title">No tienes solicitudes en revisión</h3>
+                    <p class="empty-message">Tus APIs no están actualmente en proceso de revisión QA.</p>
+                </div>
+            </div>
+            
+            <!-- PARA OTROS USUARIOS (sin rol QA ni PROVIDER): Mostrar Otras APIs (original) -->
+            <div class="projects-section" th:if="${!isQA && !isProvider}">
+                <div class="section-header">
+                    <h3 class="section-title">
+                        <i class="fas fa-globe" style="color: #2596be;"></i>
+                        Otras APIs
+                        <span class="text-muted">(<span th:text="${#lists.size(otherUsersApis) ?: 0}">0</span>)</span>
+                    </h3>
+                    <div class="section-actions">
+                        <a th:href="@{/devportal/{userRole}/{username}/catalog(userRole=${userRole}, username=${username})}" 
+                           class="btn-outline">
+                            <i class="fas fa-external-link-alt"></i>
+                            Ver todos
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="items-grid" th:if="${#lists.size(otherUsersApis) > 0}">
+                    <div class="item-card" th:each="api : ${otherUsersApis}" th:attr="data-api-id=${api.apiId}">
+                        <div class="item-header">
+                            <div class="item-icon">
+                                <i class="fas fa-code" style="color: #2596be"></i>
+                            </div>
+                            <div class="item-status-group">
+                                <div class="item-status" th:classappend="${api.estadoApi.name().toLowerCase()}">
+                                    <span th:text="${api.estadoApi ?: 'DESCONOCIDO'}">PRODUCCION</span>
+                                </div>
+                                
+                                <!-- Badge de Deployment Status -->
+                                <div class="deployment-status-badge" 
+                                     th:if="${!#lists.isEmpty(api.versiones)}"
+                                     th:with="hasActive=${api.versiones.?[deploymentStatus != null && deploymentStatus.name() == 'ACTIVE'].size() > 0},
+                                              hasDeploying=${api.versiones.?[deploymentStatus != null && deploymentStatus.name() == 'DEPLOYING'].size() > 0}">
+                                    <!-- Badge ACTIVE (verde) -->
+                                    <span class="deploy-badge deploy-active" th:if="${hasActive}">
+                                        <i class="fas fa-check-circle"></i> Deployed
+                                    </span>
+                                    <!-- Badge DEPLOYING (naranja) -->
+                                    <span class="deploy-badge deploy-deploying" th:if="${!hasActive && hasDeploying}">
+                                        <i class="fas fa-spinner fa-pulse"></i> Deploying
+                                    </span>
+                                    <!-- Badge NOT DEPLOYED (gris) -->
+                                    <span class="deploy-badge deploy-not-deployed" th:if="${!hasActive && !hasDeploying}">
+                                        <i class="fas fa-circle"></i> Not deployed
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="item-content">
+                            <h4 class="item-title" th:text="${api.nombreApi ?: 'Sin nombre'}">Nombre de la API</h4>
+                            <p class="item-description" th:text="${api.descripcionApi ?: 'Sin descripción'}">Descripción de la API...</p>
+                            
+                            <!-- Categorías -->
+                            <div class="api-categories" th:if="${!#lists.isEmpty(api.categorias)}">
+                                <span class="category-badge" th:each="categoria : ${#lists.size(api.categorias) > 2 ? #lists.subList(api.categorias, 0, 2) : api.categorias}" 
+                                      th:text="${categoria.nombreCategoria}">Categoría</span>
+                                <span class="category-badge" th:if="${#lists.size(api.categorias) > 2}">
+                                    +<span th:text="${#lists.size(api.categorias) - 2}">1</span> más
+                                </span>
+                            </div>
+                            
+                            <!-- Etiquetas -->
+                            <div class="api-tags" th:if="${!#lists.isEmpty(api.etiquetas)}">
+                                <span class="tag-item" th:each="etiqueta : ${#lists.size(api.etiquetas) > 4 ? #lists.subList(api.etiquetas, 0, 4) : api.etiquetas}" 
+                                      th:text="${etiqueta.nombreTag}">etiqueta</span>
+                                <span class="tag-item" th:if="${#lists.size(api.etiquetas) > 4}">
+                                    +<span th:text="${#lists.size(api.etiquetas) - 4}">2</span> más
+                                </span>
+                            </div>
+                            
+                            <div class="item-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-layer-group"></i>
+                                    <span th:text="${#lists.size(api.versiones)} + ' versiones'">3 versiones</span>
+                                </div>
+                                <div class="meta-item" th:if="${api.creadoEn}">
+                                    <i class="fas fa-calendar"></i>
+                                    <span th:text="${#temporals.format(api.creadoEn, 'dd/MM/yyyy')}">01/01/2024</span>
+                                </div>
+                                <div class="meta-item" th:if="${!#lists.isEmpty(api.versiones)}">
+                                    <i class="fas fa-code-branch"></i>
+                                    <span th:text="'v' + ${#lists.isEmpty(api.versiones) ? '1.0.0' : api.versiones[0].numeroVersion}">v1.0.0</span>
+                                </div>
+                                <div class="meta-item" th:if="${!#lists.isEmpty(api.credenciales)}">
+                                    <i class="fas fa-key"></i>
+                                    <span>Credenciales</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="item-actions">
+                            <a th:href="@{/devportal/{userRole}/{username}/apis/api-{apiId}(userRole=${userRole != null ? userRole : 'dev'}, username=${username}, apiId=${api.apiId})}"
+                               class="btn-primary" title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="empty-state" th:if="${#lists.isEmpty(otherUsersApis)}">
+                    <div class="empty-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3 class="empty-title">No hay APIs públicas disponibles</h3>
+                    <p class="empty-message">No se encontraron otras APIs en este momento.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const itemsPerPage = 6;
+            let currentPage = 1;
+            let currentFilter = 'all';
+            
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const apiItems = document.querySelectorAll('.api-item');
+            const paginationElement = document.getElementById('pagination');
+            const paginationWrapper = document.getElementById('paginationWrapper');
+            const emptyFilterState = document.getElementById('emptyFilterState');
+            const myApisGrid = document.getElementById('myApisGrid');
+            
+            // Función para filtrar APIs
+            function filterApis(status) {
+                currentFilter = status;
+                currentPage = 1;
+                
+                apiItems.forEach(item => {
+                    const itemStatus = item.getAttribute('data-status');
+                    if (status === 'all' || itemStatus === status) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                // Verificar si hay items visibles
+                const visibleItems = Array.from(apiItems).filter(item => item.style.display !== 'none');
+                
+                if (visibleItems.length === 0) {
+                    // No hay resultados
+                    if (myApisGrid) myApisGrid.style.display = 'none';
+                    if (emptyFilterState) emptyFilterState.style.display = 'block';
+                    if (paginationWrapper) paginationWrapper.style.display = 'none';
+                } else {
+                    // Hay resultados
+                    if (myApisGrid) myApisGrid.style.display = 'grid';
+                    if (emptyFilterState) emptyFilterState.style.display = 'none';
+                    updatePagination();
+                    showPage(currentPage);
+                }
+            }
+            
+            // Función para mostrar una página específica
+            function showPage(page) {
+                currentPage = page;
+                const visibleItems = Array.from(apiItems).filter(item => item.style.display !== 'none');
+                const totalPages = Math.ceil(visibleItems.length / itemsPerPage);
+                
+                // Ocultar todos los items
+                visibleItems.forEach(item => item.classList.add('d-none'));
+                
+                // Mostrar solo los items de la página actual
+                const start = (page - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+                visibleItems.slice(start, end).forEach(item => item.classList.remove('d-none'));
+                
+                updatePaginationButtons(totalPages);
+            }
+            
+            // Función para actualizar la paginación
+            function updatePagination() {
+                const visibleItems = Array.from(apiItems).filter(item => item.style.display !== 'none');
+                const totalPages = Math.ceil(visibleItems.length / itemsPerPage);
+                
+                if (totalPages <= 1) {
+                    paginationWrapper.style.display = 'none';
+                    return;
+                }
+                
+                paginationWrapper.style.display = 'flex';
+                paginationElement.innerHTML = '';
+                
+                // Botón anterior
+                const prevLi = document.createElement('li');
+                prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+                prevLi.innerHTML = `<a class="page-link" href="#"><i class="fas fa-chevron-left"></i></a>`;
+                prevLi.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (currentPage > 1) showPage(currentPage - 1);
+                });
+                paginationElement.appendChild(prevLi);
+                
+                // Páginas numeradas
+                for (let i = 1; i <= totalPages; i++) {
+                    const li = document.createElement('li');
+                    li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                    li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                    li.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        showPage(i);
+                    });
+                    paginationElement.appendChild(li);
+                }
+                
+                // Botón siguiente
+                const nextLi = document.createElement('li');
+                nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+                nextLi.innerHTML = `<a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a>`;
+                nextLi.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (currentPage < totalPages) showPage(currentPage + 1);
+                });
+                paginationElement.appendChild(nextLi);
+            }
+            
+            // Función para actualizar botones de paginación
+            function updatePaginationButtons(totalPages) {
+                const pageItems = paginationElement.querySelectorAll('.page-item');
+                pageItems.forEach((item, index) => {
+                    if (index === 0) {
+                        // Botón anterior
+                        item.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+                    } else if (index === pageItems.length - 1) {
+                        // Botón siguiente
+                        item.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+                    } else {
+                        // Páginas numeradas
+                        item.className = `page-item ${index === currentPage ? 'active' : ''}`;
+                    }
+                });
+            }
+            
+            // Event listeners para filtros
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    const filter = this.getAttribute('data-filter');
+                    filterApis(filter);
+                });
+            });
+            
+            // Inicializar paginación
+            if (apiItems.length > 0) {
+                updatePagination();
+                showPage(1);
+            }
+        });
+        
+        // ==================== JAVASCRIPT PARA ACCIONES QA (FASE 3.4) ====================
+        
+        // Obtener información del contexto Thymeleaf
+        const userRole = document.querySelector('meta[name="user-role"]')?.content || 'dev';
+        const username = document.querySelector('meta[name="username"]')?.content;
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+        
+        // Event delegation para botones de aprobar
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('btn-aprobar') || e.target.closest('.btn-aprobar')) {
+                const button = e.target.classList.contains('btn-aprobar') ? e.target : e.target.closest('.btn-aprobar');
+                const solicitudId = button.getAttribute('data-solicitud-id');
+                const apiName = button.getAttribute('data-api-name');
+                
+                if (confirm(`¿Aprobar la solicitud de publicación para "${apiName}"?\n\nLa API pasará a estado PRODUCCION y será visible en el catálogo público.`)) {
+                    aprobarSolicitud(solicitudId, apiName);
+                }
+            }
+            
+            // Event delegation para botones de rechazar
+            if (e.target.classList.contains('btn-rechazar') || e.target.closest('.btn-rechazar')) {
+                const button = e.target.classList.contains('btn-rechazar') ? e.target : e.target.closest('.btn-rechazar');
+                const solicitudId = button.getAttribute('data-solicitud-id');
+                const apiName = button.getAttribute('data-api-name');
+                
+                if (confirm(`¿Rechazar solicitud para "${apiName}"?\n\nLa API volverá a estado BORRADOR para que el desarrollador pueda hacer correcciones.`)) {
+                    rechazarSolicitud(solicitudId, apiName);
+                }
+            }
+            
+            // Event delegation para botones de cancelar
+            if (e.target.classList.contains('btn-cancelar') || e.target.closest('.btn-cancelar')) {
+                const button = e.target.classList.contains('btn-cancelar') ? e.target : e.target.closest('.btn-cancelar');
+                const solicitudId = button.getAttribute('data-solicitud-id');
+                const apiName = button.getAttribute('data-api-name');
+                
+                if (confirm(`¿Cancelar la solicitud de revisión para "${apiName}"?\n\nPodrás solicitar revisión nuevamente en el futuro.`)) {
+                    cancelarSolicitud(solicitudId, apiName);
+                }
+            }
+            
+            // Botones de refresh
+            if (e.target.id === 'refreshSolicitudes' || e.target.closest('#refreshSolicitudes')) {
+                location.reload();
+            }
+            
+            if (e.target.id === 'refreshMisSolicitudes' || e.target.closest('#refreshMisSolicitudes')) {
+                location.reload();
+            }
+        });
+        
+        // Función para aprobar solicitud
+        async function aprobarSolicitud(solicitudId, apiName) {
+            // Necesitamos obtener apiId y version de la tarjeta
+            const solicitudCard = document.querySelector(`[data-solicitud-id="${solicitudId}"]`);
+            const apiId = solicitudCard?.closest('[data-api-id]')?.dataset.apiId;
+            const version = solicitudCard?.dataset.version || '1.0.0'; // Fallback
+            
+            try {
+                const response = await fetch(`/devportal/${userRole}/${username}/apis/api-${apiId}/v-${version}/request-review/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    }
+                });
+                
+                if (response.ok) {
+                    alert(`✅ Solicitud aprobada exitosamente\n\nLa API "${apiName}" ahora está publicada en el catálogo.`);
+                    location.reload();
+                } else {
+                    const errorData = await response.json();
+                    alert(`❌ Error al aprobar solicitud:\n${errorData.message || 'Error desconocido'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error de conexión al aprobar la solicitud');
+            }
+        }
+        
+        // Función para rechazar solicitud
+        async function rechazarSolicitud(solicitudId, apiName) {
+            const solicitudCard = document.querySelector(`[data-solicitud-id="${solicitudId}"]`);
+            const apiId = solicitudCard?.closest('[data-api-id]')?.dataset.apiId;
+            const version = solicitudCard?.dataset.version || '1.0.0';
+            
+            try {
+                const response = await fetch(`/devportal/${userRole}/${username}/apis/api-${apiId}/v-${version}/request-review/reject`, {
+                    method: 'POST',
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    }
+                });
+                
+                if (response.ok) {
+                    alert(`🔴 Solicitud rechazada\n\nLa API "${apiName}" vuelve a estado BORRADOR.`);
+                    location.reload();
+                } else {
+                    const errorData = await response.json();
+                    alert(`❌ Error al rechazar solicitud:\n${errorData.message || 'Error desconocido'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error de conexión al rechazar la solicitud');
+            }
+        }
+        
+        // Función para cancelar solicitud (DEV/PROVIDER)
+        async function cancelarSolicitud(solicitudId, apiName) {
+            const solicitudCard = document.querySelector(`[data-solicitud-id="${solicitudId}"]`);
+            const apiId = solicitudCard?.closest('[data-api-id]')?.dataset.apiId;
+            const version = solicitudCard?.dataset.version || '1.0.0';
+            
+            try {
+                const response = await fetch(`/devportal/${userRole}/${username}/apis/api-${apiId}/v-${version}/request-review/cancel`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    }
+                });
+                
+                if (response.ok) {
+                    alert(`⚠️ Solicitud cancelada\n\nLa API "${apiName}" vuelve a estado BORRADOR.`);
+                    location.reload();
+                } else {
+                    const errorData = await response.json();
+                    alert(`❌ Error al cancelar solicitud:\n${errorData.message || 'Error desconocido'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error de conexión al cancelar la solicitud');
+            }
+        }
+    </script>
+
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+</body>
+</html>

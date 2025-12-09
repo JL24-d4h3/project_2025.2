@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${repositorio != null ? 'Editar Repositorio' : 'Crear Repositorio'} + ' - DevPortal'">Crear Repositorio - DevPortal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/project-repository.css}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
+</head>
+<body>
+    <div class="repository-container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-content">
+                <nav class="breadcrumb-nav">
+                    <a th:href="@{/devportal/{role}/{username}/dashboard(role=${userRole}, username=${username})}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a th:href="@{/devportal/{role}/{username}/repositories(role=${userRole}, username=${username})}">
+                        Repositorios
+                    </a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span th:if="${repositorio != null}">
+                        <a th:href="@{/devportal/{role}/{username}/repositories/R-{id}(role=${userRole}, username=${username}, id=${repositorio.repositorioId})}"
+                           th:text="${repositorio.nombreRepositorio}">Repositorio</a>
+                        <span class="breadcrumb-separator">/</span>
+                        <span>Editar</span>
+                    </span>
+                    <span th:unless="${repositorio != null}">Crear Repositorio</span>
+                </nav>
+                
+                <div class="header-actions">
+                    <div class="user-info">
+                        <img th:src="${user.fotoPerfil != null ? user.fotoPerfil : '/img/default-avatar.png'}" 
+                             alt="Avatar" class="user-avatar">
+                        <span th:text="${user.nombreUsuario}">Usuario</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Form Header -->
+            <section class="form-header">
+                <div class="form-title">
+                    <h1>
+                        <div class="icon">
+                            <i class="fas fa-code-branch"></i>
+                        </div>
+                        <span th:if="${repositorio != null}">Editar Repositorio</span>
+                        <span th:unless="${repositorio != null}">Crear Nuevo Repositorio</span>
+                    </h1>
+                    <p class="form-subtitle" th:if="${repositorio != null}">
+                        Modifica la información y configuración de tu repositorio.
+                    </p>
+                    <p class="form-subtitle" th:unless="${repositorio != null}">
+                        Crea un nuevo repositorio para almacenar y versionar tu código.
+                    </p>
+                </div>
+            </section>
+            
+            <!-- Repository Form -->
+            <section class="form-section">
+                <form th:action="${repositorio != null ? 
+                    '/devportal/' + userRole + '/' + username + '/repositories/R-' + repositorio.repositorioId + '/edit' : 
+                    '/devportal/' + userRole + '/' + username + '/repositories/create'}" 
+                      method="post" 
+                      class="repository-form">
+                    
+                    <!-- Error Messages -->
+                    <div class="alert alert-danger" th:if="${error}">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span th:text="${error}">Error message</span>
+                    </div>
+                    
+                    <!-- Success Messages -->
+                    <div class="alert alert-success" th:if="${success}">
+                        <i class="fas fa-check-circle"></i>
+                        <span th:text="${success}">Success message</span>
+                    </div>
+                    
+                    <!-- Basic Information -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3>
+                                <i class="fas fa-info-circle"></i>
+                                Información Básica
+                            </h3>
+                            <p>Información fundamental sobre tu repositorio.</p>
+                        </div>
+                        
+                        <div class="form-card-body">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="nombreRepositorio">
+                                        Nombre del repositorio <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           id="nombreRepositorio" 
+                                           name="nombreRepositorio" 
+                                           class="form-control" 
+                                           required 
+                                           placeholder="mi-repositorio-increible"
+                                           th:value="${repositorio != null ? repositorio.nombreRepositorio : ''}">
+                                    <div class="form-text">
+                                        Usa un nombre descriptivo con minúsculas, números y guiones.
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="ramaPrincipal">Rama principal</label>
+                                    <input type="text" 
+                                           id="ramaPrincipal" 
+                                           name="ramaPrincipal" 
+                                           class="form-control" 
+                                           placeholder="main"
+                                           th:value="${repositorio != null ? repositorio.ramaPrincipalRepositorio : 'main'}">
+                                    <div class="form-text">
+                                        Nombre de la rama principal (por defecto: main).
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="licenciaRepositorio">Licencia</label>
+                                    <input type="text"
+                                           id="licenciaRepositorio"
+                                           name="licenciaRepositorio"
+                                           class="form-control"
+                                           placeholder="Ejemplo: MIT, GPL, Apache 2.0, etc."
+                                           th:value="${repositorio != null ? repositorio.licenciaRepositorio : ''}">
+                                    <div class="form-text">
+                                        Especifica la licencia bajo la cual se distribuye el repositorio.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="descripcionRepositorio">Descripción</label>
+                                <textarea id="descripcionRepositorio" 
+                                          name="descripcionRepositorio" 
+                                          class="form-control" 
+                                          rows="4" 
+                                          placeholder="Una breve descripción de lo que hace tu repositorio..."
+                                          th:text="${repositorio != null ? repositorio.descripcionRepositorio : ''}"></textarea>
+                                <div class="form-text">
+                                    Una buena descripción ayuda a otros a entender el propósito de tu código.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Project Association -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3>
+                                <i class="fas fa-folder"></i>
+                                Asociación con Proyecto
+                            </h3>
+                            <p>Opcionalmente asocia este repositorio con un proyecto existente.</p>
+                        </div>
+                        
+                        <div class="form-card-body">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="proyectoId">Proyecto</label>
+                                    <select id="proyectoId" name="proyectoId" class="form-select">
+                                        <option value="">Sin proyecto asociado</option>
+                                        <option th:each="proyecto : ${proyectos}" 
+                                                th:value="${proyecto.proyecto_id}"
+                                                th:text="${proyecto.nombre_proyecto}"
+                                                th:selected="${repositorio != null and repositorio.proyecto_id == proyecto.proyecto_id}">
+                                            Proyecto
+                                        </option>
+                                    </select>
+                                    <div class="form-text">
+                                        Los repositorios pueden ser independientes o formar parte de un proyecto.
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="categoriaId">Categoría</label>
+                                    <select id="categoriaId" name="categoriaId" class="form-select">
+                                        <option value="">Seleccionar categoría</option>
+                                        <option th:each="categoria : ${categorias}" 
+                                                th:value="${categoria.idCategoria}"
+                                                th:text="${categoria.nombreCategoria}"
+                                                th:selected="${repositorio != null and repositorio.categoria_id == categoria.idCategoria}">
+                                            Categoría
+                                        </option>
+                                    </select>
+                                    <div class="form-text">
+                                        La categoría ayuda a organizar y encontrar tu repositorio.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3>
+                                <i class="fas fa-cog"></i>
+                                Configuración
+                            </h3>
+                            <p>Configura la visibilidad y permisos de tu repositorio.</p>
+                        </div>
+                        
+                        <div class="form-card-body">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="tipoRepositorio">
+                                        Tipo de repositorio <span class="text-danger">*</span>
+                                    </label>
+                                    <select id="tipoRepositorio" name="tipoRepositorio" class="form-select" required>
+                                        <option value="PERSONAL" 
+                                                th:selected="${repositorio == null or repositorio.tipoRepositorio == 'PERSONAL'}">
+                                            <i class="fas fa-user"></i> Personal
+                                        </option>
+                                        <option value="COLABORATIVO" 
+                                                th:selected="${repositorio != null and repositorio.tipoRepositorio == 'COLABORATIVO'}">
+                                            <i class="fas fa-users"></i> Colaborativo
+                                        </option>
+                                    </select>
+                                    <div class="form-text">
+                                        <strong>Personal:</strong> Repositorio individual para tu uso propio.<br>
+                                        <strong>Colaborativo:</strong> Repositorio para trabajo en equipo y colaboración.
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="visibilidadRepositorio">Visibilidad</label>
+                                    <select id="visibilidadRepositorio" name="visibilidadRepositorio" class="form-select">
+                                        <option value="PRIVADO" 
+                                                th:selected="${repositorio == null or repositorio.visibilidadRepositorio == 'PRIVADO'}">
+                                            <i class="fas fa-lock"></i> Privado
+                                        </option>
+                                        <option value="PUBLICO" 
+                                                th:selected="${repositorio != null and repositorio.visibilidadRepositorio == 'PUBLICO'}">
+                                            <i class="fas fa-globe"></i> Público
+                                        </option>
+                                    </select>
+                                    <div class="form-text">
+                                        <strong>Privado:</strong> Solo tú y tus colaboradores pueden ver este repositorio.<br>
+                                        <strong>Público:</strong> Cualquiera puede ver y clonar este repositorio.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="accesoRepositorio">Acceso</label>
+                                    <select id="accesoRepositorio" name="accesoRepositorio" class="form-select">
+                                        <option value="RESTRINGIDO" 
+                                                th:selected="${repositorio == null or repositorio.accesoRepositorio == 'RESTRINGIDO'}">
+                                            Restringido
+                                        </option>
+                                        <option value="ORGANIZACION" 
+                                                th:selected="${repositorio != null and repositorio.accesoRepositorio == 'ORGANIZACION'}">
+                                            Organización
+                                        </option>
+                                        <option value="CUALQUIER_PERSONA_CON_EL_ENLACE" 
+                                                th:selected="${repositorio != null and repositorio.accesoRepositorio == 'CUALQUIER_PERSONA_CON_EL_ENLACE'}">
+                                            Cualquier persona con el enlace
+                                        </option>
+                                    </select>
+                                    <div class="form-text">
+                                        <strong>Restringido:</strong> Solo colaboradores invitados pueden acceder.<br>
+                                        <strong>Organización:</strong> Cualquier miembro de la organización puede acceder.<br>
+                                        <strong>Con enlace:</strong> Cualquier persona con el enlace puede acceder.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Settings (Edit mode only) -->
+                    <div class="form-card" th:if="${repositorio != null}">
+                        <div class="form-card-header">
+                            <h3>
+                                <i class="fas fa-tools"></i>
+                                Configuración Avanzada
+                            </h3>
+                            <p>Opciones adicionales para la gestión del repositorio.</p>
+                        </div>
+                        
+                        <div class="form-card-body">
+                            <div class="form-group">
+                                <label class="form-label" for="estadoRepositorio">Estado del repositorio</label>
+                                <select id="estadoRepositorio" name="estadoRepositorio" class="form-select">
+                                    <option value="ACTIVO" th:selected="${repositorio.estado_repositorio == 'ACTIVO'}">
+                                        Activo
+                                    </option>
+                                    <option value="ARCHIVADO" th:selected="${repositorio.estado_repositorio == 'ARCHIVADO'}">
+                                        Archivado
+                                    </option>
+                                    <option value="MANTENIMIENTO" th:selected="${repositorio.estado_repositorio == 'MANTENIMIENTO'}">
+                                        En Mantenimiento
+                                    </option>
+                                </select>
+                                <div class="form-text">
+                                    El estado ayuda a indicar la situación actual del repositorio.
+                                </div>
+                            </div>
+                            
+                            <div class="feature-toggles">
+                                <h4>Características</h4>
+                                <div class="toggle-group">
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" 
+                                               id="permitirIssues" 
+                                               name="permitirIssues" 
+                                               checked>
+                                        <label for="permitirIssues">Issues</label>
+                                    </div>
+                                    <div class="form-text">
+                                        Permite reportar bugs y solicitar características.
+                                    </div>
+                                </div>
+                                
+                                <div class="toggle-group">
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" 
+                                               id="permitirPullRequests" 
+                                               name="permitirPullRequests" 
+                                               checked>
+                                        <label for="permitirPullRequests">Pull Requests</label>
+                                    </div>
+                                    <div class="form-text">
+                                        Permite proponer cambios al código.
+                                    </div>
+                                </div>
+                                
+                                <div class="toggle-group">
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" 
+                                               id="permitirWiki" 
+                                               name="permitirWiki">
+                                        <label for="permitirWiki">Wiki</label>
+                                    </div>
+                                    <div class="form-text">
+                                        Habilita la documentación colaborativa.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Initialization (Create mode only) -->
+                    <div class="form-card" th:unless="${repositorio != null}">
+                        <div class="form-card-header">
+                            <h3>
+                                <i class="fas fa-play"></i>
+                                Inicialización
+                            </h3>
+                            <p>Configura los archivos iniciales de tu repositorio.</p>
+                        </div>
+                        
+                        <div class="form-card-body">
+                            <div class="init-options">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" 
+                                           id="crearReadme" 
+                                           name="crearReadme" 
+                                           checked>
+                                    <label for="crearReadme">Crear archivo README.md</label>
+                                </div>
+                                <div class="form-text">
+                                    El README es la primera cosa que verán los visitantes de tu repositorio.
+                                </div>
+                                
+                                <div class="checkbox-group">
+                                    <input type="checkbox" 
+                                           id="crearGitignore" 
+                                           name="crearGitignore">
+                                    <label for="crearGitignore">Crear archivo .gitignore</label>
+                                </div>
+                                <div class="form-text">
+                                    Especifica qué archivos Git debe ignorar.
+                                </div>
+                                
+                                <div class="form-group" style="margin-top: 1rem;">
+                                    <label class="form-label" for="plantillaGitignore">Plantilla .gitignore</label>
+                                    <select id="plantillaGitignore" name="plantillaGitignore" class="form-select" disabled>
+                                        <option value="">Ninguna</option>
+                                        <option value="Java">Java</option>
+                                        <option value="Node">Node.js</option>
+                                        <option value="Python">Python</option>
+                                        <option value="VisualStudio">Visual Studio</option>
+                                        <option value="Maven">Maven</option>
+                                        <option value="Gradle">Gradle</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <div class="actions-left">
+                            <a th:href="${repositorio != null ? 
+                                '/devportal/' + userRole + '/' + username + '/repositories/R-' + repositorio.repositorioId : 
+                                '/devportal/' + userRole + '/' + username + '/repositories'}" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-times"></i>
+                                Cancelar
+                            </a>
+                        </div>
+                        
+                        <div class="actions-right">
+                            <button type="button" class="btn btn-outline-primary" id="previewBtn">
+                                <i class="fas fa-eye"></i>
+                                Vista Previa
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                <span th:if="${repositorio != null}">Guardar Cambios</span>
+                                <span th:unless="${repositorio != null}">Crear Repositorio</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </main>
+        
+        <!-- Preview Modal -->
+        <div id="previewModal" class="modal">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h2 class="modal-title">Vista Previa del Repositorio</h2>
+                    <button type="button" class="modal-close">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="preview-container">
+                        <div class="preview-header">
+                            <div class="preview-icon">
+                                <i class="fas fa-code-branch"></i>
+                            </div>
+                            <div class="preview-info">
+                                <h3 id="previewName">Nombre del Repositorio</h3>
+                                <div class="preview-badges">
+                                    <span id="previewVisibility" class="badge">Visibilidad</span>
+                                    <span id="previewCategory" class="badge badge-category">Categoría</span>
+                                    <span id="previewProject" class="badge badge-primary">Proyecto</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="preview-description">
+                            <h4>Descripción</h4>
+                            <p id="previewDescriptionText">Descripción del repositorio</p>
+                        </div>
+                        
+                        <div class="preview-settings">
+                            <h4>Configuración</h4>
+                            <div class="settings-grid">
+                                <div class="setting-item">
+                                    <strong>Acceso:</strong> <span id="previewAccess">Acceso</span>
+                                </div>
+                                <div class="setting-item">
+                                    <strong>Rama principal:</strong> <span id="previewBranch">main</span>
+                                </div>
+                                <div class="setting-item" th:if="${repositorio != null}">
+                                    <strong>Estado:</strong> <span id="previewStatus">Estado</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary modal-close">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Additional Styles for Repository Form -->
+    <style>
+        .toggle-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .toggle-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .feature-toggles h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 1rem 0;
+        }
+        
+        .init-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+        }
+    </style>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/project-repository.js}"></script>
+    
+    <script>
+        // Enable/disable gitignore template based on checkbox
+        document.getElementById('crearGitignore').addEventListener('change', function() {
+            const template = document.getElementById('plantillaGitignore');
+            template.disabled = !this.checked;
+            if (!this.checked) {
+                template.value = '';
+            }
+        });
+        
+        // Preview functionality
+        document.getElementById('previewBtn').addEventListener('click', function() {
+            const nombre = document.getElementById('nombreRepositorio').value || 'Sin nombre';
+            const descripcion = document.getElementById('descripcionRepositorio').value || 'Sin descripción';
+            const visibilidad = document.getElementById('visibilidadRepositorio').value;
+            const acceso = document.getElementById('accesoRepositorio').value;
+            const rama = document.getElementById('ramaPrincipal').value || 'main';
+            const categoria = document.getElementById('categoriaId').selectedOptions[0]?.text || '';
+            const proyecto = document.getElementById('proyectoId').selectedOptions[0]?.text || '';
+            
+            // Update preview
+            document.getElementById('previewName').textContent = nombre;
+            document.getElementById('previewDescriptionText').textContent = descripcion;
+            document.getElementById('previewAccess').textContent = acceso;
+            document.getElementById('previewBranch').textContent = rama;
+            
+            // Update visibility badge
+            const visibilityBadge = document.getElementById('previewVisibility');
+            visibilityBadge.textContent = visibilidad === 'PUBLICO' ? 'Público' : 'Privado';
+            visibilityBadge.className = 'badge ' + (visibilidad === 'PUBLICO' ? 'badge-public' : 'badge-private');
+            
+            // Update category
+            const categoryBadge = document.getElementById('previewCategory');
+            if (categoria && categoria !== 'Seleccionar categoría') {
+                categoryBadge.textContent = categoria;
+                categoryBadge.style.display = 'inline-block';
+            } else {
+                categoryBadge.style.display = 'none';
+            }
+            
+            // Update project
+            const projectBadge = document.getElementById('previewProject');
+            if (proyecto && proyecto !== 'Sin proyecto asociado') {
+                projectBadge.textContent = proyecto;
+                projectBadge.style.display = 'inline-block';
+            } else {
+                projectBadge.style.display = 'none';
+            }
+            
+            // Show modal
+            document.getElementById('previewModal').classList.add('active');
+        });
+    </script>
+</body>
+</html>
+
+

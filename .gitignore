@@ -1,0 +1,51 @@
+# Archivos de la máquina y del sistema operativo
+.DS_Store
+*~
+.cache/
+
+# Archivos de build y de Maven
+target/
+pom.xml.tag
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+releaseArguments.properties
+.m2/repository/
+*.jar
+*.war
+
+# Archivos de IDEs
+.idea/
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+.sts4-cache/
+*.iml
+*.iws
+*.ipr
+
+# Archivos de configuración con información sensible
+src/main/resources/application.properties
+src/main/resources/application-local.properties
+src/main/resources/app.yaml
+app.yaml
+debug-oauth2.properties
+*-oauth2.properties
+
+# Credenciales de Google Cloud (GCS Service Account Keys)
+src/main/resources/*-key.json
+src/main/resources/dev-portal-storage-manager-key.json
+src/main/resources/devportal-storage-key.json
+*.json
+!src/main/resources/static/**/*.json
+!package.json
+!tsconfig.json
+
+# Archivos de log
+*.log
+logs/target/
+.gradle/
+build/
+*.jar

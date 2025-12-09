@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Dev Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center">
+        <div class="row justify-content-center w-100">
+            <div class="col-md-8 col-lg-6">
+                <div class="text-center">
+                    <!-- Error Icon -->
+                    <div class="mb-4">
+                        <i class="fas fa-bug text-danger" style="font-size: 6rem;"></i>
+                    </div>
+                    
+                    <!-- Error Message -->
+                    <h1 class="display-3 fw-bold text-danger mb-3" th:text="${statusCode ?: 'ERROR'}">ERROR</h1>
+                    <h2 class="mb-3" th:text="${title}">Ha ocurrido un error</h2>
+                    <p class="lead text-muted mb-4" th:text="${description}">
+                        Ha ocurrido un error inesperado en la aplicación.
+                    </p>
+                    
+                    <!-- Error Details -->
+                    <div class="alert alert-danger" role="alert">
+                        <strong>Detalles del error:</strong><br>
+                        <span th:text="${errorMessage}">Error desconocido</span>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2 d-md-block">
+                        <a href="javascript:history.back()" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Volver atrás
+                        </a>
+                        <a href="/" class="btn btn-primary">
+                            <i class="fas fa-home me-2"></i>Ir al inicio
+                        </a>
+                        <a href="/signin" class="btn btn-success">
+                            <i class="fas fa-sign-in-alt me-2"></i>Iniciar sesión
+                        </a>
+                    </div>
+                    
+                    <!-- Debug Info -->
+                    <div class="mt-4 p-3 bg-light rounded text-start small text-muted">
+                        <strong>Información técnica:</strong><br>
+                        Código de estado: <span th:text="${statusCode}">Desconocido</span><br>
+                        URI solicitada: <span th:text="${requestUri}">URI desconocida</span><br>
+                        Mensaje: <span th:text="${errorMessage}">Error desconocido</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+

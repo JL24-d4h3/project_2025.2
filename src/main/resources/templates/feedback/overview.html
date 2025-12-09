@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedbacks - DevPortal</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/project-repository.css}">
+    
+    <style>
+        :root {
+            --primary-color: #2596be;
+            --primary-dark: #1e7a9a;
+            --primary-light: #e3f2fd;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --border-light: #e0e0e0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        .feedback-container {
+            padding: 1.5rem;
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+
+        .feedback-main {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feedback-header {
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-left {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .breadcrumb {
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-dark);
+        }
+
+        .page-title {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 1.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            color: white;
+            text-decoration: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-icon {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.sent { background: #e3f2fd; color: #1976d2; }
+        .stat-icon.received { background: #f3e5f5; color: #7b1fa2; }
+
+        .stat-info {
+            text-align: left;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .feedback-tabs {
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs {
+            border-bottom: 2px solid var(--border-light);
+            padding: 0 1.5rem;
+        }
+
+        .nav-tabs .nav-link {
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            text-decoration: none;
+            background: transparent;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--primary-color);
+            border-color: transparent;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            background: transparent;
+        }
+
+        .tab-content {
+            padding: 1.5rem;
+        }
+
+        .filter-bar {
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-bar .form-control {
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-light);
+        }
+
+        .feedback-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .feedback-card {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            transition: all 0.2s;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%; /* Altura completa del grid */
+        }
+
+        .feedback-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+            border-color: var(--primary-color);
+        }
+
+        .feedback-card .card-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border-light);
+            background: #f8f9fa;
+        }
+
+        .feedback-card .card-header h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-primary);
+            font-size: 1.125rem;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+
+        .feedback-card .rating {
+            display: flex;
+            gap: 0.25rem;
+            color: #ffa726;
+            font-size: 1rem;
+        }
+
+        .feedback-card .card-body {
+            padding: 1.25rem;
+            flex: 1; /* Ocupa el espacio disponible */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .feedback-card .comment-preview {
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex: 1; /* Ocupa el espacio disponible */
+        }
+
+        .feedback-card .card-footer {
+            padding: 1rem 1.25rem;
+            background: #f8f9fa;
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: auto; /* Se pega al fondo */
+        }
+
+        .feedback-card .user-info,
+        .feedback-card .date {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .feedback-card .user-info i,
+        .feedback-card .date i {
+            color: var(--primary-color);
+        }
+
+        .feedback-card .card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-view,
+        .btn-delete {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-view {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: var(--primary-dark);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-delete {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .btn-delete:hover {
+            background: #d32f2f;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-title {
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .empty-message {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .pagination-nav {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .pagination {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .page-item {
+            list-style: none;
+        }
+
+        .page-link {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .page-link:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .page-item.active .page-link {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .page-item.disabled .page-link {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .feedback-container {
+                padding: 1rem;
+            }
+
+            .feedback-header {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .feedback-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Banner de impersonación si aplica -->
+<div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+
+<!-- Navbar -->
+<div th:replace="~{fragments/navbar :: navbar(currentNavSection='feedback')}"></div>
+
+<div class="feedback-container">
+    <main class="feedback-main content-after-navbar">
+        <!-- Header -->
+        <div class="feedback-header">
+            <div class="header-left">
+                <div class="breadcrumb">
+                    <a th:href="@{/devportal/{rol}/{username}/dashboard(rol=${rol}, username=${username})}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Feedbacks</span>
+                </div>
+
+                <h2 class="page-title">
+                    <i class="fas fa-comments" style="color: #2596be;"></i>
+                    Feedbacks
+                </h2>
+            </div>
+
+            <div class="header-actions">
+                <a th:href="@{/devportal/{rol}/{username}/feedback/create(rol=${rol}, username=${username})}"
+                   class="btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Nuevo Feedback
+                </a>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-grid">
+            <!-- Feedbacks Enviados -->
+            <a th:href="@{/devportal/{rol}/{username}/feedback/sent(rol=${rol}, username=${username})}" class="stat-card" style="text-decoration: none; color: inherit;">
+                <div class="stat-icon sent">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${stats.totalSent ?: 0}">0</div>
+                    <div class="stat-label">Feedbacks Enviados</div>
+                </div>
+            </a>
+
+            <!-- Feedbacks Recibidos -->
+            <a th:href="@{/devportal/{rol}/{username}/feedback/received(rol=${rol}, username=${username})}" class="stat-card" style="text-decoration: none; color: inherit;">
+                <div class="stat-icon received">
+                    <i class="fas fa-inbox"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${stats.totalReceived ?: 0}">0</div>
+                    <div class="stat-label">Feedbacks Recibidos</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Tabs Section -->
+        <div class="feedback-tabs">
+            <ul class="nav nav-tabs" id="feedbackTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" th:classappend="${activeTab == 'sent' ? 'active' : ''}" 
+                       th:href="@{/devportal/{rol}/{username}/feedback/sent(rol=${rol}, username=${username})}">
+                        <i class="fas fa-paper-plane"></i>
+                        Enviados
+                        <span class="badge bg-primary ms-2" th:text="${stats.totalSent ?: 0}">0</span>
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" th:classappend="${activeTab == 'received' ? 'active' : ''}" 
+                       th:href="@{/devportal/{rol}/{username}/feedback/received(rol=${rol}, username=${username})}">
+                        <i class="fas fa-inbox"></i>
+                        Recibidos
+                        <span class="badge bg-warning ms-2" th:text="${stats.totalReceived ?: 0}">0</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="feedbackTabsContent">
+                <!-- Tab: Enviados -->
+                <div class="tab-pane fade" th:classappend="${activeTab == 'sent' ? 'show active' : ''}" id="sent-pane" role="tabpanel">
+                    <div th:if="${#lists.isEmpty(sentFeedbacks)}" class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <h3 class="empty-title">No has enviado feedbacks</h3>
+                        <p class="empty-message">
+                            Cuando envíes tu primer feedback, aparecerá aquí.
+                        </p>
+                        <a th:href="@{/devportal/{rol}/{username}/feedback/create(rol=${rol}, username=${username})}"
+                           class="btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Crear Feedback
+                        </a>
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(sentFeedbacks)}">
+                        <!-- Barra de búsqueda/filtro -->
+                        <div class="filter-bar">
+                            <input type="text" id="searchSent" class="form-control" placeholder="Buscar por nombre de documentación...">
+                        </div>
+
+                        <!-- Grid de tarjetas de feedback -->
+                        <div class="feedback-grid" id="sentFeedbackGrid">
+                            <div class="feedback-card" th:each="feedback : ${sentFeedbacks}">
+                                <div class="card-header">
+                                    <h4 th:text="${feedback.documentationSection}" th:title="${feedback.documentationSection}">Nombre Documentación</h4>
+                                    <div class="rating">
+                                        <i th:each="star : ${#numbers.sequence(1, 5)}" 
+                                           th:classappend="${star <= feedback.rating ? 'fas fa-star' : 'far fa-star'}"></i>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <p class="comment-preview" th:text="${#strings.abbreviate(feedback.comment, 150)}">Comentario...</p>
+                                </div>
+                                <div class="card-footer">
+                                    <span class="date">
+                                        <i class="fas fa-calendar"></i>
+                                        <span th:text="${#temporals.format(feedback.createdAt, 'dd/MM/yyyy')}">28/10/2025</span>
+                                    </span>
+                                    <div class="card-actions">
+                                        <a th:href="@{/devportal/{rol}/{username}/feedback/F-{id}(rol=${rol}, username=${username}, id=${feedback.feedbackId})}"
+                                           class="btn-view">
+                                            <i class="fas fa-eye"></i>
+                                            Ver
+                                        </a>
+                                        <button class="btn-delete" th:attr="data-feedback-id=${feedback.feedbackId}" onclick="deleteFeedback(this)">
+                                            <i class="fas fa-trash"></i>
+                                            Eliminar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paginación -->
+                        <nav class="pagination-nav" th:if="${sentTotalPages > 1}">
+                            <ul class="pagination">
+                                <li class="page-item" th:classappend="${sentCurrentPage == 0 ? 'disabled' : ''}">
+                                    <a class="page-link" th:href="@{/devportal/{rol}/{username}/feedback/sent(rol=${rol}, username=${username}, page=${sentCurrentPage - 1})}">Anterior</a>
+                                </li>
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, sentTotalPages - 1)}" 
+                                    th:classappend="${i == sentCurrentPage ? 'active' : ''}">
+                                    <a class="page-link" th:href="@{/devportal/{rol}/{username}/feedback/sent(rol=${rol}, username=${username}, page=${i})}" th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${sentCurrentPage == sentTotalPages - 1 ? 'disabled' : ''}">
+                                    <a class="page-link" th:href="@{/devportal/{rol}/{username}/feedback/sent(rol=${rol}, username=${username}, page=${sentCurrentPage + 1})}">Siguiente</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Tab: Recibidos -->
+                <div class="tab-pane fade" th:classappend="${activeTab == 'received' ? 'show active' : ''}" id="received-pane" role="tabpanel">
+                    <div th:if="${#lists.isEmpty(receivedFeedbacks)}" class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-inbox"></i>
+                        </div>
+                        <h3 class="empty-title">No has recibido feedbacks</h3>
+                        <p class="empty-message">
+                            Cuando recibas feedbacks sobre tus documentaciones, aparecerán aquí.
+                        </p>
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(receivedFeedbacks)}">
+                        <!-- Barra de búsqueda/filtro -->
+                        <div class="filter-bar">
+                            <input type="text" id="searchReceived" class="form-control" placeholder="Buscar por nombre de documentación o usuario...">
+                        </div>
+
+                        <!-- Grid de tarjetas de feedback -->
+                        <div class="feedback-grid" id="receivedFeedbackGrid">
+                            <div class="feedback-card" th:each="feedback : ${receivedFeedbacks}">
+                                <div class="card-header">
+                                    <h4 th:text="${feedback.documentationSection}" th:title="${feedback.documentationSection}">Nombre Documentación</h4>
+                                    <div class="rating">
+                                        <i th:each="star : ${#numbers.sequence(1, 5)}" 
+                                           th:classappend="${star <= feedback.rating ? 'fas fa-star' : 'far fa-star'}"></i>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <p class="comment-preview" th:text="${#strings.abbreviate(feedback.comment, 150)}">Comentario...</p>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="user-info">
+                                        <i class="fas fa-user"></i>
+                                        <span th:text="${feedback.userFullName}">Usuario</span>
+                                    </div>
+                                    <span class="date">
+                                        <i class="fas fa-calendar"></i>
+                                        <span th:text="${#temporals.format(feedback.createdAt, 'dd/MM/yyyy')}">28/10/2025</span>
+                                    </span>
+                                    <div class="card-actions">
+                                        <a th:href="@{/devportal/{rol}/{username}/feedback/F-{id}(rol=${rol}, username=${username}, id=${feedback.feedbackId})}"
+                                           class="btn-view">
+                                            <i class="fas fa-eye"></i>
+                                            Ver
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paginación -->
+                        <nav class="pagination-nav" th:if="${receivedTotalPages > 1}">
+                            <ul class="pagination">
+                                <li class="page-item" th:classappend="${receivedCurrentPage == 0 ? 'disabled' : ''}">
+                                    <a class="page-link" th:href="@{/devportal/{rol}/{username}/feedback/received(rol=${rol}, username=${username}, page=${receivedCurrentPage - 1})}">Anterior</a>
+                                </li>
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, receivedTotalPages - 1)}" 
+                                    th:classappend="${i == receivedCurrentPage ? 'active' : ''}">
+                                    <a class="page-link" th:href="@{/devportal/{rol}/{username}/feedback/received(rol=${rol}, username=${username}, page=${i})}" th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${receivedCurrentPage == receivedTotalPages - 1 ? 'disabled' : ''}">
+                                    <a class="page-link" th:href="@{/devportal/{rol}/{username}/feedback/received(rol=${rol}, username=${username}, page=${receivedCurrentPage + 1})}">Siguiente</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const rol = /*[[${rol}]]*/ 'dev';
+    const username = /*[[${username}]]*/ 'usuario';
+
+    // Función para normalizar texto (remover tildes y convertir a minúsculas)
+    function normalizeText(text) {
+        return text
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, ''); // Remueve acentos/tildes
+    }
+
+    // Función para eliminar feedback
+    async function deleteFeedback(button) {
+        const feedbackId = button.getAttribute('data-feedback-id');
+        
+        if (!confirm('¿Estás seguro de que deseas eliminar este feedback? Esta acción no se puede deshacer.')) {
+            return;
+        }
+
+        try {
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+
+            const response = await fetch(`/devportal/${rol}/${username}/feedback/${feedbackId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert('Feedback eliminado exitosamente');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al eliminar el feedback');
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
+        }
+    }
+
+    // Filtro de búsqueda para enviados
+    document.getElementById('searchSent')?.addEventListener('input', function(e) {
+        const searchTerm = normalizeText(e.target.value);
+        const cards = document.querySelectorAll('#sentFeedbackGrid .feedback-card');
+        
+        cards.forEach(card => {
+            const title = normalizeText(card.querySelector('.card-header h4').textContent);
+            if (title.includes(searchTerm)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    // Filtro de búsqueda para recibidos
+    document.getElementById('searchReceived')?.addEventListener('input', function(e) {
+        const searchTerm = normalizeText(e.target.value);
+        const cards = document.querySelectorAll('#receivedFeedbackGrid .feedback-card');
+        
+        cards.forEach(card => {
+            const title = normalizeText(card.querySelector('.card-header h4').textContent);
+            const user = normalizeText(card.querySelector('.user-info span')?.textContent || '');
+            if (title.includes(searchTerm) || user.includes(searchTerm)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+    /*]]>*/
+</script>
+
+<div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+
+</body>
+</html>

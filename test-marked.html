@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Marked.js</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #output { border: 1px solid #ccc; padding: 20px; margin-top: 20px; }
+        h1, h2, h3 { color: #333; }
+        code { background: #f5f5f5; padding: 2px 5px; border-radius: 3px; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; }
+        table { border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Prueba de Marked.js</h1>
+    <div id="output"></div>
+    
+    <script src="src/main/resources/static/js/marked.min.js"></script>
+    <script>
+        const markdown = `# Título 1
+## Título 2
+### Título 3
+
+Este es un **texto en negrita** y esto es *cursiva*.
+
+| Código | Descripción | Estado |
+|--------|-------------|--------|
+| 001    | Item 1      | ✅     |
+| 002    | Item 2      | ❌     |
+
+\`\`\`java
+public class Test {
+    public static void main(String[] args) {
+        System.out.println("Hello World");
+    }
+}
+\`\`\`
+
+- Item 1
+- Item 2
+- Item 3
+`;
+
+        console.log('marked disponible?', typeof marked !== 'undefined');
+        
+        if (typeof marked !== 'undefined') {
+            try {
+                const html = marked.parse(markdown);
+                document.getElementById('output').innerHTML = html;
+                console.log('✅ Markdown renderizado correctamente');
+            } catch (error) {
+                console.error('❌ Error:', error);
+                document.getElementById('output').innerHTML = '<p style="color:red;">Error: ' + error.message + '</p>';
+            }
+        } else {
+            document.getElementById('output').innerHTML = '<p style="color:red;">marked.js no se cargó</p>';
+        }
+    </script>
+</body>
+</html>

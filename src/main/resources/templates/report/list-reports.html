@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo} + ' - DevPortal'">Reportes - DevPortal</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/project-repository.css}">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <style>
+        :root {
+            --primary-color: #2596be;
+            --primary-dark: #1e7a9a;
+            --primary-light: #e3f2fd;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --border-light: #e0e0e0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        .reports-container {
+            padding: 1.5rem;
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+
+        .reports-main {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .reports-header {
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-left {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .breadcrumb {
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-dark);
+        }
+
+        .page-title {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 1.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            color: white;
+            text-decoration: none;
+        }
+
+        .reports-table {
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 2px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .table-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        th {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: middle;
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .report-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .report-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .type-api {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .type-ticket {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .type-proyecto {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .type-repositorio {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .type-documentacion {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+
+        .type-foro {
+            background: #e0f2f1;
+            color: #00796b;
+        }
+
+        .type-general {
+            background: #f1f8e9;
+            color: #558b2f;
+        }
+
+        .report-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-borrador {
+            background: #f5f5f5;
+            color: #616161;
+        }
+
+        .status-publicado {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .status-revisado {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status-archivado {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .date-cell {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.6rem;
+            font-size: 0.75rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
+            background: white;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            cursor: pointer;
+        }
+
+        .btn-small:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-title {
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .empty-message {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .reports-container {
+                padding: 1rem;
+            }
+
+            .reports-header {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+
+            .header-left {
+                margin-bottom: 1rem;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            table {
+                font-size: 0.875rem;
+            }
+
+            th, td {
+                padding: 0.75rem;
+            }
+
+            .report-title {
+                max-width: 150px;
+            }
+
+            .actions-cell {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Banner de impersonación si aplica -->
+<div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+
+<!-- Navbar -->
+    </main>
+
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="reports-container">
+    <main class="reports-main content-after-navbar">
+        <!-- Header -->
+        <div class="reports-header">
+            <div class="header-left">
+                <div class="breadcrumb">
+                    <a th:href="@{/devportal/{rol}/{username}/dashboard(rol=${rol}, username=${username})}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <i class="fas fa-chevron-right"></i>
+                    <a th:href="@{/devportal/{rol}/{username}/reports(rol=${rol}, username=${username})}">
+                        Reportes
+                    </a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span th:text="${titulo}">Reportes</span>
+                </div>
+
+                <h2 class="page-title">
+                    <i th:class="'fas ' + ${icon ?: 'fa-file-alt'}" style="color: #2596be;"></i>
+                    <span th:text="${titulo}">Mis Reportes</span>
+                </h2>
+            </div>
+
+            <div class="header-actions">
+                <a th:href="@{/devportal/{rol}/{username}/reports/create(rol=${rol}, username=${username})}"
+                   class="btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Nuevo Reporte
+                </a>
+                <a th:href="@{/devportal/{rol}/{username}/reports(rol=${rol}, username=${username})}"
+                   class="btn-primary" style="background: transparent; color: var(--primary-color); border: 1px solid var(--primary-color);">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver
+                </a>
+            </div>
+        </div>
+
+        <!-- Tabla de Reportes -->
+        <div class="reports-table" th:if="${#lists.size(reportes) > 0}">
+            <div class="table-header">
+                <h2 th:text="${titulo} + ' (' + #lists.size(reportes) + ')'">Reportes (0)</h2>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Título</th>
+                        <th style="width: 15%;">Tipo</th>
+                        <th style="width: 15%;">Estado</th>
+                        <th style="width: 20%;">Creado</th>
+                        <th style="width: 20%;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="reporte : ${reportes}">
+                        <td>
+                            <div class="report-title" th:title="${reporte.tituloReporte}">
+                                <span th:text="${reporte.tituloReporte ?: 'Sin título'}">Título</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span th:class="'report-type type-' + ${reporte.tipoReporte.toString().toLowerCase()}"
+                                  th:text="${reporte.tipoReporte.toString()}">TIPO</span>
+                        </td>
+                        <td>
+                            <span th:class="'report-status status-' + ${reporte.estadoReporte.toString().toLowerCase()}"
+                                  th:text="${reporte.estadoReporte.toString()}">ESTADO</span>
+                        </td>
+                        <td>
+                            <div class="date-cell">
+                                <i class="fas fa-calendar"></i>
+                                <span th:text="${#temporals.format(reporte.creadoEn, 'dd/MM/yyyy HH:mm')}">01/01/2024</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="actions-cell">
+                                <a th:href="@{/devportal/{rol}/{username}/reports/view/report-{id}(rol=${rol}, username=${username}, id=${reporte.reporteId})}"
+                                   class="btn-small" title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                    <span class="d-none d-sm-inline">Ver</span>
+                                </a>
+                                <a th:href="@{/devportal/{rol}/{username}/reports/edit/report-{id}(rol=${rol}, username=${username}, id=${reporte.reporteId})}"
+                                   class="btn-small" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                    <span class="d-none d-sm-inline">Editar</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" th:if="${#lists.isEmpty(reportes)}">
+            <div class="empty-icon">
+                <i th:class="'fas ' + ${icon ?: 'fa-file-alt'}"></i>
+            </div>
+            <h3 class="empty-title">No hay reportes</h3>
+            <p class="empty-message">No se encontraron reportes de este tipo en este momento.</p>
+            <a th:href="@{/devportal/{rol}/{username}/reports/create(rol=${rol}, username=${username})}"
+               class="btn-primary">
+                <i class="fas fa-plus"></i>
+                Crear Reporte
+            </a>
+        </div>
+    </main>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+
+</body>
+</html>
+
+
+

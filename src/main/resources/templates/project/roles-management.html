@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Roles - GTICS DevPortal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/project-repository.css}">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <style>
+        .roles-container {
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            background: #f5f7fa;
+        }
+        
+        .roles-wrapper {
+            width: 100%;
+            max-width: 1000px;
+        }
+        
+        .role-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .role-header h2 {
+            margin: 0;
+            color: #1f2937;
+            font-weight: 700;
+            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .role-header i {
+            color: #3b82f6;
+        }
+        
+        .role-header small {
+            color: #6b7280 !important;
+            font-size: 0.9rem;
+        }
+        
+        .role-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.06);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .role-table table {
+            width: 100%;
+        }
+        
+        .role-table thead {
+            background: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .role-table th {
+            padding: 16px 20px;
+            font-weight: 700;
+            color: #374151;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            text-align: left;
+        }
+        
+        .role-table td {
+            padding: 16px 20px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f3f4f6;
+            color: #374151;
+        }
+        
+        .role-table tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .role-table tbody tr:hover {
+            background: #f9fafb;
+        }
+        
+        .role-name {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 1rem;
+        }
+        
+        .role-description {
+            color: #6b7280;
+            font-size: 0.95rem;
+            max-width: 300px;
+        }
+        
+        .role-users-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .role-date {
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+        
+        .role-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        
+        .role-actions .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            padding: 0;
+        }
+        
+        .btn-icon-edit {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .btn-icon-edit:hover {
+            background: #bfdbfe;
+            color: #1e3a8a;
+            transform: scale(1.05);
+        }
+        
+        .btn-icon-delete {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .btn-icon-delete:hover {
+            background: #fecaca;
+            color: #7f1d1d;
+            transform: scale(1.05);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: #6b7280;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .empty-state i {
+            font-size: 3.5rem;
+            color: #d1d5db;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state p {
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+        
+        .empty-state strong {
+            color: #1f2937;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .btn-primary-custom {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary-custom:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="container-fluid roles-container">
+        <div class="roles-wrapper">
+            <!-- Header -->
+            <div class="role-header">
+                <div>
+                    <h2>
+                        <i class="fas fa-shield-alt"></i> Gestión de Roles
+                    </h2>
+                    <small class="text-muted d-block mt-2" th:text="'Proyecto: ' + ${proyecto.nombreProyecto}">
+                        Proyecto: TelDevPortal
+                    </small>
+                </div>
+                <a th:href="@{/devportal/sa/{username}/projects/P-{id}/roles/create-roles(username=${username}, id=${proyecto.proyectoId})}" 
+                   class="btn-primary-custom">
+                    <i class="fas fa-plus"></i> Crear Nuevo Rol
+                </a>
+            </div>
+
+            <!-- Roles Table -->
+            <div class="role-table" th:if="${not #lists.isEmpty(roles)}">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nombre del Rol</th>
+                            <th>Descripción</th>
+                            <th style="text-align: center;">Usuarios</th>
+                            <th>Fecha Creación</th>
+                            <th style="text-align: right; width: 100px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="rol : ${roles}">
+                            <td>
+                                <span class="role-name" th:text="${rol.nombreRolProyecto}">Editor</span>
+                            </td>
+                            <td>
+                                <span class="role-description" th:text="${#strings.abbreviate(rol.descripcionRolProyecto, 50)}">Descripción del rol</span>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="role-users-badge" th:text="${rol.usuariosAsignados}">5</span>
+                            </td>
+                            <td>
+                                <span class="role-date" th:text="${#temporals.format(rol.creadoEn, 'dd/MM/yyyy HH:mm')}">
+                                    01/01/2024 10:30
+                                </span>
+                            </td>
+                            <td>
+                                <div class="role-actions" style="justify-content: flex-end;">
+                                    <a th:href="@{/devportal/sa/{username}/projects/P-{id}/roles/update-roles/{rolId}(username=${username}, id=${proyecto.proyectoId}, rolId=${rol.rolProyectoId})}" 
+                                       class="btn-icon btn-icon-edit"
+                                       title="Editar rol">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                                    <button class="btn-icon btn-icon-delete" 
+                                            type="button"
+                                            th:data-rol-id="${rol.rolProyectoId}"
+                                            th:data-rol-nombre="${rol.nombreRolProyecto}"
+                                            onclick="eliminarRol(this)"
+                                            title="Eliminar rol">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" th:if="${#lists.isEmpty(roles)}">
+                <i class="fas fa-inbox"></i>
+                <p class="mt-3">
+                    <strong>No hay roles definidos aún</strong>
+                </p>
+                <p class="text-muted">
+                    Crea un nuevo rol para asignar permisos específicos a los miembros del equipo.
+                </p>
+                <a th:href="@{/devportal/sa/{username}/projects/P-{id}/roles/create-roles(username=${username}, id=${proyecto.proyectoId})}" 
+                   class="btn-primary-custom">
+                    <i class="fas fa-plus"></i> Crear Primer Rol
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteRoleModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar el rol <strong id="rolNombre"></strong>?</p>
+                    <p class="text-danger small">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Esta acción no se puede deshacer.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form th:action="@{/devportal/sa/{username}/projects/P-{id}/roles/delete(username=${username}, id=${proyecto.proyectoId})}" 
+                          method="POST" style="display: inline;">
+                        <input type="hidden" name="rolId" id="rolId">
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function eliminarRol(button) {
+            const rolId = button.getAttribute('data-rol-id');
+            const rolNombre = button.getAttribute('data-rol-nombre');
+            document.getElementById('rolId').value = rolId;
+            document.getElementById('rolNombre').textContent = rolNombre;
+            new bootstrap.Modal(document.getElementById('deleteRoleModal')).show();
+        }
+    </script>
+</body>
+</html>
+
+
+

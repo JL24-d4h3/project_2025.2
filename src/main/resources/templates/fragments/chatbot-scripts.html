@@ -1,0 +1,30 @@
+<!-- Fragment: Chatbot Scripts -->
+<div th:fragment="chatbot-scripts">
+    <!-- Chatbot Libraries - Archivos locales -->
+    <script>
+        console.log('[CHATBOT] Cargando librerias...');
+        console.log('[CHATBOT] Base URL:', window.location.origin);
+    </script>
+    
+    <script src="/js/highlight.min.js"
+            onload="console.log('[CHATBOT] Highlight.js OK - tipo:', typeof hljs);"
+            onerror="console.error('[CHATBOT] ERROR cargando /js/highlight.min.js');">
+    </script>
+    
+    <script src="/js/marked.min.js"
+            onload="console.log('[CHATBOT] Marked.js OK - tipo:', typeof marked);"
+            onerror="console.error('[CHATBOT] ERROR cargando /js/marked.min.js');">
+    </script>
+    
+    <script>
+        setTimeout(function() {
+            console.log('[CHATBOT] Verificacion (1 segundo):');
+            console.log('  marked:', typeof marked, marked ? 'OK' : 'ERROR');
+            console.log('  hljs:', typeof hljs, hljs ? 'OK' : 'ERROR');
+            
+            if (typeof marked === 'undefined' || typeof hljs === 'undefined') {
+                console.error('[CHATBOT] Las librerias NO se cargaron correctamente');
+            }
+        }, 1000);
+    </script>
+</div>

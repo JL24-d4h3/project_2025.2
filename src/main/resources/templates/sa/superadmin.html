@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Super Administrador - DevPortal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Navbar CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-dark: #212529;
+            --text-muted: #6c757d;
+            --border-color: #e9ecef;
+            --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            --shadow-hover: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+        }
+
+        body {
+            background-color: var(--background-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-dark);
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .header-section {
+            background: var(--card-background);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .header-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle {
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Admin Cards Section */
+        .admin-section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+        }
+
+        .admin-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .admin-card {
+            background: var(--card-background);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .admin-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .card-icon {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .card-description {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .card-action i {
+            transition: transform 0.2s;
+        }
+
+        .admin-card:hover .card-action {
+            color: var(--primary-color);
+        }
+
+        .admin-card:hover .card-action i {
+            transform: translateX(4px);
+        }
+
+        /* Specific card colors */
+        .card-dashboard .card-icon { background: rgba(23, 162, 184, 0.1); color: var(--info-color); }
+        .card-metrics .card-icon { background: rgba(40, 167, 69, 0.1); color: var(--success-color); }
+        .card-users .card-icon { background: rgba(0, 123, 255, 0.1); color: var(--primary-color); }
+        .card-categories .card-icon { background: rgba(220, 53, 69, 0.1); color: var(--danger-color); }
+        .card-impersonate .card-icon { background: rgba(108, 117, 125, 0.1); color: var(--secondary-color); }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem 0.5rem;
+            }
+            
+            .admin-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Banner de Impersonación -->
+    <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+
+    <!-- Navbar SA -->
+    <div th:replace="~{fragments/navbar-sa :: navbar-sa}"></div>
+
+    <div class="main-container content-after-navbar">
+        <!-- Header -->
+        <div class="header-section">
+            <h1 class="header-title">
+                <i class="fas fa-user-shield"></i> Panel Super Administrador
+            </h1>
+            <p class="header-subtitle">Bienvenido de vuelta, <span th:text="${username}">Super Admin</span></p>
+        </div>
+
+        <!-- Admin Functions Section -->
+        <div class="admin-section">
+            <h2 class="section-title">
+                <i class="fas fa-tools"></i> Funciones de Administración
+            </h2>
+            <div class="admin-cards">
+                <!-- Tarjeta: Dashboard -->
+                <a class="admin-card card-dashboard" th:href="@{/devportal/sa}">
+                    <div class="card-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h3 class="card-title">Dashboard Principal</h3>
+                    <p class="card-description">
+                        Vista general del sistema con acceso rápido a todas las funcionalidades administrativas.
+                    </p>
+                    <div class="card-action">
+                        Ir al Dashboard <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+                
+                <!-- Tarjeta: Ver Métricas -->
+                <a class="admin-card card-metrics" 
+                   th:href="'/devportal/sa/' + ${usuario != null ? usuario.username : 'admin'} + '/dashboard-panel'">
+                    <div class="card-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="card-title">Ver Métricas</h3>
+                    <p class="card-description">
+                        Visualiza métricas detalladas del Developer Portal con gráficos y análisis del rendimiento del sistema.
+                    </p>
+                    <div class="card-action">
+                        Ver Métricas <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+                
+                <!-- Tarjeta: Gestionar Usuarios -->
+                <a class="admin-card card-users" 
+                   th:href="'/devportal/sa/' + ${usuario != null ? usuario.username : 'admin'} + '/manage-users'">
+                    <div class="card-icon">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <h3 class="card-title">Gestionar Usuarios</h3>
+                    <p class="card-description">
+                        Administra cuentas de usuario: habilitar, inhabilitar, modificar permisos y controlar accesos al sistema.
+                    </p>
+                    <div class="card-action">
+                        Gestionar Usuarios <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+                
+                <!-- Tarjeta: Gestionar Categorías -->
+                <a class="admin-card card-categories" 
+                   th:href="'/devportal/sa/' + ${usuario != null ? usuario.username : 'admin'} + '/manage-categories'">
+                    <div class="card-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <h3 class="card-title">Gestionar Categorías</h3>
+                    <p class="card-description">
+                        Administra categorías de APIs, proyectos, documentación y repositorios para mantener el sistema organizado.
+                    </p>
+                    <div class="card-action">
+                        Gestionar Categorías <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+                
+                <!-- Tarjeta: Impersonar Usuario -->
+                <a class="admin-card card-impersonate" 
+                   th:href="'/devportal/sa/' + ${usuario != null ? usuario.username : 'admin'} + '/impersonate-user'">
+                    <div class="card-icon">
+                        <i class="fas fa-user-secret"></i>
+                    </div>
+                    <h3 class="card-title">Impersonar Usuario</h3>
+                    <p class="card-description">
+                        Accede al sistema como cualquier usuario para soporte técnico, debugging y resolución de problemas.
+                    </p>
+                    <div class="card-action">
+                        Impersonar Usuario <i class="fas fa-arrow-right"></i>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script th:inline="javascript">
+        const stats = /*[[${stats}]]*/ {};
+        const username = /*[[${username}]]*/ '';
+        const role = 'sa';
+        
+        console.log('Super Admin Dashboard loaded:', { stats, username, role });
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate cards on scroll
+            animateCardsOnScroll();
+            
+            // Setup card interactions
+            setupCardInteractions();
+            
+            // Setup accessibility features
+            setupAccessibility();
+            
+            // Performance monitoring
+            if ('performance' in window) {
+                window.addEventListener('load', function() {
+                    const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+                    console.log(`Super Admin Dashboard load time: ${loadTime}ms`);
+                });
+            }
+        });
+
+        function animateCardsOnScroll() {
+            const cards = document.querySelectorAll('.admin-card');
+            
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = `all 0.6s ease ${index * 0.1}s`;
+                observer.observe(card);
+            });
+        }
+
+        function setupCardInteractions() {
+            const adminCards = document.querySelectorAll('.admin-card');
+            
+            adminCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-4px)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+                
+                card.addEventListener('click', function(e) {
+                    const cardTitle = this.querySelector('.card-title').textContent;
+                    console.log(`Admin card clicked: ${cardTitle}`);
+                    
+                    // Visual feedback
+                    this.style.transform = 'scale(0.98) translateY(-4px)';
+                    setTimeout(() => {
+                        this.style.transform = 'translateY(-4px)';
+                    }, 150);
+                });
+            });
+        }
+
+        function setupAccessibility() {
+            // Keyboard navigation support
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    document.body.classList.add('keyboard-navigation');
+                }
+            });
+            
+            document.addEventListener('mousedown', function() {
+                document.body.classList.remove('keyboard-navigation');
+            });
+            
+            // Focus management for cards
+            const adminCards = document.querySelectorAll('.admin-card');
+            adminCards.forEach(card => {
+                card.addEventListener('focus', function() {
+                    this.style.outline = '3px solid var(--primary-color)';
+                    this.style.outlineOffset = '2px';
+                });
+                
+                card.addEventListener('blur', function() {
+                    this.style.outline = '';
+                    this.style.outlineOffset = '';
+                });
+            });
+        }
+
+        // Smooth scroll for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+
+    </script>
+    
+    <style>
+        /* Enhanced focus styles for accessibility */
+        .keyboard-navigation .admin-card:focus,
+        .keyboard-navigation .nav-link:focus {
+            outline: 3px solid var(--primary-color) !important;
+            outline-offset: 2px !important;
+        }
+        
+        /* Print styles */
+        @media print {
+            .navbar, .main-container > *:not(.admin-section) {
+                display: none;
+            }
+            
+            .admin-card {
+                break-inside: avoid;
+                box-shadow: none !important;
+                border: 1px solid #ccc;
+                transform: none !important;
+            }
+        }
+    </style>
+
+    <!-- Scripts del navbar SA -->
+    <div th:replace="~{fragments/navbar-sa :: navbar-sa-scripts}"></div>    <!-- Chatbot Widget -->
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+
+</body>
+</html>
+
+

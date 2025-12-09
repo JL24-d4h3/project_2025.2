@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle != null ? pageTitle + ' - DevPortal' : 'DevPortal'}">DevPortal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Core CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <!-- Chatbot CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" 
+          onerror="console.warn('⚠️ CSS Highlight.js CDN falló'); this.href='/css/highlight-atom-one-dark.min.css';">
+    
+    <!-- Additional CSS - can be overridden by pages -->
+    <th:block th:fragment="additional-css">
+        <!-- Page-specific CSS will go here -->
+    </th:block>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
+    
+    <style>
+        /* Base Layout Styles - GitHub-inspired */
+        :root {
+            --primary-color: #0969da;
+            --secondary-color: #656d76;
+            --background-color: #ffffff;
+            --surface-color: #f6f8fa;
+            --card-background: #ffffff;
+            --text-primary: #1f2328;
+            --text-secondary: #656d76;
+            --text-muted: #848d97;
+            --border-color: #d1d9e0;
+            --border-hover: #0969da;
+            --shadow-sm: 0 1px 3px rgba(16, 22, 26, 0.1);
+            --shadow-md: 0 6px 16px rgba(16, 22, 26, 0.12);
+            --success-color: #1a7f37;
+            --warning-color: #bf8700;
+            --danger-color: #d1242f;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--background-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Main container */
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Content area */
+        .content-wrapper {
+            flex: 1;
+            padding: 1.5rem 0;
+            background-color: var(--surface-color);
+        }
+
+        .content-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Page header */
+        .page-header {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin: 0.25rem 0 0 0;
+        }
+
+        .page-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb-container {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .breadcrumb {
+            margin: 0;
+            background: transparent;
+            padding: 0;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: "/";
+            color: var(--text-muted);
+        }
+
+        .breadcrumb-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-secondary);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--border-hover);
+        }
+
+        .card-header {
+            background: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 12px 12px 0 0 !important;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Buttons - GitHub style */
+        .btn {
+            font-weight: 500;
+            border-radius: 6px;
+            padding: 0.375rem 1rem;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0550ae;
+            border-color: #0550ae;
+            color: white;
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--border-color);
+            background-color: var(--card-background);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--surface-color);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            border-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+            color: white;
+        }
+
+        /* Tables */
+        .table {
+            background: var(--card-background);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .table th {
+            background: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+        }
+
+        .table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table tbody tr:hover {
+            background-color: var(--surface-color);
+        }
+
+        /* Forms */
+        .form-control {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.375rem 0.75rem;
+            background-color: var(--card-background);
+            color: var(--text-primary);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+            outline: none;
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Alerts */
+        .alert {
+            border-radius: 8px;
+            border: 1px solid;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background-color: #dafbe1;
+            border-color: #1a7f37;
+            color: #0f5132;
+        }
+
+        .alert-danger {
+            background-color: #ffebe9;
+            border-color: #d1242f;
+            color: #58151c;
+        }
+
+        .alert-warning {
+            background-color: #fff8dc;
+            border-color: #bf8700;
+            color: #664d00;
+        }
+
+        .alert-info {
+            background-color: #dbeafe;
+            border-color: var(--primary-color);
+            color: #0c4a6e;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content-container {
+                padding: 0 0.75rem;
+            }
+            
+            .page-header {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .page-title {
+                font-size: 1.25rem;
+            }
+            
+            .page-actions {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Impersonation Banner -->
+        <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+
+        <!-- Navbar -->
+        <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+        <!-- Main Content -->
+        <main class="content-wrapper">
+            <div class="content-container">
+                <!-- Breadcrumb (optional) -->
+                <div th:if="${breadcrumbs != null and !breadcrumbs.empty}" class="breadcrumb-container">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li th:each="breadcrumb, iterStat : ${breadcrumbs}" 
+                                th:class="${iterStat.last} ? 'breadcrumb-item active' : 'breadcrumb-item'">
+                                <a th:if="${!iterStat.last and breadcrumb.url != null}" 
+                                   th:href="${breadcrumb.url}" 
+                                   th:text="${breadcrumb.title}">Home</a>
+                                <span th:if="${iterStat.last}" th:text="${breadcrumb.title}">Current</span>
+                            </li>
+                        </ol>
+                    </nav>
+                </div>
+
+                <!-- Page Content -->
+                <div th:replace="~{${template} :: content}">
+                    <!-- Page content will be inserted here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Prevenir navegación hacia atrás después del login -->
+    <script th:if="${#authorization.expression('isAuthenticated()')}">
+        // ✅ BLOQUEO COMPLETO DEL HISTORIAL: Ejecutar INMEDIATAMENTE
+        (function() {
+            'use strict';
+            
+            console.log('🔒 Iniciando bloqueo de historial del navegador...');
+            
+            // PASO 1: Reemplazar TODO el historial con la página actual
+            if (window.history && window.history.replaceState) {
+                history.replaceState(null, null, location.href);
+                console.log('✅ Historial reemplazado');
+            }
+            
+            // PASO 2: Agregar estado de bloqueo
+            if (window.history && window.history.pushState) {
+                history.pushState(null, null, location.href);
+                console.log('✅ Estado de bloqueo agregado');
+            }
+            
+            // PASO 3: Interceptar TODOS los intentos de navegación hacia atrás
+            window.addEventListener('popstate', function(e) {
+                console.log('⚠️ Intento de navegación hacia atrás bloqueado');
+                history.pushState(null, null, location.href);
+            }, false);
+            
+            // PASO 4: Prevenir que la página venga del caché (bfcache)
+            window.addEventListener('pageshow', function(e) {
+                if (e.persisted) {
+                    console.log('⚠️ Página cargada desde caché - recargando...');
+                    location.reload();
+                }
+            }, false);
+            
+            // PASO 5: Bloqueo adicional en beforeunload
+            window.addEventListener('beforeunload', function() {
+                history.pushState(null, null, location.href);
+            }, false);
+            
+            console.log('🔒 Bloqueo de historial completado');
+        })();
+    </script>
+    
+    <!-- Navbar Scripts -->
+    <div th:replace="~{fragments/navbar :: navbar-scripts}"></div>
+    
+    <!-- Chatbot Libraries - SOLO archivos locales -->
+    <script>
+        console.log('🔄 Cargando librerías del chatbot desde archivos locales...');
+        console.log('📂 Ruta esperada Highlight.js:', window.location.origin + '/js/highlight.min.js');
+        console.log('📂 Ruta esperada Marked.js:', window.location.origin + '/js/marked.min.js');
+    </script>
+    
+    <script th:src="@{/js/highlight.min.js}" 
+            onerror="console.error('❌ FALLO CRÍTICO: No se pudo cargar /js/highlight.min.js'); console.error('URL intentada:', this.src);"
+            onload="console.log('✅ Highlight.js cargado correctamente'); console.log('hljs disponible:', typeof hljs);"></script>
+    
+    <script th:src="@{/js/marked.min.js}" 
+            onerror="console.error('❌ FALLO CRÍTICO: No se pudo cargar /js/marked.min.js'); console.error('URL intentada:', this.src);"
+            onload="console.log('✅ Marked.js cargado correctamente'); console.log('marked disponible:', typeof marked);"></script>
+    
+    <script>
+        // Verificación inmediata después de los scripts
+        setTimeout(function() {
+            console.log('� Verificación post-carga:');
+            console.log('  - marked:', typeof marked);
+            console.log('  - hljs:', typeof hljs);
+            if (typeof marked === 'undefined') {
+                console.error('❌ Marked.js NO disponible después de la carga');
+            }
+            if (typeof hljs === 'undefined') {
+                console.error('❌ Highlight.js NO disponible después de la carga');
+            }
+        }, 500);
+    </script>
+    
+    <!-- Chatbot Widget -->
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+    
+    <!-- Additional Scripts -->
+    <th:block th:fragment="additional-scripts">
+        <!-- Page-specific scripts will go here -->
+    </th:block>
+</body>
+</html>
+
+

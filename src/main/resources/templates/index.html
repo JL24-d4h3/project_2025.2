@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <title>TelDev Portal</title>
+
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #6c757d;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-dark: #212529;
+            --text-muted: #6c757d;
+            --border-color: #e9ecef;
+            --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            --shadow-hover: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-dark);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark) !important;
+        }
+
+        .navbar .nav-link {
+            color: var(--text-muted);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s;
+        }
+
+        .navbar .nav-link:hover {
+            color: var(--primary-color);
+        }
+
+        .btn-access {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-access:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow);
+        }
+
+        .dropdown-menu {
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-hover);
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+        }
+
+        .dropdown-item {
+            border-radius: 0.375rem;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: var(--background-color);
+            color: var(--primary-color);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 5rem 0 4rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .hero-section p {
+            font-size: 1.125rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-hover);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .search-input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-input-wrapper input {
+            flex: 1;
+            padding: 0.875rem 1rem 0.875rem 2.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-size: 0.9375rem;
+        }
+
+        .search-input-wrapper input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-input-wrapper select {
+            padding: 0.875rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            background: white;
+            min-width: 150px;
+        }
+
+        .search-input-wrapper button {
+            padding: 0.875rem 2rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .search-input-wrapper button:hover {
+            background: #2563eb;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-keywords {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .search-keywords a {
+            color: var(--primary-color);
+            text-decoration: none;
+            padding: 0.25rem 0.75rem;
+            background: #eff6ff;
+            border-radius: 999px;
+            transition: all 0.2s;
+        }
+
+        .search-keywords a:hover {
+            background: #dbeafe;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 4rem 0;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            height: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .feature-card h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin: 0;
+        }
+
+        /* Topics Section */
+        .topics-section {
+            padding: 4rem 0;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-title p {
+            color: var(--text-muted);
+            font-size: 1.125rem;
+        }
+
+        .topic-card {
+            background: var(--background-color);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            height: 100%;
+            transition: all 0.3s;
+        }
+
+        .topic-card:hover {
+            background: white;
+            box-shadow: var(--shadow-hover);
+        }
+
+        .topic-icon {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .topic-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .topic-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .topic-card ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .topic-card ul li a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .topic-card ul li a:hover {
+            color: var(--primary-color);
+            padding-left: 0.5rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 4rem 0;
+            color: white;
+        }
+
+        .cta-content {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .cta-content h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .cta-form {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 2rem;
+        }
+
+        .cta-form input {
+            flex: 1;
+            padding: 0.875rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+        }
+
+        .cta-form button {
+            padding: 0.875rem 2rem;
+            background: white;
+            color: var(--primary-color);
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .cta-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Footer */
+        footer {
+            background: white;
+            border-top: 1px solid var(--border-color);
+            padding: 3rem 0 1.5rem;
+        }
+
+        .footer-brand {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9375rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 0.75rem;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            background: var(--background-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .social-links a:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .footer-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-section h1 {
+                font-size: 2rem;
+            }
+
+            .search-input-wrapper {
+                flex-direction: column;
+            }
+
+            .cta-form {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="index.html">
+            TelDev
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto me-3">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">Documentacion</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#docs">Foro</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#features">Features</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/foro/ver-foro">Forum</a>
+                </li>
+            </ul>
+            <div class="dropdown">
+                <button class="btn btn-access dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-user me-2"></i>Acceder
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <h6 class="dropdown-header">Selecciona tu perfil</h6>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="/signin">
+                            <i class="fas fa-users me-2"></i>
+                            <div class="d-inline-block">
+                                <strong>Usuario de la plataforma</strong>
+                                <br><small class="text-muted">Desarrollador, QA, Product Owner</small>
+                            </div>
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="/sa-access">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            <div class="d-inline-block">
+                                <strong>Administrador</strong>
+                                <br><small class="text-muted">Acceso administrativo completo</small>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h1>Bienvenido a TelDev Portal</h1>
+            <p>Aquí podrás buscar diferentes APIs, Proyectos, Equipos, entre otros</p>
+        </div>
+
+        <div class="search-box">
+            <form action="#" method="get">
+                <div class="search-input-wrapper position-relative">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="search"
+                           placeholder="Coloca lo que quieras buscar"
+                           name="search">
+                    <select name="post_type">
+                        <option value="">API's</option>
+                        <option value="manual_kb">Proyectos</option>
+                        <option value="manual_documentation">Repositorios</option>
+                        <option value="manual_faq">Equipos</option>
+                    </select>
+                    <button type="submit">Buscar</button>
+                </div>
+                <div class="search-keywords">
+                    <span>Búsquedas sugeridas:</span>
+                    <a href="#">Poke API</a>
+                    <a href="#">Equipo Rocket</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section" id="features">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h4>Documentacion de API's</h4>
+                    <p>245 Posts</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h4>Foros de la comunidad</h4>
+                    <p>245 Posts</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h4>Numero de proyectos</h4>
+                    <p>245 Posts</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-cog"></i>
+                    </div>
+                    <h4>Cantidad de usuarios</h4>
+                    <p>245 Posts</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Topics Section -->
+<section class="topics-section" id="docs">
+    <div class="container">
+        <div class="section-title">
+            <h2>¿Porque usar nuestra plataforma?</h2>
+            <p>TelDev Portal tiene los siguientes beneficios</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="topic-card">
+                    <div class="topic-icon">
+                        😊
+                    </div>
+                    <h3>Catalogo de API's</h3>
+                    <ul>
+                        <li>Te permite tener informacion confiable de las API's</li>
+                        <li>Podras ver los cambios historicos de las APIS's</li>
+                        <li>Poder crear la documentacion de tus propias API's</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="topic-card">
+                    <div class="topic-icon">
+                        🏠
+                    </div>
+                    <h3>Proyectos y repositorios</h3>
+                    <ul>
+                        <li>Poder gestionar tus propios proyectos y repositorios en la plataforma</li>
+                        <li>Poder manejar a tu propio equipo de trabajo</li>
+                        <li>La documentacion esta ligada directamente a tus proyectos y repositorios</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="topic-card">
+                    <div class="topic-icon">
+                        📄
+                    </div>
+                    <h3>Una gran comunidad</h3>
+                    <ul>
+                        <li>Tickets gestionados por la propia comunidad</li>
+                        <li>Dudas respondidas por los propios usuarios</li>
+                        <li>Indicios de una red social</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="topic-card">
+                    <div class="topic-icon">
+                        💼
+                    </div>
+                    <h3>Sandbox</h3>
+                    <ul>
+                        <li>Poder probar las API's en tiempo real</li>
+                        <li>Poder probar diferentes lenguajes de programacion</li>
+                        <li>Poder descargar un JSON para probarlo localmente</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Contacta con nosotros para asociaciones comerciales</h2>
+            <form action="#" method="post" class="cta-form">
+                <input type="email"
+                       name="email"
+                       placeholder="Tu correo electrinico"
+                       required>
+                <button type="submit">Enviar correo</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="footer-brand">TelDev</div>
+                <p class="footer-text">I'm available for commissions and collaborations, and I'm excited to hear from you about new projects!</p>
+                <ul class="social-links">
+                    <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+                    <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                    <li><a href="#"><i class="fab fa-vimeo-v"></i></a></li>
+                    <li><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
+                </ul>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <h5 class="footer-title">Solutions</h5>
+                <ul class="footer-links">
+                    <li><a href="#">Help Docs</a></li>
+                    <li><a href="#">Docbuzz</a></li>
+                    <li><a href="#">User Frontend</a></li>
+                    <li><a href="#">Lightbox</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h5 class="footer-title">Support</h5>
+                <ul class="footer-links">
+                    <li><a href="#">Help Desk</a></li>
+                    <li><a href="#">Knowledge Base</a></li>
+                    <li><a href="#">Live Chat</a></li>
+                    <li><a href="#">Integrations</a></li>
+                    <li><a href="#">Reports</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h5 class="footer-title">Company</h5>
+                <ul class="footer-links">
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Testimonials</a></li>
+                    <li><a href="#">Affiliates</a></li>
+                    <li><a href="#">Partners</a></li>
+                    <li><a href="#">Careers</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 All Rights Reserved. TelDev Portal</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+

@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Nueva API - DevPortal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <!-- CodeMirror for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/default.css">
+    
+    <style>
+        :root {
+            --primary-color: #2596be;
+            --primary-dark: #1e7a9a;
+            --primary-light: #e3f2fd;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --border-light: #e0e0e0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+
+        .projects-container { 
+            padding: 1.5rem; 
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+        
+        .projects-main { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+        }
+        
+        .projects-header { 
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .header-left {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .breadcrumb { 
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .breadcrumb a { 
+            color: var(--primary-color); 
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .breadcrumb a:hover {
+            color: var(--primary-dark);
+        }
+        
+        .page-title { 
+            margin: 0; 
+            color: var(--text-primary);
+            font-size: 1.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .form-section {
+            padding: 2rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(37, 150, 190, 0.25);
+        }
+
+        .btn-primary { 
+            background: var(--primary-color); 
+            color: white; 
+            padding: 0.75rem 1.5rem; 
+            text-decoration: none; 
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            border: 1px solid var(--primary-color);
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #6c757d;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            border-color: #5a6268;
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--primary-color);
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Contract Editor Styles */
+        .contract-editor-container {
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .editor-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .editor-tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .editor-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            background: white;
+        }
+
+        .editor-tab:hover:not(.active) {
+            color: var(--text-primary);
+            background: #e9ecef;
+        }
+
+        .editor-content {
+            position: relative;
+        }
+
+        .editor-panel {
+            display: none;
+            padding: 1rem;
+        }
+
+        .editor-panel.active {
+            display: block;
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .file-upload-area:hover,
+        .file-upload-area.dragover {
+            border-color: var(--primary-color);
+            background: var(--primary-light);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-area.dragover .upload-icon {
+            color: var(--primary-color);
+        }
+
+        #contractContent {
+            min-height: 400px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* Multi-select styles */
+        .multi-select-container {
+            position: relative;
+        }
+
+        .multi-select-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .tag-item {
+            background: var(--primary-light);
+            color: var(--primary-color);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tag-remove {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tag-remove:hover {
+            color: var(--danger-color);
+        }
+
+        /* Validation styles */
+        .is-invalid {
+            border-color: var(--danger-color);
+        }
+
+        .is-valid {
+            border-color: var(--success-color);
+        }
+
+        .invalid-feedback {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .valid-feedback {
+            color: var(--success-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .name-validation-status {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .name-validation-status.checking {
+            display: block;
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .name-validation-status.available {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .name-validation-status.unavailable {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Form actions */
+        .form-actions {
+            background: #f8f9fa;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .form-actions-left {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .form-actions-right {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .projects-container {
+                padding: 1rem;
+            }
+            
+            .projects-header {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            
+            .form-section {
+                padding: 1.5rem;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .form-actions-left,
+            .form-actions-right {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .editor-tabs {
+                flex-direction: column;
+            }
+        }
+
+        /* CodeMirror customization */
+        .CodeMirror {
+            border: none;
+            height: 400px;
+            font-size: 0.875rem;
+        }
+
+        .CodeMirror-focused {
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Banner de Impersonación -->
+    <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <div class="projects-container">
+        <!-- Banner de impersonación si aplica -->
+        <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+        
+        <main class="projects-main content-after-navbar">
+            <!-- Header -->
+            <div class="projects-header">
+                <div class="header-left">
+                    <div class="breadcrumb">
+                        <a th:href="@{/devportal/{userRole}/{username}/dashboard(userRole=${userRole}, username=${username})}">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                        <i class="fas fa-chevron-right"></i>
+                        <a th:href="@{/devportal/{userRole}/{username}/apis(userRole=${userRole}, username=${username})}">
+                            APIs
+                        </a>
+                        <i class="fas fa-chevron-right"></i>
+                        <span>Crear Nueva API</span>
+                    </div>
+                    
+                    <h2 class="page-title">
+                        <i class="fas fa-plus-circle" style="color: #2596be;"></i>
+                        Crear Nueva API
+                    </h2>
+                </div>
+            </div>
+
+            <!-- Formulario -->
+            <form id="createApiForm" th:action="@{/devportal/{userRole}/{username}/apis/create(userRole=${userRole}, username=${username})}" method="post" enctype="multipart/form-data">
+                
+                <!-- Campos ocultos para usuario -->
+                <input type="hidden" name="userRole" th:value="${userRole}"/>
+                <input type="hidden" name="username" th:value="${username}"/>
+                
+                <div class="form-container">
+                    
+                    <!-- Información Básica -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-info-circle" style="color: #2596be;"></i>
+                            Información Básica
+                        </h3>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="apiName" class="form-label">
+                                        Nombre de la API <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="apiName" name="apiName" required>
+                                    <div class="name-validation-status" id="nameValidationStatus">
+                                        <i class="fas fa-spinner fa-spin"></i> Verificando disponibilidad...
+                                    </div>
+                                    <div class="invalid-feedback" id="nameInvalidFeedback"></div>
+                                    <div class="valid-feedback" id="nameValidFeedback">El nombre está disponible</div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="apiVersion" class="form-label">
+                                        Versión Inicial <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="apiVersion" name="apiVersion" value="1.0.0" required pattern="^(\d+\.)?(\d+\.)?(\*|\d+)$">
+                                    <div class="invalid-feedback">
+                                        Formato válido: 1.0.0, 2.1.3, etc.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="apiDescription" class="form-label">
+                                        Descripción <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea class="form-control" id="apiDescription" name="apiDescription" rows="3" required 
+                                              placeholder="Describe brevemente qué hace tu API..."></textarea>
+                                    <div class="invalid-feedback">
+                                        La descripción es obligatoria
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="apiStatus" class="form-label">
+                                        Estado
+                                    </label>
+                                    <select class="form-select" id="apiStatus" name="apiStatus">
+                                        <option value="">Seleccionar estado...</option>
+                                        <option value="QA">🧪 QA (En desarrollo)</option>
+                                        <option value="PRODUCCION">🚀 Producción</option>
+                                        <option value="DEPRECATED">⚠️ Deprecada</option>
+                                    </select>
+                                    <small class="text-muted">Campo opcional - puedes dejarlo vacío</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categorización -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-tags" style="color: #2596be;"></i>
+                            Categorización
+                        </h3>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="categories" class="form-label">Categorías</label>
+                                    <select class="form-select" id="categories" name="categories" multiple>
+                                        <option th:each="categoria : ${categorias}" 
+                                                th:value="${categoria.idCategoria}" 
+                                                th:text="${categoria.nombreCategoria}">
+                                            Categoría
+                                        </option>
+                                    </select>
+                                    <div class="multi-select-tags" id="selectedCategories"></div>
+                                    <small class="text-muted">Mantén Ctrl presionado para seleccionar múltiples categorías</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="tags" class="form-label">Etiquetas</label>
+                                    <select class="form-select" id="tags" name="tags" multiple>
+                                        <option th:each="etiqueta : ${etiquetas}" 
+                                                th:value="${etiqueta.tagId}" 
+                                                th:text="${etiqueta.nombreTag}">
+                                            Etiqueta
+                                        </option>
+                                    </select>
+                                    <div class="multi-select-tags" id="selectedTags"></div>
+                                    <small class="text-muted">Mantén Ctrl presionado para seleccionar múltiples etiquetas</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contrato de la API -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-file-code" style="color: #2596be;"></i>
+                            Contrato de la API <span class="text-danger">*</span>
+                        </h3>
+                        
+                        <div class="contract-editor-container">
+                            <div class="editor-tabs">
+                                <button type="button" class="editor-tab active" data-tab="write">
+                                    <i class="fas fa-edit"></i> Escribir código
+                                </button>
+                                <button type="button" class="editor-tab" data-tab="upload">
+                                    <i class="fas fa-upload"></i> Subir archivo
+                                </button>
+                            </div>
+                            
+                            <div class="editor-content">
+                                <!-- Panel de escritura -->
+                                <div class="editor-panel active" id="writePanel">
+                                    <textarea id="contractContent" name="contractContent" placeholder="Pega aquí el código de tu API (OpenAPI, Swagger, etc.)...">
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Mi API",
+    "version": "1.0.0",
+    "description": "Descripción de mi API"
+  },
+  "paths": {
+    "/hello": {
+      "get": {
+        "summary": "Saludo",
+        "responses": {
+          "200": {
+            "description": "Mensaje de saludo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}</textarea>
+                                </div>
+                                
+                                <!-- Panel de subida -->
+                                <div class="editor-panel" id="uploadPanel">
+                                    <div class="file-upload-area" id="fileUploadArea">
+                                        <div class="upload-icon">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                        </div>
+                                        <h5>Arrastra un archivo aquí o haz clic para seleccionar</h5>
+                                        <p class="text-muted">Archivos soportados: .json, .yaml, .yml, .txt</p>
+                                        <input type="file" id="contractFile" name="contractFile" accept=".json,.yaml,.yml,.txt" style="display: none;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="invalid-feedback" id="contractInvalidFeedback">
+                            El contrato de la API es obligatorio
+                        </div>
+                    </div>
+
+                    <!-- Configuración Adicional -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-cog" style="color: #2596be;"></i>
+                            Configuración Adicional
+                        </h3>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="baseUrl" class="form-label">URL Base (opcional)</label>
+                                    <input type="url" class="form-control" id="baseUrl" name="baseUrl" 
+                                           placeholder="https://api.ejemplo.com">
+                                    <small class="text-muted">URL donde está desplegada la API</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="documentationUrl" class="form-label">Documentación Externa (opcional)</label>
+                                    <input type="url" class="form-control" id="documentationUrl" name="documentationUrl" 
+                                           placeholder="https://docs.ejemplo.com">
+                                    <small class="text-muted">Enlace a documentación adicional</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="requiresCredentials" name="requiresCredentials">
+                                    <label class="form-check-label" for="requiresCredentials">
+                                        Esta API requiere credenciales para acceder
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acciones del formulario -->
+                    <div class="form-actions">
+                        <div class="form-actions-left">
+                            <a th:href="@{/devportal/{userRole}/{username}/apis(userRole=${userRole}, username=${username})}" 
+                               class="btn-secondary">
+                                <i class="fas fa-times"></i>
+                                Cancelar
+                            </a>
+                        </div>
+                        
+                        <div class="form-actions-right">
+                            <button type="submit" class="btn-primary" id="createApiBtn" disabled>
+                                <i class="fas fa-save"></i>
+                                Crear API
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- CodeMirror JS -->
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/javascript/javascript.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/yaml/yaml.js"></script>
+    
+    <script>
+        // Variables globales
+        let contractEditor = null;
+        let isNameValid = false;
+        let nameCheckTimeout = null;
+
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCodeEditor();
+            initializeEditorTabs();
+            initializeFileUpload();
+            initializeNameValidation();
+            initializeMultiSelect();
+            initializeFormValidation();
+        });
+
+        // Inicializar CodeMirror
+        function initializeCodeEditor() {
+            const contractTextarea = document.getElementById('contractContent');
+            
+            contractEditor = CodeMirror.fromTextArea(contractTextarea, {
+                mode: 'application/json',
+                theme: 'default',
+                lineNumbers: true,
+                lineWrapping: true,
+                indentUnit: 2,
+                tabSize: 2,
+                autoCloseBrackets: true,
+                matchBrackets: true
+            });
+
+            // Validar contenido cuando cambie
+            contractEditor.on('change', function() {
+                validateContract();
+                updateSubmitButton();
+            });
+        }
+
+        // Inicializar tabs del editor
+        function initializeEditorTabs() {
+            const tabs = document.querySelectorAll('.editor-tab');
+            const panels = document.querySelectorAll('.editor-panel');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetTab = this.dataset.tab;
+                    
+                    // Actualizar tabs activos
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Actualizar panels activos
+                    panels.forEach(p => p.classList.remove('active'));
+                    document.getElementById(targetTab + 'Panel').classList.add('active');
+                    
+                    // Refrescar CodeMirror cuando se active
+                    if (targetTab === 'write' && contractEditor) {
+                        setTimeout(() => contractEditor.refresh(), 100);
+                    }
+                });
+            });
+        }
+
+        // Inicializar carga de archivos
+        function initializeFileUpload() {
+            const uploadArea = document.getElementById('fileUploadArea');
+            const fileInput = document.getElementById('contractFile');
+
+            // Click para seleccionar archivo
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelection(files[0]);
+                }
+            });
+
+            // Cambio de archivo
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleFileSelection(e.target.files[0]);
+                }
+            });
+        }
+
+        // Manejar selección de archivo
+        function handleFileSelection(file) {
+            const allowedTypes = ['application/json', 'text/yaml', 'text/yml', 'text/plain'];
+            const allowedExtensions = ['.json', '.yaml', '.yml', '.txt'];
+            
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+                alert('Tipo de archivo no soportado. Use archivos .json, .yaml, .yml o .txt');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                contractEditor.setValue(e.target.result);
+                
+                // Cambiar a tab de escritura para mostrar el contenido
+                document.querySelector('[data-tab="write"]').click();
+                
+                // Detectar modo basado en el contenido
+                const content = e.target.result.trim();
+                if (content.startsWith('{') || content.startsWith('[')) {
+                    contractEditor.setOption('mode', 'application/json');
+                } else {
+                    contractEditor.setOption('mode', 'yaml');
+                }
+                
+                validateContract();
+                updateSubmitButton();
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Inicializar validación de nombre
+        function initializeNameValidation() {
+            const nameInput = document.getElementById('apiName');
+            const statusDiv = document.getElementById('nameValidationStatus');
+
+            nameInput.addEventListener('input', function() {
+                const name = this.value.trim();
+                
+                // Limpiar timeout anterior
+                if (nameCheckTimeout) {
+                    clearTimeout(nameCheckTimeout);
+                }
+
+                if (name.length < 3) {
+                    hideNameValidation();
+                    isNameValid = false;
+                    updateSubmitButton();
+                    return;
+                }
+
+                // Mostrar estado de verificación
+                showNameValidation('checking');
+                
+                // Esperar 500ms antes de hacer la verificación
+                nameCheckTimeout = setTimeout(() => {
+                    checkApiNameAvailability(name);
+                }, 500);
+            });
+        }
+
+        // Verificar disponibilidad del nombre
+        function checkApiNameAvailability(name) {
+            // Hacer llamada AJAX real al controlador
+            const userRole = document.querySelector('input[name="userRole"]')?.value || 'dev';
+            const username = document.querySelector('input[name="username"]')?.value || 'user';
+            
+            fetch(`/devportal/${userRole}/${username}/apis/check-name?name=${encodeURIComponent(name)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.available) {
+                    showNameValidation('available');
+                    isNameValid = true;
+                } else {
+                    showNameValidation('unavailable');
+                    isNameValid = false;
+                }
+                updateSubmitButton();
+            })
+            .catch(error => {
+                console.error('Error checking name availability:', error);
+                showNameValidation('unavailable');
+                isNameValid = false;
+                updateSubmitButton();
+            });
+        }
+
+        // Mostrar estado de validación del nombre
+        function showNameValidation(status) {
+            const statusDiv = document.getElementById('nameValidationStatus');
+            const nameInput = document.getElementById('apiName');
+            
+            statusDiv.className = 'name-validation-status ' + status;
+            
+            if (status === 'checking') {
+                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando disponibilidad...';
+                nameInput.classList.remove('is-valid', 'is-invalid');
+            } else if (status === 'available') {
+                statusDiv.innerHTML = '<i class="fas fa-check"></i> El nombre está disponible';
+                nameInput.classList.add('is-valid');
+                nameInput.classList.remove('is-invalid');
+            } else if (status === 'unavailable') {
+                statusDiv.innerHTML = '<i class="fas fa-times"></i> Este nombre ya está en uso. Elige otro nombre.';
+                nameInput.classList.add('is-invalid');
+                nameInput.classList.remove('is-valid');
+            }
+        }
+
+        // Ocultar validación del nombre
+        function hideNameValidation() {
+            const statusDiv = document.getElementById('nameValidationStatus');
+            const nameInput = document.getElementById('apiName');
+            
+            statusDiv.style.display = 'none';
+            nameInput.classList.remove('is-valid', 'is-invalid');
+        }
+
+        // Inicializar multi-select
+        function initializeMultiSelect() {
+            const categoriesSelect = document.getElementById('categories');
+            const tagsSelect = document.getElementById('tags');
+            
+            categoriesSelect.addEventListener('change', function() {
+                updateSelectedItems('categories', 'selectedCategories');
+            });
+            
+            tagsSelect.addEventListener('change', function() {
+                updateSelectedItems('tags', 'selectedTags');
+            });
+        }
+
+        // Actualizar elementos seleccionados
+        function updateSelectedItems(selectId, containerId) {
+            const select = document.getElementById(selectId);
+            const container = document.getElementById(containerId);
+            
+            container.innerHTML = '';
+            
+            Array.from(select.selectedOptions).forEach(option => {
+                const tag = document.createElement('span');
+                tag.className = 'tag-item';
+                tag.innerHTML = `
+                    ${option.text}
+                    <span class="tag-remove" onclick="removeSelection('${selectId}', '${option.value}')">×</span>
+                `;
+                container.appendChild(tag);
+            });
+        }
+
+        // Remover selección
+        function removeSelection(selectId, value) {
+            const select = document.getElementById(selectId);
+            const option = select.querySelector(`option[value="${value}"]`);
+            if (option) {
+                option.selected = false;
+            }
+            updateSelectedItems(selectId, selectId === 'categories' ? 'selectedCategories' : 'selectedTags');
+        }
+
+        // Validar contrato
+        function validateContract() {
+            const content = contractEditor.getValue().trim();
+            const contractInvalid = document.getElementById('contractInvalidFeedback');
+            
+            if (content.length === 0) {
+                contractInvalid.style.display = 'block';
+                return false;
+            } else {
+                contractInvalid.style.display = 'none';
+                return true;
+            }
+        }
+
+        // Inicializar validación del formulario
+        function initializeFormValidation() {
+            const form = document.getElementById('createApiForm');
+            const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+            
+            inputs.forEach(input => {
+                input.addEventListener('input', updateSubmitButton);
+                input.addEventListener('change', updateSubmitButton);
+            });
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault(); // Siempre prevenir el envío normal del formulario
+                
+                if (!validateForm()) {
+                    return false;
+                }
+                
+                // Actualizar el textarea oculto con el contenido de CodeMirror
+                document.getElementById('contractContent').value = contractEditor.getValue();
+                
+                // Deshabilitar el botón de envío para prevenir envíos múltiples
+                const submitBtn = document.getElementById('createApiBtn');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
+                
+                // Crear FormData del formulario
+                const formData = new FormData(form);
+                
+                // Enviar usando fetch
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Mostrar mensaje de éxito
+                        alert('✅ ' + data.message);
+                        // Redirigir a la página de APIs
+                        window.location.href = data.redirectUrl;
+                    } else {
+                        // Mostrar mensaje de error
+                        alert('❌ Error: ' + (data.message || 'Error desconocido'));
+                        // Rehabilitar el botón
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-plus"></i> Crear API';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('❌ Error al crear la API: ' + error.message);
+                    // Rehabilitar el botón
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-plus"></i> Crear API';
+                });
+            });
+        }
+
+        // Validar formulario completo
+        function validateForm() {
+            const requiredFields = [
+                { id: 'apiName', message: 'El nombre de la API es obligatorio' },
+                { id: 'apiVersion', message: 'La versión es obligatoria' },
+                { id: 'apiDescription', message: 'La descripción es obligatoria' }
+            ];
+
+            let isValid = true;
+
+            // Validar campos requeridos
+            requiredFields.forEach(field => {
+                const input = document.getElementById(field.id);
+                if (!input.value.trim()) {
+                    input.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+
+            // Validar nombre único
+            if (!isNameValid) {
+                isValid = false;
+            }
+
+            // Validar contrato
+            if (!validateContract()) {
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Actualizar estado del botón submit
+        function updateSubmitButton() {
+            const submitBtn = document.getElementById('createApiBtn');
+            const requiredInputs = document.querySelectorAll('input[required], textarea[required]');
+            
+            let allValid = isNameValid && validateContract();
+            
+            requiredInputs.forEach(input => {
+                if (!input.value.trim()) {
+                    allValid = false;
+                }
+            });
+
+            submitBtn.disabled = !allValid;
+        }
+    </script>
+</body>
+</html>

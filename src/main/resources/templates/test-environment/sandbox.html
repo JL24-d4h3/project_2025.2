@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Sandbox - DevPortal</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Navbar CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-dark: #212529;
+            --text-muted: #6c757d;
+            --border-color: #e9ecef;
+            --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            --shadow-hover: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            background-color: var(--background-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-dark);
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .header-section {
+            background: var(--card-background);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .header-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle {
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* Panel Cards */
+        .panel {
+            background: var(--card-background);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        textarea {
+            font-family: 'Courier New', monospace;
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            background: var(--secondary-color);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        /* Response Section */
+        .response-panel {
+            background: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .status {
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .latency {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        pre {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            overflow-x: auto;
+            font-size: 0.875rem;
+            border: 1px solid var(--border-color);
+            color: var(--text-dark);
+        }
+
+        /* Header Items */
+        .header-item {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            align-items: center;
+        }
+
+        .header-item input {
+            flex: 1;
+        }
+
+        .add-header-btn {
+            margin-top: 0.75rem;
+            width: auto;
+        }
+
+        /* Loading State */
+        .spinner-border {
+            width: 1rem;
+            height: 1rem;
+            border-width: 0.15rem;
+            margin-right: 0.5rem;
+        }
+
+        /* Response Tabs */
+        .response-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Pretty View Styles */
+        .pretty-view {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+
+        .json-entry, .json-array-item {
+            margin: 0.25rem 0;
+            padding: 0.25rem 0;
+        }
+
+        .json-key {
+            color: #0066cc;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .json-value-simple {
+            display: inline;
+        }
+
+        .json-string {
+            color: #22863a;
+        }
+
+        .json-number {
+            color: #005cc5;
+        }
+
+        .json-boolean {
+            color: #e36209;
+            font-weight: 600;
+        }
+
+        .json-null {
+            color: #6a737d;
+            font-style: italic;
+        }
+
+        .collapse-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.15rem 0.4rem;
+            margin-right: 0.5rem;
+            cursor: pointer;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .collapse-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .collapse-btn.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .json-value.collapsible {
+            transition: all 0.3s;
+        }
+
+        .json-value.collapsed {
+            display: none;
+        }
+
+        .json-object, .json-array {
+            border-left: 2px solid var(--border-color);
+            padding-left: 0.5rem;
+        }
+
+        /* Postman-like styles */
+        .request-bar {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+        }
+
+        .request-bar select {
+            width: 120px;
+            padding: 0.5rem;
+        }
+
+        .request-bar input {
+            flex: 1;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .request-bar .btn-primary {
+            width: auto;
+            padding: 0.5rem 2rem;
+        }
+
+        .request-tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 0;
+            background: white;
+        }
+
+        .request-tab {
+            background: transparent;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .request-tab:hover {
+            color: var(--text-dark);
+            background: #f8f9fa;
+        }
+
+        .request-tab.active {
+            color: #FF6C37;
+            border-bottom-color: #FF6C37;
+        }
+
+        .request-tab-content {
+            display: none;
+            padding: 1.5rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 0.375rem 0.375rem;
+            min-height: 200px;
+        }
+
+        .request-tab-content.active {
+            display: block;
+        }
+
+        .export-btn-container {
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem 0.5rem;
+            }
+
+            .request-bar {
+                flex-wrap: wrap;
+            }
+
+            .request-bar select,
+            .request-bar input,
+            .request-bar .btn-primary {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Banner de Impersonación -->
+<div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+
+<!-- Navbar -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="main-container content-after-navbar">
+    <!-- Header -->
+    <div class="header-section">
+        <h1 class="header-title">
+            <i class="fas fa-vial me-2"></i>
+            API Sandbox Tester
+        </h1>
+        <p class="header-subtitle">Prueba tus APIs en tiempo real con nuestro sandbox interactivo</p>
+    </div>
+
+    <!-- Request Configuration Panel -->
+    <div class="panel">
+        <!-- Barra de request estilo Postman -->
+        <div class="request-bar">
+            <select id="method" class="form-select">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="DELETE">DELETE</option>
+            </select>
+            <input type="text" id="url" class="form-control"
+                   placeholder="Ingrese la URL de la API a probar"
+                   value="">
+            <button class="btn btn-primary" id="sendBtn" onclick="sendRequest()">
+                <i class="fas fa-paper-plane me-2"></i>
+                Enviar Request
+            </button>
+        </div>
+
+        <!-- Tabs estilo Postman -->
+        <div class="request-tabs">
+            <button class="request-tab active" onclick="switchRequestTab(event, 'headers-tab')">Headers</button>
+            <button class="request-tab" onclick="switchRequestTab(event, 'body-tab')">Body</button>
+        </div>
+
+        <!-- Contenido de tabs -->
+        <div id="headers-tab" class="request-tab-content active">
+            <div id="headers-container">
+                <!-- Headers dinámicos se agregarán aquí -->
+            </div>
+            <button class="btn btn-success add-header-btn" onclick="addHeader()">
+                <i class="fas fa-plus me-1"></i>
+                Agregar Header
+            </button>
+        </div>
+
+        <div id="body-tab" class="request-tab-content">
+            <textarea id="body" class="form-control"
+                      placeholder='Coloca el cuerpo en formato JSON'
+                      style="min-height: 250px; font-family: 'Courier New', monospace;"></textarea>
+        </div>
+
+        <!-- Botón de exportar a Postman -->
+        <div class="export-btn-container">
+            <button class="btn btn-secondary" id="exportBtn" onclick="exportToPostman()" style="width: 100%; background: #FF6C37; border: none;">
+                <i class="fas fa-download me-2"></i>
+                Exportar a Postman
+            </button>
+        </div>
+    </div>
+
+    <!-- Response Panel -->
+    <div class="panel" id="response-container" style="display: none;">
+        <div class="section-title">
+            <i class="fas fa-chart-line me-2"></i>
+            Respuesta
+        </div>
+        <div class="response-panel">
+            <div class="response-header">
+                <div id="status-badge"></div>
+                <div class="latency" id="latency"></div>
+            </div>
+            <div>
+                <strong style="color: var(--text-muted);">Response Data:</strong>
+                <pre id="response-data"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Obtener la URL actual dinámicamente para construir el BACKEND_URL
+    const currentPath = window.location.pathname; // /devportal/dev/cgomez/sandbox
+    const BACKEND_URL = currentPath; // Usar la misma ruta para el POST
+
+    // Mostrar/ocultar body según el método
+    document.getElementById('method').addEventListener('change', function() {
+        const bodyGroup = document.getElementById('body-group');
+        const method = this.value;
+        if (method === 'POST' || method === 'PUT') {
+            bodyGroup.style.display = 'block';
+        } else {
+            bodyGroup.style.display = 'none';
+        }
+    });
+
+    // Agregar header dinámicamente
+    function addHeader() {
+        const container = document.getElementById('headers-container');
+        const headerItem = document.createElement('div');
+        headerItem.className = 'header-item';
+        headerItem.innerHTML = `
+            <input type="text" placeholder="Coloca aqui tu llave" class="header-key form-control">
+            <input type="text" placeholder="Coloca aqui la clave de la llave" class="header-value form-control">
+            <button class="btn btn-danger" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        container.appendChild(headerItem);
+    }
+
+    // Obtener headers del formulario
+    function getHeaders() {
+        const headers = {};
+        const headerItems = document.querySelectorAll('.header-item');
+        headerItems.forEach(item => {
+            const key = item.querySelector('.header-key').value.trim();
+            const value = item.querySelector('.header-value').value.trim();
+            if (key && value) {
+                headers[key] = value;
+            }
+        });
+        return headers;
+    }
+
+    // Enviar request - TODA LA LÓGICA EN EL BACKEND
+    async function sendRequest() {
+        const method = document.getElementById('method').value;
+        const url = document.getElementById('url').value.trim();
+        const bodyText = document.getElementById('body').value.trim();
+        const sendBtn = document.getElementById('sendBtn');
+        const responseContainer = document.getElementById('response-container');
+
+        if (!url) {
+            alert('Por favor ingresa una URL');
+            return;
+        }
+
+        // Preparar body (validar JSON si existe)
+        let body = null;
+        if ((method === 'POST' || method === 'PUT') && bodyText) {
+            try {
+                body = JSON.parse(bodyText);
+            } catch (e) {
+                alert('El body no es un JSON válido');
+                return;
+            }
+        }
+
+        // Preparar headers
+        const headers = getHeaders();
+
+        // Mostrar loading
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...';
+        responseContainer.style.display = 'none';
+
+        try {
+            // Enviar SOLO los datos al backend - el backend hace todo lo demás
+            const response = await fetch(BACKEND_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    method: method,
+                    url: url,
+                    headers: headers,
+                    body: body
+                })
+            });
+
+            // Recibir HTML renderizado del backend
+            const htmlContent = await response.text();
+
+            // Mostrar respuesta (HTML ya viene del backend)
+            responseContainer.style.display = 'block';
+            responseContainer.querySelector('.response-panel').outerHTML = htmlContent;
+
+        } catch (error) {
+            // Mostrar error simple
+            responseContainer.style.display = 'block';
+            responseContainer.innerHTML = `
+                <div class="section-title">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Respuesta
+                </div>
+                <div class='response-panel'>
+                    <div class='response-header'>
+                        <div class='status error'>
+                            <i class="fas fa-exclamation-circle me-1"></i>
+                            Error de Conexión
+                        </div>
+                        <div class='latency'></div>
+                    </div>
+                    <div>
+                        <strong style='color: var(--text-muted);'>Error:</strong>
+                        <pre>${error.message}\n\nNo se pudo conectar con el backend.</pre>
+                    </div>
+                </div>
+            `;
+        } finally {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Enviar Request';
+        }
+    }
+
+    // Función para exportar la configuración actual a Postman
+    function exportToPostman() {
+        const method = document.getElementById('method').value;
+        const url = document.getElementById('url').value.trim();
+        const bodyText = document.getElementById('body').value.trim();
+
+        if (!url) {
+            alert('Por favor ingresa una URL antes de exportar');
+            return;
+        }
+
+        // Obtener headers
+        const headers = getHeaders();
+
+        // Parsear la URL correctamente
+        let parsedUrl;
+        try {
+            parsedUrl = new URL(url);
+        } catch (e) {
+            alert('La URL ingresada no es válida');
+            return;
+        }
+
+        // Crear objeto de colección de Postman
+        const postmanCollection = {
+            info: {
+                name: "DevPortal Sandbox Collection",
+                description: "Colección exportada desde DevPortal Sandbox",
+                schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+            },
+            item: [
+                {
+                    name: method + " " + parsedUrl.pathname,
+                    request: {
+                        method: method,
+                        header: [],
+                        url: {
+                            raw: url,
+                            protocol: parsedUrl.protocol.replace(':', ''),
+                            host: parsedUrl.hostname.split('.'),
+                            port: parsedUrl.port || '',
+                            path: parsedUrl.pathname.split('/').filter(Boolean),
+                            query: []
+                        }
+                    }
+                }
+            ]
+        };
+
+        // Agregar query parameters si existen
+        if (parsedUrl.search) {
+            const searchParams = new URLSearchParams(parsedUrl.search);
+            searchParams.forEach((value, key) => {
+                postmanCollection.item[0].request.url.query.push({
+                    key: key,
+                    value: value
+                });
+            });
+        }
+
+        // Agregar headers al objeto de colección
+        Object.entries(headers).forEach(([key, value]) => {
+            postmanCollection.item[0].request.header.push({
+                key: key,
+                value: value,
+                type: "text"
+            });
+        });
+
+        // Agregar body si existe y el método lo permite
+        if ((method === 'POST' || method === 'PUT' || method === 'PATCH') && bodyText) {
+            try {
+                JSON.parse(bodyText); // Validar que sea JSON válido
+                postmanCollection.item[0].request.body = {
+                    mode: "raw",
+                    raw: bodyText,
+                    options: {
+                        raw: {
+                            language: "json"
+                        }
+                    }
+                };
+            } catch (e) {
+                // Si no es JSON válido, agregarlo como texto
+                postmanCollection.item[0].request.body = {
+                    mode: "raw",
+                    raw: bodyText
+                };
+            }
+        }
+
+        // Convertir a JSON
+        const collectionJson = JSON.stringify(postmanCollection, null, 2);
+
+        // Crear blob y descargar
+        const blob = new Blob([collectionJson], { type: 'application/json' });
+        const urlBlob = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = urlBlob;
+        a.download = 'DevPortal_Sandbox_Collection.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(urlBlob);
+
+        // Mostrar modal con instrucciones para abrir en Postman
+        setTimeout(() => {
+            if (confirm('✅ Colección descargada exitosamente!\n\n¿Deseas abrir Postman ahora?\n\nSi haces clic en "Aceptar", intentaremos abrir Postman automáticamente.\nLuego importa el archivo descargado desde: File > Import')) {
+                // Intentar abrir Postman usando el protocolo postman://
+                const postmanUrl = 'postman://app';
+                window.location.href = postmanUrl;
+
+                // Fallback: abrir la web de Postman si la app no está instalada
+                setTimeout(() => {
+                    const openWeb = confirm('Si Postman no se abrió automáticamente:\n\n1. Abre Postman manualmente\n2. Ve a File > Import\n3. Selecciona el archivo "DevPortal_Sandbox_Collection.json"\n\n¿Deseas abrir Postman Web?');
+                    if (openWeb) {
+                        window.open('https://web.postman.co/', '_blank');
+                    }
+                }, 1000);
+            }
+        }, 500);
+    }
+
+    // Función para colapsar/expandir elementos JSON en la vista Pretty
+    function toggleCollapse(btn) {
+        const valueDiv = btn.nextElementSibling;
+        if (valueDiv && valueDiv.classList.contains('collapsible')) {
+            valueDiv.classList.toggle('collapsed');
+            btn.classList.toggle('collapsed');
+            // Cambiar el icono de flecha
+            if (btn.classList.contains('collapsed')) {
+                btn.textContent = '▶';
+            } else {
+                btn.textContent = '▼';
+            }
+        }
+    }
+
+    // Función para cambiar entre tabs Pretty y Raw
+    function switchTab(evt, tabName) {
+        // Ocultar todos los contenidos de tabs
+        var tabContents = document.getElementsByClassName('tab-content');
+        for (var i = 0; i < tabContents.length; i++) {
+            tabContents[i].style.display = 'none';
+            tabContents[i].classList.remove('active');
+        }
+
+        // Remover la clase active de todos los botones
+        var tabBtns = document.getElementsByClassName('tab-btn');
+        for (var i = 0; i < tabBtns.length; i++) {
+            tabBtns[i].classList.remove('active');
+        }
+
+        // Mostrar el tab actual
+        document.getElementById(tabName).style.display = 'block';
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+    }
+
+    // Función para cambiar entre tabs de request (Headers/Body)
+    function switchRequestTab(evt, tabName) {
+        // Ocultar todos los contenidos de tabs de request
+        var tabContents = document.getElementsByClassName('request-tab-content');
+        for (var i = 0; i < tabContents.length; i++) {
+            tabContents[i].style.display = 'none';
+            tabContents[i].classList.remove('active');
+        }
+
+        // Remover la clase active de todos los botones de tabs de request
+        var tabBtns = document.getElementsByClassName('request-tab');
+        for (var i = 0; i < tabBtns.length; i++) {
+            tabBtns[i].classList.remove('active');
+        }
+
+        // Mostrar el tab actual de request
+        document.getElementById(tabName).style.display = 'block';
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+    }
+</script>    <!-- Chatbot Widget -->
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+
+</body>
+</html>
+
+
+

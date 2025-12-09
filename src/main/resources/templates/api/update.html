@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar API - DevPortal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <!-- CodeMirror for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/default.css">
+    
+    <style>
+        :root {
+            --primary-color: #2596be;
+            --primary-dark: #1e7a9a;
+            --primary-light: #e3f2fd;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --border-light: #e0e0e0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+
+        .projects-container { 
+            padding: 1.5rem; 
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+        
+        .projects-main { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+        }
+        
+        .projects-header { 
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .header-left {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .breadcrumb { 
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .breadcrumb a { 
+            color: var(--primary-color); 
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .breadcrumb a:hover {
+            color: var(--primary-dark);
+        }
+        
+        .page-title { 
+            margin: 0; 
+            color: var(--text-primary);
+            font-size: 1.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .form-section {
+            padding: 2rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(37, 150, 190, 0.25);
+        }
+
+        .btn-primary { 
+            background: var(--primary-color); 
+            color: white; 
+            padding: 0.75rem 1.5rem; 
+            text-decoration: none; 
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            border: 1px solid var(--primary-color);
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #6c757d;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            border-color: #5a6268;
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--primary-color);
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Current Contract Section */
+        .current-contract-section {
+            background: #f8f9fa;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .current-contract-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .current-contract-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .copy-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .copy-button:hover {
+            background: var(--primary-dark);
+        }
+
+        .current-contract-content {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* Contract Editor Styles */
+        .contract-editor-container {
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .editor-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .editor-tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .editor-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            background: white;
+        }
+
+        .editor-tab:hover:not(.active) {
+            color: var(--text-primary);
+            background: #e9ecef;
+        }
+
+        .editor-content {
+            position: relative;
+        }
+
+        .editor-panel {
+            display: none;
+            padding: 1rem;
+        }
+
+        .editor-panel.active {
+            display: block;
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .file-upload-area:hover,
+        .file-upload-area.dragover {
+            border-color: var(--primary-color);
+            background: var(--primary-light);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-area.dragover .upload-icon {
+            color: var(--primary-color);
+        }
+
+        #contractContent {
+            min-height: 400px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* Multi-select styles */
+        .multi-select-container {
+            position: relative;
+        }
+
+        .multi-select-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .tag-item {
+            background: var(--primary-light);
+            color: var(--primary-color);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tag-remove {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tag-remove:hover {
+            color: var(--danger-color);
+        }
+
+        /* Version info styles */
+        .version-info {
+            background: var(--primary-light);
+            border: 1px solid var(--primary-color);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .version-info h6 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .version-info p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Modal styles */
+        .modal-content {
+            border: none;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            background: var(--primary-color);
+            color: white;
+            border-bottom: none;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            padding: 1.5rem;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        .modal-body {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .modal-body .success-icon {
+            font-size: 4rem;
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+
+        .modal-body .error-icon {
+            font-size: 4rem;
+            color: var(--danger-color);
+            margin-bottom: 1rem;
+        }
+
+        .modal-footer {
+            border-top: none;
+            padding: 1.5rem;
+            justify-content: center;
+        }
+
+        /* Form actions */
+        .form-actions {
+            background: #f8f9fa;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .form-actions-left {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .form-actions-right {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .projects-container {
+                padding: 1rem;
+            }
+            
+            .projects-header {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            
+            .form-section {
+                padding: 1.5rem;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .form-actions-left,
+            .form-actions-right {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .editor-tabs {
+                flex-direction: column;
+            }
+
+            .current-contract-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+        }
+
+        /* CodeMirror customization */
+        .CodeMirror {
+            border: none;
+            height: 400px;
+            font-size: 0.875rem;
+        }
+
+        .CodeMirror-focused {
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Banner de Impersonación -->
+    <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <div class="projects-container">
+        <!-- Banner de impersonación si aplica -->
+        <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+        
+        <main class="projects-main content-after-navbar">
+            <!-- Header -->
+            <div class="projects-header">
+                <div class="header-left">
+                    <nav class="breadcrumb">
+                        <a th:href="@{/devportal/{userRole}/{username}(userRole=${userRole}, username=${username})}">
+                            <i class="fas fa-home"></i> Inicio
+                        </a>
+                        <span>/</span>
+                        <a th:href="@{/devportal/{userRole}/{username}/apis(userRole=${userRole}, username=${username})}">
+                            APIs
+                        </a>
+                        <span>/</span>
+                        <span>Actualizar API</span>
+                    </nav>
+                    <h1 class="page-title">
+                        <i class="fas fa-sync-alt" style="color: #2596be;"></i>
+                        Actualizar API
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Formulario -->
+            <form id="updateApiForm" th:action="@{/devportal/{userRole}/{username}/apis/update(userRole=${userRole}, username=${username})}" method="post" enctype="multipart/form-data">
+                
+                <!-- Campos ocultos para usuario -->
+                <input type="hidden" name="userRole" th:value="${userRole}"/>
+                <input type="hidden" name="username" th:value="${username}"/>
+                
+                <div class="form-container">
+                    <!-- Información Básica -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-info-circle" style="color: #2596be;"></i>
+                            Información Básica
+                        </h3>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="apiSelect" class="form-label">API a Actualizar <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="apiSelect" name="apiId" required>
+                                        <option value="">Selecciona una API...</option>
+                                        <option th:each="api : ${allApis}" 
+                                                th:value="${api.apiId}" 
+                                                th:text="${api.nombreApi}"
+                                                th:data-description="${api.descripcionApi}"
+                                                th:data-status="${api.estadoApi}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="apiVersion" class="form-label">Nueva Versión <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="apiVersion" name="apiVersion" 
+                                           placeholder="Se generará automáticamente..." readonly required>
+                                    <div class="version-info" id="versionInfo" style="display: none;">
+                                        <h6>Información de Versiones</h6>
+                                        <p id="versionHistory"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="apiStatus" class="form-label">Estado de la API</label>
+                                    <select class="form-select" id="apiStatus" name="apiStatus">
+                                        <option value="">Selecciona el estado...</option>
+                                        <option value="QA">🧪 QA (En pruebas)</option>
+                                        <option value="PRODUCCION">🚀 Producción</option>
+                                        <option value="DEPRECATED">⚠️ Deprecada</option>
+                                    </select>
+                                    <small class="text-muted">Campo opcional - puedes dejarlo vacío</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="versionDescription" class="form-label">Descripción de la Nueva Versión <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="versionDescription" name="versionDescription" 
+                                              rows="3" placeholder="Describe los cambios en esta nueva versión..." required></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Categorías y Etiquetas -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-tags" style="color: #2596be;"></i>
+                            Categorías y Etiquetas
+                        </h3>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="categories" class="form-label">Categorías</label>
+                                    <div class="multi-select-container">
+                                        <select class="form-select" id="categories" name="categories" multiple>
+                                            <option th:each="categoria : ${categorias}" 
+                                                    th:value="${categoria.idCategoria}" 
+                                                    th:text="${categoria.nombreCategoria}">
+                                            </option>
+                                        </select>
+                                        <div class="multi-select-tags" id="selectedCategories"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="tags" class="form-label">Etiquetas</label>
+                                    <div class="multi-select-container">
+                                        <select class="form-select" id="tags" name="tags" multiple>
+                                            <option th:each="etiqueta : ${etiquetas}" 
+                                                    th:value="${etiqueta.tagId}" 
+                                                    th:text="${etiqueta.nombreTag}">
+                                            </option>
+                                        </select>
+                                        <div class="multi-select-tags" id="selectedTags"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contrato Actual -->
+                    <div class="form-section" id="currentContractSection" style="display: none;">
+                        <h3 class="section-title">
+                            <i class="fas fa-file-contract" style="color: #2596be;"></i>
+                            Contrato Actual de la API
+                        </h3>
+                        
+                        <div class="current-contract-section">
+                            <div class="current-contract-header">
+                                <h5 class="current-contract-title">
+                                    <i class="fas fa-code"></i>
+                                    Versión Actual: <span id="currentVersionLabel">-</span>
+                                </h5>
+                                <button type="button" class="copy-button" onclick="copyCurrentContract()">
+                                    <i class="fas fa-copy"></i>
+                                    Copiar
+                                </button>
+                            </div>
+                            <div class="current-contract-content" id="currentContractContent">
+                                <!-- Se cargará el contrato actual aquí -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nuevo Contrato -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-code" style="color: #2596be;"></i>
+                            Nuevo Contrato de la API <span class="text-danger">*</span>
+                        </h3>
+                        
+                        <div class="contract-editor-container">
+                            <div class="editor-tabs">
+                                <button type="button" class="editor-tab active" data-tab="write">
+                                    <i class="fas fa-edit"></i>
+                                    Escribir
+                                </button>
+                                <button type="button" class="editor-tab" data-tab="upload">
+                                    <i class="fas fa-upload"></i>
+                                    Subir Archivo
+                                </button>
+                            </div>
+                            
+                            <div class="editor-content">
+                                <!-- Panel de escritura -->
+                                <div class="editor-panel active" id="writePanel">
+                                    <textarea id="contractContent" name="contractContent" required>{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Mi API",
+    "version": "1.0.0",
+    "description": "Descripción de mi API"
+  },
+  "paths": {
+    "/hello": {
+      "get": {
+        "summary": "Saludo",
+        "responses": {
+          "200": {
+            "description": "Respuesta exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}</textarea>
+                                </div>
+                                
+                                <!-- Panel de subida -->
+                                <div class="editor-panel" id="uploadPanel">
+                                    <div class="file-upload-area" id="fileUploadArea">
+                                        <div class="upload-icon">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                        </div>
+                                        <h5>Arrastra un archivo aquí o haz clic para seleccionar</h5>
+                                        <p class="text-muted">Archivos soportados: .json, .yaml, .yml, .txt</p>
+                                        <input type="file" id="contractFile" name="contractFile" accept=".json,.yaml,.yml,.txt" style="display: none;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="invalid-feedback" id="contractInvalidFeedback">
+                            El contrato de la API es obligatorio
+                        </div>
+                    </div>
+
+                    <!-- Configuración Adicional -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-cog" style="color: #2596be;"></i>
+                            Configuración Adicional
+                        </h3>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="baseUrl" class="form-label">URL Base</label>
+                                    <input type="url" class="form-control" id="baseUrl" name="baseUrl" 
+                                           placeholder="https://api.ejemplo.com">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="documentationUrl" class="form-label">URL de Documentación</label>
+                                    <input type="url" class="form-control" id="documentationUrl" name="documentationUrl" 
+                                           placeholder="https://docs.ejemplo.com">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="requiresCredentials" 
+                                           name="requiresCredentials">
+                                    <label class="form-check-label" for="requiresCredentials">
+                                        <i class="fas fa-key"></i> Requiere credenciales de autenticación
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acciones del formulario -->
+                    <div class="form-actions">
+                        <div class="form-actions-left">
+                            <a th:href="@{/devportal/{userRole}/{username}/apis(userRole=${userRole}, username=${username})}" 
+                               class="btn-secondary">
+                                <i class="fas fa-arrow-left"></i>
+                                Cancelar
+                            </a>
+                        </div>
+                        
+                        <div class="form-actions-right">
+                            <button type="submit" class="btn-primary" id="updateApiBtn" disabled>
+                                <i class="fas fa-save"></i>
+                                Actualizar API
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">
+                        <i class="fas fa-check-circle"></i>
+                        Resultado de la Operación
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="successContent" style="display: none;">
+                        <div class="success-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h4>¡API Actualizada Exitosamente!</h4>
+                        <p>La nueva versión de la API ha sido creada correctamente.</p>
+                    </div>
+                    <div id="errorContent" style="display: none;">
+                        <div class="error-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <h4>Error al Actualizar</h4>
+                        <p id="errorMessage">Ha ocurrido un error inesperado.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-primary" id="modalOkButton">
+                        <i class="fas fa-check"></i>
+                        Aceptar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- CodeMirror JS -->
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/javascript/javascript.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/yaml/yaml.js"></script>
+    
+    <script>
+        // Variables globales
+        let contractEditor = null;
+        let selectedApiData = null;
+        let currentContractContent = '';
+
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCodeEditor();
+            initializeEditorTabs();
+            initializeFileUpload();
+            initializeApiSelection();
+            initializeMultiSelect();
+            initializeFormValidation();
+            
+            // Pre-seleccionar API si viene del parámetro
+            setTimeout(function() {
+                const preselectedApiIdFromThymeleaf = '[[${preselectedApiId}]]';
+                const preselectedApiId = preselectedApiIdFromThymeleaf && preselectedApiIdFromThymeleaf !== 'null' && preselectedApiIdFromThymeleaf !== '' 
+                    ? preselectedApiIdFromThymeleaf 
+                    : null;
+                
+                if (preselectedApiId != null && preselectedApiId !== '' && preselectedApiId !== 'null') {
+                    console.log('🎯 Pre-seleccionando API ID:', preselectedApiId);
+                    const apiSelect = document.getElementById('apiSelect');
+                    
+                    if (apiSelect) {
+                        const preselectedValue = String(preselectedApiId);
+                        const optionExists = Array.from(apiSelect.options).some(option => option.value === preselectedValue);
+                        
+                        if (optionExists) {
+                            apiSelect.value = preselectedValue;
+                            console.log('✅ API pre-seleccionada y datos cargándose...');
+                            
+                            // Triggear el evento change para cargar los datos
+                            const changeEvent = new Event('change', { bubbles: true });
+                            apiSelect.dispatchEvent(changeEvent);
+                        } else {
+                            console.warn('⚠️ La API ID no existe en las opciones del select');
+                        }
+                    }
+                }
+            }, 500);
+        });
+
+        // Inicializar CodeMirror
+        function initializeCodeEditor() {
+            const contractTextarea = document.getElementById('contractContent');
+            
+            contractEditor = CodeMirror.fromTextArea(contractTextarea, {
+                mode: 'application/json',
+                theme: 'default',
+                lineNumbers: true,
+                lineWrapping: true,
+                indentUnit: 2,
+                tabSize: 2,
+                autoCloseBrackets: true,
+                matchBrackets: true
+            });
+
+            // Validar contenido cuando cambie
+            contractEditor.on('change', function() {
+                validateContract();
+                updateSubmitButton();
+            });
+        }
+
+        // Inicializar tabs del editor
+        function initializeEditorTabs() {
+            const tabs = document.querySelectorAll('.editor-tab');
+            const panels = document.querySelectorAll('.editor-panel');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remover clase active de todos los tabs y panels
+                    tabs.forEach(t => t.classList.remove('active'));
+                    panels.forEach(p => p.classList.remove('active'));
+                    
+                    // Activar el tab clickeado
+                    this.classList.add('active');
+                    
+                    // Activar el panel correspondiente
+                    const targetTab = this.dataset.tab;
+                    const targetPanel = document.getElementById(targetTab + 'Panel');
+                    if (targetPanel) {
+                        targetPanel.classList.add('active');
+                    }
+                });
+            });
+        }
+
+        // Inicializar carga de archivos
+        function initializeFileUpload() {
+            const uploadArea = document.getElementById('fileUploadArea');
+            const fileInput = document.getElementById('contractFile');
+
+            // Click para seleccionar archivo
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelection(files[0]);
+                }
+            });
+
+            // Cambio de archivo
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleFileSelection(e.target.files[0]);
+                }
+            });
+        }
+
+        // Manejar selección de archivo
+        function handleFileSelection(file) {
+            const allowedTypes = ['application/json', 'text/yaml', 'text/yml', 'text/plain'];
+            const allowedExtensions = ['.json', '.yaml', '.yml', '.txt'];
+            
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+                alert('Tipo de archivo no soportado. Use archivos .json, .yaml, .yml o .txt');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                contractEditor.setValue(e.target.result);
+                
+                // Cambiar a tab de escritura para mostrar el contenido
+                document.querySelector('[data-tab="write"]').click();
+                
+                // Detectar modo basado en el contenido
+                const content = e.target.result.trim();
+                if (content.startsWith('{') || content.startsWith('[')) {
+                    contractEditor.setOption('mode', 'application/json');
+                } else {
+                    contractEditor.setOption('mode', 'yaml');
+                }
+                
+                validateContract();
+                updateSubmitButton();
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Inicializar selección de API
+        function initializeApiSelection() {
+            const apiSelect = document.getElementById('apiSelect');
+            
+            apiSelect.addEventListener('change', function() {
+                const selectedApiId = this.value;
+                
+                if (selectedApiId) {
+                    loadApiData(selectedApiId);
+                } else {
+                    clearApiData();
+                }
+            });
+        }
+
+        // Cargar datos de la API seleccionada
+        function loadApiData(apiId) {
+            const userRole = document.querySelector('input[name="userRole"]')?.value || 'dev';
+            const username = document.querySelector('input[name="username"]')?.value || 'user';
+            
+            console.log('🔄 Loading API data for ID:', apiId);
+            
+            // Mostrar loading
+            const updateBtn = document.getElementById('updateApiBtn');
+            updateBtn.disabled = true;
+            updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando datos...';
+            
+            fetch(`/devportal/${userRole}/${username}/apis/${apiId}/details`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                console.log('📡 Response status:', response.status);
+                console.log('📡 Response OK:', response.ok);
+                console.log('📡 Response statusText:', response.statusText);
+                console.log('📡 Response URL:', response.url);
+                
+                // Intentar leer la respuesta incluso si no es OK
+                return response.text().then(text => {
+                    console.log('📡 Raw response text:', text);
+                    
+                    if (!response.ok) {
+                        throw new Error(`Error HTTP ${response.status}: ${response.statusText}. Response: ${text}`);
+                    }
+                    
+                    try {
+                        return JSON.parse(text);
+                    } catch (parseError) {
+                        console.error('❌ Error parsing JSON:', parseError);
+                        throw new Error(`Invalid JSON response: ${text}`);
+                    }
+                });
+            })
+            .then(data => {
+                console.log('✅ API data received:', data);
+                
+                if (data.success) {
+                    selectedApiData = data;
+                    populateApiData(data);
+                    console.log('✅ API data loaded successfully');
+                } else {
+                    throw new Error(data.message || 'Error desconocido al cargar datos');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error loading API data:', error);
+                
+                // Limpiar datos anteriores
+                selectedApiData = null;
+                clearApiForm();
+                
+                // Mostrar error
+                showErrorModal(`Error al cargar los datos de la API: ${error.message}`);
+            })
+            .finally(() => {
+                // Restablecer estado del botón
+                console.log('🔄 Updating submit button state...');
+                resetSubmitButton();
+            });
+        }
+
+        // Poblar formulario con datos de la API
+        function populateApiData(apiData) {
+            console.log('🔄 populateApiData called with:', apiData);
+            console.log('📊 API Data structure:');
+            console.log('- latestVersion:', apiData.latestVersion);
+            console.log('- versions array:', apiData.versions);
+            console.log('- versions length:', apiData.versions ? apiData.versions.length : 'undefined');
+            
+            // Mostrar información de versiones
+            const versionInfo = document.getElementById('versionInfo');
+            const versionHistory = document.getElementById('versionHistory');
+            const apiVersionInput = document.getElementById('apiVersion');
+            const versionDescriptionTextarea = document.getElementById('versionDescription');
+            const apiStatusSelect = document.getElementById('apiStatus');
+            
+            // Calcular nueva versión
+            const latestVersion = apiData.latestVersion || '1.0.0';
+            console.log('Latest version from apiData:', latestVersion);
+            console.log('All version data:', apiData.versions);
+            
+            const newVersion = calculateNextVersion(latestVersion);
+            console.log('Calculated new version:', newVersion);
+            
+            apiVersionInput.value = newVersion;
+            versionHistory.textContent = `Última versión: ${latestVersion} → Nueva versión: ${newVersion}`;
+            versionInfo.style.display = 'block';
+            
+            // Cargar descripción de la versión anterior
+            versionDescriptionTextarea.value = apiData.latestVersionDescription || apiData.description || '';
+            
+            // Establecer estado actual
+            apiStatusSelect.value = apiData.status || '';
+            
+            // Cargar categorías y etiquetas existentes
+            loadExistingCategoriesAndTags(apiData.categories || [], apiData.tags || []);
+            
+            // Mostrar contrato actual
+            showCurrentContract(apiData.currentContract, latestVersion);
+            
+            updateSubmitButton();
+        }
+
+        // Calcular siguiente versión
+        function calculateNextVersion(currentVersion) {
+            try {
+                const parts = currentVersion.split('.').map(Number);
+                
+                if (parts.length !== 3 || parts.some(isNaN)) {
+                    console.warn('⚠️ Versión actual no tiene formato válido:', currentVersion);
+                    return '1.0.1'; // Fallback
+                }
+                
+                let [major, minor, patch] = parts;
+                
+                // Incrementar el patch por defecto
+                if (patch < 99) {
+                    patch++;
+                } else {
+                    patch = 0;
+                    if (minor < 99) {
+                        minor++;
+                    } else {
+                        minor = 0;
+                        major++;
+                    }
+                }
+                
+                const nextVersion = `${major}.${minor}.${patch}`;
+                console.log(`📈 Calculando siguiente versión: ${currentVersion} → ${nextVersion}`);
+                return nextVersion;
+            } catch (error) {
+                console.error('❌ Error calculando siguiente versión:', error);
+                return '1.0.1'; // Fallback seguro
+            }
+        }
+
+        // Cargar categorías y etiquetas existentes
+        function loadExistingCategoriesAndTags(categories, tags) {
+            const categoriesSelect = document.getElementById('categories');
+            const tagsSelect = document.getElementById('tags');
+            
+            // Limpiar selecciones anteriores
+            Array.from(categoriesSelect.options).forEach(option => option.selected = false);
+            Array.from(tagsSelect.options).forEach(option => option.selected = false);
+            
+            // Seleccionar categorías existentes
+            categories.forEach(categoryId => {
+                const option = categoriesSelect.querySelector(`option[value="${categoryId}"]`);
+                if (option) {
+                    option.selected = true;
+                }
+            });
+            
+            // Seleccionar etiquetas existentes
+            tags.forEach(tagId => {
+                const option = tagsSelect.querySelector(`option[value="${tagId}"]`);
+                if (option) {
+                    option.selected = true;
+                }
+            });
+            
+            // Actualizar visualización de tags
+            updateSelectedItems('categories', 'selectedCategories');
+            updateSelectedItems('tags', 'selectedTags');
+        }
+
+        // Mostrar contrato actual
+        function showCurrentContract(contract, version) {
+            const currentContractSection = document.getElementById('currentContractSection');
+            const currentVersionLabel = document.getElementById('currentVersionLabel');
+            const currentContractContentEl = document.getElementById('currentContractContent');
+            
+            if (contract) {
+                currentContractContentEl.textContent = contract;
+                currentVersionLabel.textContent = version;
+                currentContractSection.style.display = 'block';
+                
+                // Guardar el contenido del contrato en la variable global ya existente
+                currentContractContent = contract;
+            } else {
+                currentContractSection.style.display = 'none';
+                currentContractContent = '';
+            }
+        }
+
+        // Copiar contrato actual
+        function copyCurrentContract() {
+            if (currentContractContent) {
+                contractEditor.setValue(currentContractContent);
+                
+                // Cambiar a tab de escritura
+                document.querySelector('[data-tab="write"]').click();
+                
+                // Detectar modo
+                const content = currentContractContent.trim();
+                if (content.startsWith('{') || content.startsWith('[')) {
+                    contractEditor.setOption('mode', 'application/json');
+                } else {
+                    contractEditor.setOption('mode', 'yaml');
+                }
+                
+                validateContract();
+                updateSubmitButton();
+                
+                // Mostrar feedback visual
+                const copyButton = document.querySelector('.copy-button');
+                const originalText = copyButton.innerHTML;
+                copyButton.innerHTML = '<i class="fas fa-check"></i> Copiado';
+                copyButton.style.background = 'var(--success-color)';
+                
+                setTimeout(() => {
+                    copyButton.innerHTML = originalText;
+                    copyButton.style.background = 'var(--primary-color)';
+                }, 2000);
+            }
+        }
+
+        // Limpiar datos de API
+        function clearApiData() {
+            selectedApiData = null;
+            document.getElementById('versionInfo').style.display = 'none';
+            document.getElementById('apiVersion').value = '';
+            document.getElementById('versionDescription').value = '';
+            document.getElementById('apiStatus').value = '';
+            document.getElementById('currentContractSection').style.display = 'none';
+            
+            // Limpiar selecciones
+            const categoriesSelect = document.getElementById('categories');
+            const tagsSelect = document.getElementById('tags');
+            Array.from(categoriesSelect.options).forEach(option => option.selected = false);
+            Array.from(tagsSelect.options).forEach(option => option.selected = false);
+            updateSelectedItems('categories', 'selectedCategories');
+            updateSelectedItems('tags', 'selectedTags');
+            
+            updateSubmitButton();
+        }
+
+        // Inicializar multi-select
+        function initializeMultiSelect() {
+            const categoriesSelect = document.getElementById('categories');
+            const tagsSelect = document.getElementById('tags');
+            
+            categoriesSelect.addEventListener('change', function() {
+                updateSelectedItems('categories', 'selectedCategories');
+            });
+            
+            tagsSelect.addEventListener('change', function() {
+                updateSelectedItems('tags', 'selectedTags');
+            });
+        }
+
+        // Actualizar elementos seleccionados
+        function updateSelectedItems(selectId, containerId) {
+            const select = document.getElementById(selectId);
+            const container = document.getElementById(containerId);
+            
+            container.innerHTML = '';
+            
+            Array.from(select.selectedOptions).forEach(option => {
+                const tag = document.createElement('span');
+                tag.className = 'tag-item';
+                tag.innerHTML = `
+                    ${option.textContent}
+                    <span class="tag-remove" onclick="removeSelection('${selectId}', '${option.value}')">×</span>
+                `;
+                container.appendChild(tag);
+            });
+        }
+
+        // Remover selección
+        function removeSelection(selectId, value) {
+            const select = document.getElementById(selectId);
+            const option = select.querySelector(`option[value="${value}"]`);
+            if (option) {
+                option.selected = false;
+            }
+            updateSelectedItems(selectId, selectId === 'categories' ? 'selectedCategories' : 'selectedTags');
+        }
+
+        // Validar contrato
+        function validateContract() {
+            const content = contractEditor.getValue().trim();
+            const contractInvalid = document.getElementById('contractInvalidFeedback');
+            
+            if (content.length === 0) {
+                contractInvalid.style.display = 'block';
+                return false;
+            } else {
+                contractInvalid.style.display = 'none';
+                return true;
+            }
+        }
+
+        // Inicializar validación del formulario
+        function initializeFormValidation() {
+            const form = document.getElementById('updateApiForm');
+            const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+            
+            inputs.forEach(input => {
+                input.addEventListener('input', updateSubmitButton);
+                input.addEventListener('change', updateSubmitButton);
+            });
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault(); // Siempre prevenir el envío normal del formulario
+                
+                if (!validateForm()) {
+                    return false;
+                }
+                
+                // Actualizar el textarea oculto con el contenido de CodeMirror
+                document.getElementById('contractContent').value = contractEditor.getValue();
+                
+                // Deshabilitar el botón de envío para prevenir envíos múltiples
+                const submitBtn = document.getElementById('updateApiBtn');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando...';
+                
+                // Enviar formulario con AJAX
+                const formData = new FormData(form);
+                
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccessModal(data.message, data.redirectUrl);
+                    } else {
+                        showErrorModal(data.message || 'Error desconocido');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showErrorModal('Error de conexión. Por favor, inténtalo de nuevo.');
+                })
+                .finally(() => {
+                    // Rehabilitar el botón
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Actualizar API';
+                });
+            });
+        }
+
+        // Validar formulario completo
+        function validateForm() {
+            const requiredFields = [
+                { id: 'apiSelect', name: 'API' },
+                { id: 'apiVersion', name: 'Versión' },
+                { id: 'versionDescription', name: 'Descripción de la versión' }
+            ];
+
+            let isValid = true;
+
+            // Validar campos requeridos
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (!element.value.trim()) {
+                    isValid = false;
+                    element.classList.add('is-invalid');
+                } else {
+                    element.classList.remove('is-invalid');
+                }
+            });
+
+            // Validar contrato
+            if (!validateContract()) {
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Actualizar estado del botón submit
+        function updateSubmitButton() {
+            const submitBtn = document.getElementById('updateApiBtn');
+            const requiredInputs = document.querySelectorAll('input[required], textarea[required]');
+            
+            let allValid = validateContract() && selectedApiData !== null;
+            
+            requiredInputs.forEach(input => {
+                if (!input.value.trim()) {
+                    allValid = false;
+                }
+            });
+
+            submitBtn.disabled = !allValid;
+        }
+
+        // Restablecer estado del botón de envío
+        function resetSubmitButton() {
+            const submitBtn = document.getElementById('updateApiBtn');
+            submitBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Actualizar API';
+            updateSubmitButton(); // Actualizar estado basado en validaciones
+        }
+
+        // Limpiar formulario cuando falla la carga
+        function clearApiForm() {
+            console.log('🧹 Clearing API form data...');
+            
+            // Limpiar campos de versión
+            document.getElementById('apiVersion').value = '';
+            document.getElementById('versionDescription').value = '';
+            document.getElementById('versionInfo').style.display = 'none';
+            document.getElementById('versionHistory').textContent = '';
+            
+            // Limpiar editor de contrato
+            if (window.contractEditor) {
+                window.contractEditor.setValue('');
+            }
+            
+            // Ocultar sección de contrato actual
+            const currentContractSection = document.getElementById('currentContractSection');
+            if (currentContractSection) {
+                currentContractSection.style.display = 'none';
+            }
+            
+            // Limpiar categorías y etiquetas
+            document.querySelectorAll('input[name="categorias"]').forEach(cb => cb.checked = false);
+            document.querySelectorAll('input[name="tags"]').forEach(cb => cb.checked = false);
+        }
+
+        // Mostrar modal de éxito
+        function showSuccessModal(message, redirectUrl) {
+            const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+            const successContent = document.getElementById('successContent');
+            const errorContent = document.getElementById('errorContent');
+            const modalOkButton = document.getElementById('modalOkButton');
+            
+            successContent.style.display = 'block';
+            errorContent.style.display = 'none';
+            
+            if (message) {
+                successContent.querySelector('p').textContent = message;
+            }
+            
+            modalOkButton.onclick = function() {
+                modal.hide();
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                }
+            };
+            
+            modal.show();
+        }
+
+        // Mostrar modal de error
+        function showErrorModal(message) {
+            const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+            const successContent = document.getElementById('successContent');
+            const errorContent = document.getElementById('errorContent');
+            const errorMessage = document.getElementById('errorMessage');
+            const modalOkButton = document.getElementById('modalOkButton');
+            
+            successContent.style.display = 'none';
+            errorContent.style.display = 'block';
+            errorMessage.textContent = message;
+            
+            modalOkButton.onclick = function() {
+                modal.hide();
+            };
+            
+            modal.show();
+        }
+    </script>
+
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+</body>
+</html>
+
+

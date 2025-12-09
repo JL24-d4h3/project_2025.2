@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTICS DevPortal - Invitar Usuarios</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .invite-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .invite-header {
+            background: white;
+            border-bottom: 3px solid #0066cc;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .invite-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .invite-header h1 i {
+            font-size: 2.5rem;
+            color: #0066cc;
+        }
+
+        .invite-header .project-badge {
+            display: inline-block;
+            background: #f0f0f0;
+            color: #666;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .invite-type-badge {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #0066cc;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .invite-content {
+            padding: 40px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #0066cc;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        .info-box i {
+            color: #0066cc;
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section-title i {
+            color: #0066cc;
+            font-size: 1.4rem;
+        }
+
+        .form-section {
+            margin-bottom: 40px;
+        }
+
+        .email-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .email-input-group input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .email-input-group input:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .email-input-group button {
+            padding: 12px 24px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .email-input-group button:hover {
+            background: #0052a3;
+        }
+
+        .helper-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .roles-container {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .role-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .role-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            cursor: pointer;
+            accent-color: #0066cc;
+        }
+
+        .role-item label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .role-name {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .role-desc {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .create-role-btn {
+            padding: 8px 16px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .create-role-btn:hover {
+            background: #0052a3;
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .create-role-btn i {
+            font-size: 0.95rem;
+        }
+
+        .permission-select {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            width: 100%;
+        }
+
+        .permission-select:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .users-list {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 200px;
+        }
+
+        .user-item {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-email {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+        }
+
+        .user-role {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .user-permission {
+            font-size: 0.85rem;
+            color: #0066cc;
+            font-weight: 600;
+        }
+
+        .remove-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.3s;
+        }
+
+        .remove-btn:hover {
+            background: #ee5a52;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            justify-content: flex-end;
+        }
+
+        .action-buttons button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .btn-primary-action {
+            background: #0066cc;
+            color: white;
+        }
+
+        .btn-primary-action:hover {
+            background: #0052a3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+        }
+
+        .btn-secondary-action {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary-action:hover {
+            background: #e0e0e0;
+        }
+
+        .corporate-users-section {
+            background: #fff9e6;
+            border: 1px solid #ffe680;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .corporate-users-header {
+            font-weight: 600;
+            color: #b88600;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .corporate-users-list {
+            display: grid;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .corporate-user-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #ffe680;
+        }
+
+        .corporate-user-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            cursor: pointer;
+            accent-color: #0066cc;
+        }
+
+        .corporate-user-item label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .corporate-user-name {
+            font-weight: 600;
+            color: #1a1a1a;
+            display: block;
+        }
+
+        .corporate-user-email {
+            font-size: 0.85rem;
+            color: #666;
+            display: block;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .manual-add-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ffe680;
+        }
+
+        .manual-add-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #b88600;
+            margin-bottom: 12px;
+        }
+
+        .teams-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            padding: 15px 0;
+        }
+
+        .team-checkbox-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            transition: all 0.2s;
+        }
+
+        .team-checkbox-item:hover {
+            border-color: #0066cc;
+            box-shadow: 0 2px 8px rgba(0, 102, 204, 0.15);
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .team-checkbox {
+            width: 1.125rem;
+            height: 1.125rem;
+            accent-color: #0066cc;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .team-label {
+            font-weight: 500;
+            color: #1a1a1a;
+            cursor: pointer;
+            margin: 0;
+            flex: 1;
+        }
+
+        .no-teams-message {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+            font-style: italic;
+            grid-column: 1 / -1;
+        }
+
+        .no-teams-message i {
+            margin-right: 8px;
+            color: #ccc;
+        }
+
+        .form-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .mt-2 {
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Mensajes de Flash Attribute (Éxito/Error) -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert" style="margin: 20px; margin-top: 80px;">
+        <i class="fas fa-check-circle"></i>
+        <strong>¡Éxito!</strong> <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert" style="margin: 20px; margin-top: 80px;">
+        <i class="fas fa-exclamation-circle"></i>
+        <strong>Error:</strong> <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="invite-container">
+        <!-- Header -->
+        <div class="invite-header">
+            <h1>
+                <i class="fas fa-envelope"></i>
+                Invitar Usuarios al Proyecto
+            </h1>
+            <div class="project-badge" th:text="${'Proyecto: ' + proyecto.nombreProyecto}">Proyecto: Demo</div>
+            <div class="invite-type-badge" th:text="${invitationType == 'GROUP' ? 'Invitación Grupal' : 'Invitación Empresarial'}">
+                Invitación Grupal
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="invite-content">
+            <!-- Info Box -->
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <p>Los usuarios invitados recibirán un correo electrónico con un enlace para confirmar su participación en el proyecto.</p>
+            </div>
+
+            <!-- For Enterprise: Corporate Users -->
+            <div th:if="${invitationType == 'ENTERPRISE'}" class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-building"></i>
+                    Usuarios del Dominio Corporativo
+                </div>
+                
+                <div class="corporate-users-section">
+                    <div class="corporate-users-header">
+                        <i class="fas fa-shield-alt"></i>
+                        Dominio: <strong th:text="${corporateDomain}">company.com</strong>
+                    </div>
+
+                    <input type="text" class="search-input" id="corporateSearch" placeholder="Buscar usuarios...">
+
+                    <div class="corporate-users-list" id="corporateUsersList">
+                        <div class="empty-state" th:if="${corporateUsers == null || corporateUsers.isEmpty()}">
+                            <i class="fas fa-inbox"></i>
+                            <p>No hay usuarios con este dominio corporativo</p>
+                        </div>
+                        <div th:each="user : ${corporateUsers}" class="corporate-user-item">
+                            <input type="checkbox" class="corporate-checkbox" th:value="${user['correo']}" th:id="${'corp-' + user['usuario_id']}">
+                            <label th:for="${'corp-' + user['usuario_id']}">
+                                <span class="corporate-user-name" th:text="${user['nombre_completo']}">Nombre Usuario</span>
+                                <span class="corporate-user-email" th:text="${user['correo']}">email@company.com</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="manual-add-section">
+                        <p class="manual-add-title">O agregar usuarios con otros dominios:</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Emails Section -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-user-plus"></i>
+                    <span th:text="${invitationType == 'GROUP' ? 'Agregar Usuarios Manualmente' : 'Agregar Otros Usuarios'}">Agregar Usuarios Manualmente</span>
+                </div>
+
+                <div class="email-input-group">
+                    <input type="email" id="emailInput" placeholder="Ingresa correos separados por comas o presiona Enter..." multiple>
+                    <button onclick="addEmail()">
+                        <i class="fas fa-plus"></i> Agregar
+                    </button>
+                </div>
+                <div class="helper-text">
+                    Puedes agregar múltiples correos separados por comas (ej: usuario1@email.com, usuario2@email.com)
+                </div>
+            </div>
+
+            <!-- Equipment Selection Section -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-users"></i>
+                    Asignar a Equipos (Obligatorio)
+                </div>
+
+                <p style="margin-bottom: 20px; color: #666;">Los usuarios deben ser asignados a al menos un equipo.</p>
+
+                <div class="teams-list">
+                    <div th:each="equipo : ${equipos}" class="team-checkbox-item">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" 
+                                   th:id="${'equipo_' + equipo.equipoId}" 
+                                   th:name="${'equipoIds'}" 
+                                   th:value="${equipo.equipoId}"
+                                   class="team-checkbox"
+                                   required>
+                            <label th:for="${'equipo_' + equipo.equipoId}" class="team-label" th:text="${equipo.nombreEquipo}">
+                                Nombre Equipo
+                            </label>
+                        </div>
+                    </div>
+                    <div th:if="${equipos.isEmpty()}" class="no-teams-message">
+                        <i class="fas fa-info-circle"></i>
+                        <span>No hay equipos disponibles. <a href="javascript:showCreateTeamModal()" style="color: #0066cc; text-decoration: underline;">Crear uno nuevo</a></span>
+                    </div>
+                </div>
+                <div class="form-text" style="margin-top: 10px;">
+                    Selecciona uno o más equipos. Los usuarios invitados serán asignados a todos los equipos seleccionados.
+                    <button type="button" class="btn btn-outline-primary" style="margin-left: 10px; font-size: 0.85rem;" onclick="showCreateTeamModal()">
+                        <i class="fas fa-plus"></i> Crear Equipo Temporal
+                    </button>
+                </div>
+            </div>
+
+            <!-- Roles and Permission Section -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-shield-alt"></i>
+                    Asignar Rol y Permiso
+                </div>
+
+                <p style="margin-bottom: 20px; color: #666;">Selecciona los roles del proyecto (hasta 3) y el permiso que tendrán todos los usuarios agregados.</p>
+
+                <!-- Roles -->
+                <div style="margin-bottom: 30px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <label style="font-weight: 600; color: #1a1a1a; margin: 0;">
+                            <i class="fas fa-briefcase"></i> Roles del Proyecto (Máximo 3)
+                        </label>
+                        <a th:href="@{/devportal/{rol}/{username}/projects/P-{projectId}/roles/create-roles(rol=${userRole}, username=${username}, projectId=${proyecto.proyectoId}, returnTo=${invitationType == 'ENTERPRISE' ? 'invite-E' : 'invite-G'})}" 
+                           class="btn btn-sm btn-outline-primary" style="font-size: 0.85rem;">
+                            <i class="fas fa-plus"></i> Crear Rol
+                        </a>
+                    </div>
+                    <div class="roles-container">
+                        <div th:each="role : ${roles}" class="role-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <div style="flex: 1;">
+                                <input type="checkbox" class="role-checkbox" th:value="${role.nombreRolProyecto}" th:id="${'role-' + role.rolProyectoId}" th:data-role-id="${role.rolProyectoId}">
+                                <label th:for="${'role-' + role.rolProyectoId}" style="margin-bottom: 0; cursor: pointer;">
+                                    <span class="role-name" th:text="${role.nombreRolProyecto}">Nombre Rol</span>
+                                    <span class="role-desc" th:if="${role.descripcionRolProyecto}" th:text="${role.descripcionRolProyecto}"></span>
+                                </label>
+                            </div>
+                            <form th:action="@{/devportal/{rol}/{username}/projects/P-{projectId}/roles/{roleId}/delete(rol=${userRole}, username=${username}, projectId=${proyecto.proyectoId}, roleId=${role.rolProyectoId})}" 
+                                  method="POST" style="display: inline; margin-left: 10px;">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                        onclick="return confirm('¿Eliminar este rol?');">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <div th:if="${roles == null || roles.isEmpty()}" class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>No hay roles creados para este proyecto.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Permission dropdown -->
+                <div style="margin-top: 25px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #1a1a1a;">
+                        <i class="fas fa-lock"></i> Permiso en el Proyecto
+                    </label>
+                    <select class="permission-select form-select" id="permissionSelect" name="permission" required style="background-color: white; border: 1px solid #dee2e6;">
+                        <option value="">Selecciona un permiso...</option>
+                        <option value="LECTOR">👁️ LECTOR - Solo lectura</option>
+                        <option value="EDITOR">✏️ EDITOR - Editar contenido</option>
+                        <option value="COMENTADOR" selected>💬 COMENTADOR - Puede comentar</option>
+                        <option value="ADMINISTRADOR">⚙️ ADMINISTRADOR - Control total</option>
+                    </select>
+                    <small style="display: block; margin-top: 8px; color: #6c757d;">
+                        Este permiso se aplicará a todos los usuarios invitados.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Users to Invite -->
+            <div class="form-section">
+                <div class="section-title">
+                    <i class="fas fa-list"></i>
+                    Usuarios a Invitar <span style="color: #0066cc; font-weight: 700;" id="userCount">(0)</span>
+                </div>
+
+                <div class="users-list" id="usersList">
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No hay usuarios agregados aún</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn-secondary-action" onclick="window.history.back()">
+                    <i class="fas fa-arrow-left"></i> Atrás
+                </button>
+                <button class="btn-primary-action" onclick="sendInvitations()">
+                    <i class="fas fa-check"></i> Enviar Invitaciones
+                </button>
+            </div>
+            
+            <!-- Hidden form para enviar datos POST -->
+            <form id="inviteForm" method="POST" th:action="@{/devportal/{rol}/{username}/projects/P-{projectId}/invite(rol=${userRole}, username=${username}, projectId=${proyecto.proyectoId})}" style="display: none;">
+                <input type="hidden" name="emails" id="emailsInput">
+                <input type="hidden" name="rolIds" id="rolIdsInput">
+                <input type="hidden" name="permission" id="permissionInput">
+                <input type="hidden" name="equipoIds" id="equipoIdsInput">
+                <input type="hidden" name="invitationType" id="invitationTypeInput" th:value="${invitationType}">
+                <input type="hidden" name="sendEmail" value="true">
+            </form>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let usersToInvite = [];
+        let selectedRoles = [];
+        let temporaryTeams = [];
+        let nextTemporaryTeamId = -1;
+        const MAX_ROLES = 3;
+
+        // Add email function
+        async function addEmail() {
+            console.log('🔍 addEmail() llamada');
+            const input = document.getElementById('emailInput');
+            const emails = input.value.split(',').map(e => e.trim()).filter(e => e);
+            console.log('📧 Emails a procesar:', emails);
+            
+            if (emails.length === 0) {
+                showError('Por favor ingresa al menos un email');
+                return;
+            }
+            
+            let invalidEmails = [];
+            let validEmails = [];
+            
+            for (const email of emails) {
+                console.log('➡️ Procesando email:', email);
+                
+                if (!isValidEmail(email)) {
+                    console.error('❌ Email inválido:', email);
+                    showError(`Email inválido: ${email}`);
+                    invalidEmails.push(email);
+                    continue;
+                }
+                
+                if (usersToInvite.find(u => u.email === email)) {
+                    console.warn('⚠️ Email ya en lista:', email);
+                    showError(`El email ${email} ya está en la lista`);
+                    continue;
+                }
+                
+                // Validar que el usuario existe en la plataforma
+                console.log('🔎 Validando existencia de usuario:', email);
+                
+                // Mostrar indicador de carga
+                showInfo(`Verificando ${email}...`);
+                
+                const userExists = await checkUserExists(email);
+                console.log('📊 Resultado de checkUserExists:', userExists);
+                console.log('   - Tipo de dato:', typeof userExists);
+                console.log('   - Valor exacto:', JSON.stringify(userExists));
+                
+                if (!userExists) {
+                    console.error('❌❌❌ Usuario NO existe - NO SE AGREGARÁ:', email);
+                    invalidEmails.push(email);
+                    
+                    // Mostrar mensaje de error claro y visible
+                    showError(`El usuario ${email} no existe en la plataforma`);
+                    showWarning('Solo puedes invitar usuarios que ya están registrados en la plataforma.');
+                    
+                    console.log('⏭️ CONTINUE ejecutado - saltando a siguiente email');
+                    continue; // NO agregar a la lista
+                } else {
+                    console.log('✅✅✅ Usuario SÍ existe - se agregará:', email);
+                    validEmails.push(email);
+                }
+                
+                // Solo se llega aquí si el usuario es válido
+                console.log('➕ AGREGANDO USUARIO A LA LISTA:', email);
+                usersToInvite.push({ 
+                    email: email,
+                    isValid: true
+                });
+                console.log('✅ Email AGREGADO exitosamente. Total ahora:', usersToInvite.length);
+            }
+
+            input.value = '';
+            updateUsersList();
+            updateInviteButton();
+            
+            // Mostrar resumen de validación
+            if (invalidEmails.length > 0) {
+                showBigError(
+                    `${invalidEmails.length} correo(s) no se agregaron`, 
+                    `Los siguientes correos no existen en la plataforma: ${invalidEmails.join(', ')}`
+                );
+            }
+            
+            if (validEmails.length > 0) {
+                showSuccess(`${validEmails.length} usuario(s) agregado(s) correctamente`);
+            }
+            
+            console.log('📋 Lista actualizada. Total usuarios:', usersToInvite.length);
+        }
+        
+        // Validar si un usuario existe en la base de datos
+        async function checkUserExists(email) {
+            try {
+                console.log('═══════════════════════════════════════');
+                console.log('🌐 [checkUserExists] Verificando:', email);
+                const url = `/devportal/user/check-exists?email=${encodeURIComponent(email)}`;
+                console.log('🔗 [checkUserExists] URL completa:', url);
+                
+                const response = await fetch(url);
+                console.log('📡 [checkUserExists] Response status:', response.status);
+                console.log('📡 [checkUserExists] Response OK?:', response.ok);
+                
+                if (!response.ok) {
+                    console.error('❌ [checkUserExists] Response NOT OK:', response.status, response.statusText);
+                    showError(`Error al verificar el usuario ${email} (Status: ${response.status})`);
+                    return false;
+                }
+                
+                const data = await response.json();
+                console.log('📦 [checkUserExists] Data recibida:', JSON.stringify(data));
+                console.log('📊 [checkUserExists] data.exists:', data.exists);
+                console.log('📊 [checkUserExists] typeof data.exists:', typeof data.exists);
+                console.log('📊 [checkUserExists] data.exists === true:', data.exists === true);
+                console.log('═══════════════════════════════════════');
+                
+                return data.exists === true;
+            } catch (error) {
+                console.error('❌ [checkUserExists] Exception capturada:', error);
+                console.error('❌ [checkUserExists] Error message:', error.message);
+                console.error('❌ [checkUserExists] Error stack:', error.stack);
+                showError(`Error al verificar el usuario ${email}: ${error.message}`);
+                return false;
+            }
+        }
+        
+        // Mostrar mensaje de error
+        function showError(message) {
+            // Crear elemento de alerta si no existe
+            let alertContainer = document.getElementById('alertContainer');
+            if (!alertContainer) {
+                alertContainer = document.createElement('div');
+                alertContainer.id = 'alertContainer';
+                alertContainer.style.position = 'fixed';
+                alertContainer.style.top = '80px';
+                alertContainer.style.right = '20px';
+                alertContainer.style.zIndex = '9999';
+                alertContainer.style.maxWidth = '400px';
+                document.body.appendChild(alertContainer);
+            }
+            
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-danger alert-dismissible fade show';
+            alert.style.minWidth = '300px';
+            alert.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            alert.innerHTML = `
+                <strong><i class="fas fa-exclamation-circle"></i> ${message}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            alertContainer.appendChild(alert);
+            
+            // Auto-cerrar después de 5 segundos
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+        
+        // Mostrar mensaje de advertencia
+        function showWarning(message) {
+            let alertContainer = document.getElementById('alertContainer');
+            if (!alertContainer) {
+                alertContainer = document.createElement('div');
+                alertContainer.id = 'alertContainer';
+                alertContainer.style.position = 'fixed';
+                alertContainer.style.top = '80px';
+                alertContainer.style.right = '20px';
+                alertContainer.style.zIndex = '9999';
+                alertContainer.style.maxWidth = '400px';
+                document.body.appendChild(alertContainer);
+            }
+            
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-warning alert-dismissible fade show';
+            alert.style.minWidth = '300px';
+            alert.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            alert.innerHTML = `
+                <i class="fas fa-info-circle"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            alertContainer.appendChild(alert);
+            
+            // Auto-cerrar después de 8 segundos
+            setTimeout(() => {
+                alert.remove();
+            }, 8000);
+        }
+        
+        // Mostrar mensaje informativo
+        function showInfo(message) {
+            let alertContainer = document.getElementById('alertContainer');
+            if (!alertContainer) {
+                alertContainer = document.createElement('div');
+                alertContainer.id = 'alertContainer';
+                alertContainer.style.position = 'fixed';
+                alertContainer.style.top = '80px';
+                alertContainer.style.right = '20px';
+                alertContainer.style.zIndex = '9999';
+                alertContainer.style.maxWidth = '400px';
+                document.body.appendChild(alertContainer);
+            }
+            
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-info alert-dismissible fade show';
+            alert.style.minWidth = '300px';
+            alert.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            alert.innerHTML = `
+                <i class="fas fa-info-circle"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            alertContainer.appendChild(alert);
+            
+            // Auto-cerrar después de 3 segundos (más rápido para mensajes informativos)
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+        
+        // Mostrar mensaje de éxito
+        function showSuccess(message) {
+            let alertContainer = document.getElementById('alertContainer');
+            if (!alertContainer) {
+                alertContainer = document.createElement('div');
+                alertContainer.id = 'alertContainer';
+                alertContainer.style.position = 'fixed';
+                alertContainer.style.top = '80px';
+                alertContainer.style.right = '20px';
+                alertContainer.style.zIndex = '9999';
+                alertContainer.style.maxWidth = '400px';
+                document.body.appendChild(alertContainer);
+            }
+            
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-success alert-dismissible fade show';
+            alert.style.minWidth = '300px';
+            alert.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            alert.innerHTML = `
+                <i class="fas fa-check-circle"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            alertContainer.appendChild(alert);
+            
+            // Auto-cerrar después de 5 segundos
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+        
+        // Actualizar estado del botón de enviar invitaciones
+            function updateInviteButton() {
+                const inviteButton = document.querySelector('.btn-primary-action');
+                const hasUsers = usersToInvite.length > 0;
+                
+                console.log('🔘 [updateInviteButton] Estado actual:');
+                console.log('   - Total usuarios:', usersToInvite.length);
+                
+                if (!hasUsers) {
+                    inviteButton.disabled = true;
+                    inviteButton.style.opacity = '0.5';
+                    inviteButton.style.cursor = 'not-allowed';
+                    console.log('   ❌ BOTÓN BLOQUEADO (sin usuarios)');
+                } else {
+                    inviteButton.disabled = false;
+                    inviteButton.style.opacity = '1';
+                    inviteButton.style.cursor = 'pointer';
+                    console.log('   ✅ BOTÓN HABILITADO');
+                }
+            }        // Add from corporate users
+        function addSelectedCorporate() {
+            const checkboxes = document.querySelectorAll('.corporate-checkbox:checked');
+            checkboxes.forEach(checkbox => {
+                const email = checkbox.value;
+                if (!usersToInvite.find(u => u.email === email)) {
+                    usersToInvite.push({
+                        email: email,
+                        isValid: true
+                    });
+                }
+                checkbox.checked = false;
+            });
+            updateUsersList();
+            updateInviteButton();
+        }
+
+        // Validate email
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        // Mostrar modal para crear equipo temporal
+        function showCreateTeamModal() {
+            const modal = document.getElementById('createTeamModal');
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+
+        // Cerrar modal de crear equipo
+        function closeCreateTeamModal() {
+            const modal = document.getElementById('createTeamModal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.getElementById('createTeamForm').reset();
+            }
+        }
+
+        // Agregar equipo temporal
+        async function addTeamToInvitation() {
+            const teamNameInput = document.getElementById('teamName');
+            const teamName = teamNameInput.value;
+            
+            if (!teamName.trim()) {
+                alert('Por favor ingresa un nombre para el equipo');
+                return;
+            }
+            
+            // ✅ VALIDAR: Verificar si el nombre ya existe en equipos temporales
+            const nombreDuplicadoTemp = temporaryTeams.some(t => 
+                t.name.toLowerCase() === teamName.trim().toLowerCase()
+            );
+            
+            if (nombreDuplicadoTemp) {
+                alert('Ya has creado un equipo temporal con ese nombre. Por favor usa un nombre diferente.');
+                teamNameInput.focus();
+                return;
+            }
+            
+            // ✅ VALIDAR: Verificar si el nombre ya existe en el proyecto (llamada al backend)
+            try {
+                const projectId = window.location.pathname.match(/P-(\d+)/)[1];
+                const response = await fetch(`/devportal/${window.location.pathname.split('/')[2]}/${window.location.pathname.split('/')[3]}/projects/P-${projectId}/validate-team-name?teamName=${encodeURIComponent(teamName.trim())}`);
+                const result = await response.json();
+                
+                if (!result.valid) {
+                    alert(result.message || 'Este nombre de equipo ya existe en el proyecto');
+                    teamNameInput.focus();
+                    return;
+                }
+                
+                console.log('✅ Team name validated:', result.message);
+                
+            } catch (error) {
+                console.error('Error validating team name:', error);
+                alert('Error al validar el nombre del equipo. Por favor intenta de nuevo.');
+                return;
+            }
+            
+            // Crear ID temporal negativo
+            const tempId = nextTemporaryTeamId--;
+            
+            // Guardar en array temporal
+            const newTeam = {
+                id: tempId,
+                name: teamName,
+                isTemporary: true
+            };
+            temporaryTeams.push(newTeam);
+            
+            // Agregar a la UI en la sección de equipos
+            const teamsList = document.querySelector('.teams-list');
+            
+            // Si hay mensaje de "no hay equipos", removarlo
+            const noTeamsMessage = teamsList.querySelector('.no-teams-message');
+            if (noTeamsMessage) {
+                noTeamsMessage.remove();
+            }
+            
+            const newTeamItem = document.createElement('div');
+            newTeamItem.className = 'team-checkbox-item';
+            newTeamItem.id = 'team-item-' + tempId;
+            newTeamItem.innerHTML = `
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" 
+                           id="equipo_${tempId}" 
+                           name="equipoIds" 
+                           value="${tempId}"
+                           class="team-checkbox"
+                           checked>
+                    <label for="equipo_${tempId}" class="team-label">
+                        ${teamName}
+                        <span style="font-size: 0.85rem; color: #ff9800; margin-left: 0.5rem;">(Nuevo - se creará al invitar)</span>
+                    </label>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeTemporaryTeam(${tempId})" style="margin-top: 0.5rem; font-size: 0.85rem;">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            `;
+            
+            teamsList.appendChild(newTeamItem);
+            
+            // Agregar event listener al nuevo checkbox
+            newTeamItem.querySelector('.team-checkbox').addEventListener('change', function() {
+                // Aquí se puede agregar lógica adicional si es necesaria
+            });
+            
+            closeCreateTeamModal();
+            alert('Equipo temporal agregado. Se creará automáticamente cuando envíes las invitaciones.');
+        }
+
+        // Eliminar equipo temporal
+        function removeTemporaryTeam(tempId) {
+            // Remover del array
+            temporaryTeams = temporaryTeams.filter(t => t.id !== tempId);
+            
+            // Remover del DOM
+            const teamItem = document.getElementById('team-item-' + tempId);
+            if (teamItem) {
+                teamItem.remove();
+            }
+        }
+
+        // Handle role checkboxes
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar estado del botón
+            updateInviteButton();
+            
+            const roleCheckboxes = document.querySelectorAll('.role-checkbox');
+            roleCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked && selectedRoles.length >= MAX_ROLES) {
+                        this.checked = false;
+                        showError(`Máximo ${MAX_ROLES} roles permitidos por usuario`);
+                        return;
+                    }
+                    
+                    // Usar data-role-id en lugar de value para obtener el ID numérico
+                    const roleId = this.dataset.roleId;
+                    if (this.checked) {
+                        selectedRoles.push(roleId);
+                    } else {
+                        selectedRoles = selectedRoles.filter(r => r !== roleId);
+                    }
+                });
+            });
+
+            // Search filter for corporate users
+            const searchInput = document.getElementById('corporateSearch');
+            if (searchInput) {
+                searchInput.addEventListener('keyup', function() {
+                    const filter = this.value.toLowerCase();
+                    const items = document.querySelectorAll('.corporate-user-item');
+                    items.forEach(item => {
+                        const text = item.textContent.toLowerCase();
+                        item.style.display = text.includes(filter) ? '' : 'none';
+                    });
+                });
+            }
+
+            // Email input - allow Enter key
+            const emailInput = document.getElementById('emailInput');
+            if (emailInput) {
+                emailInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addEmail();
+                    }
+                });
+            }
+
+            // Cerrar modal cuando se hace clic fuera
+            const modal = document.getElementById('createTeamModal');
+            if (modal) {
+                window.addEventListener('click', function(event) {
+                    if (event.target === modal) {
+                        closeCreateTeamModal();
+                    }
+                });
+            }
+        });
+
+        // Update users list display
+        function updateUsersList() {
+            const usersList = document.getElementById('usersList');
+            const userCount = document.getElementById('userCount');
+            
+            userCount.textContent = `(${usersToInvite.length})`;
+
+            if (usersToInvite.length === 0) {
+                usersList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No hay usuarios agregados aún</p>
+                    </div>
+                `;
+                updateInviteButton();
+                return;
+            }
+
+            usersList.innerHTML = usersToInvite.map((user, index) => {
+                return `
+                    <div class="user-item">
+                        <div class="user-info">
+                            <div class="user-email">${user.email}</div>
+                        </div>
+                        <button class="remove-btn" onclick="removeUser(${index})">
+                            <i class="fas fa-trash"></i> Remover
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            
+            updateInviteButton();
+        }
+
+        // Remove user from list
+        function removeUser(index) {
+            usersToInvite.splice(index, 1);
+            updateUsersList();
+            updateInviteButton();
+        }
+
+        // Send invitations
+        async function sendInvitations() {
+            if (usersToInvite.length === 0) {
+                showError('Debes agregar al menos un usuario');
+                return;
+            }
+
+            // RE-validar que todos los usuarios existen antes de enviar
+            console.log('🔍 RE-VALIDANDO todos los usuarios antes de enviar...');
+            let allValid = true;
+            
+            for (const user of usersToInvite) {
+                const exists = await checkUserExists(user.email);
+                if (!exists) {
+                    showError(`❌ El usuario ${user.email} no existe en la plataforma`);
+                    showWarning('Por favor, elimina los usuarios no válidos de la lista antes de continuar.');
+                    allValid = false;
+                }
+            }
+            
+            if (!allValid) {
+                console.error('❌ Validación final falló - hay usuarios que no existen');
+                return;
+            }
+            console.log('✅ Todos los usuarios validados exitosamente');
+
+            // Validar que se haya seleccionado al menos un equipo
+            const equipoCheckboxes = document.querySelectorAll('.team-checkbox:checked');
+            const equipoIds = Array.from(equipoCheckboxes).map(checkbox => {
+                // Convertir a número si es un ID real, mantener como string si es temporal (-1, -2, etc)
+                const val = checkbox.value;
+                return isNaN(val) ? val : parseInt(val, 10);
+            });
+            
+            if (equipoIds.length === 0) {
+                showError('Debes seleccionar al menos un equipo');
+                return;
+            }
+
+            if (selectedRoles.length === 0) {
+                showError('Debes seleccionar al menos un rol');
+                return;
+            }
+
+            const permission = document.getElementById('permissionSelect').value;
+            if (!permission) {
+                showError('Debes seleccionar un permiso');
+                return;
+            }
+
+            // Llenar el formulario oculto con los datos (as JSON strings that will be parsed on server)
+            console.log('📧 Emails:', usersToInvite.map(u => u.email));
+            console.log('🎭 RolIds (before convert):', selectedRoles);
+            console.log('🎭 RolIds (after convert):', selectedRoles.map(r => parseInt(r, 10)));
+            console.log('👥 EquipoIds:', equipoIds);
+            
+            document.getElementById('emailsInput').value = JSON.stringify(usersToInvite.map(u => u.email));
+            // selectedRoles are already numeric IDs from data-role-id attribute
+            document.getElementById('rolIdsInput').value = JSON.stringify(selectedRoles.map(r => parseInt(r, 10)));
+            document.getElementById('permissionInput').value = permission;
+            document.getElementById('equipoIdsInput').value = JSON.stringify(equipoIds);
+            
+            console.log('✅ Form values set:');
+            console.log('  emails:', document.getElementById('emailsInput').value);
+            console.log('  rolIds:', document.getElementById('rolIdsInput').value);
+            console.log('  equipoIds:', document.getElementById('equipoIdsInput').value);
+            console.log('  permission:', document.getElementById('permissionInput').value);
+            
+            // Agregar equipos temporales al formulario si existen
+            if (temporaryTeams.length > 0) {
+                temporaryTeams.forEach((team, index) => {
+                    const nameInput = document.createElement('input');
+                    nameInput.type = 'hidden';
+                    nameInput.name = 'temporaryTeamName_' + index;
+                    nameInput.value = team.name;
+                    document.getElementById('inviteForm').appendChild(nameInput);
+                });
+                
+                const countInput = document.createElement('input');
+                countInput.type = 'hidden';
+                countInput.name = 'temporaryTeamsCount';
+                countInput.value = temporaryTeams.length;
+                document.getElementById('inviteForm').appendChild(countInput);
+            }
+            
+            // Enviar el formulario
+            console.log('🚀 Submitting form...');
+            document.getElementById('inviteForm').submit();
+        }
+    </script>
+
+    <!-- Modal para crear equipo temporal -->
+    <div id="createTeamModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; padding: 30px; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0; font-size: 1.5rem; color: #1a1a1a;">
+                    <i class="fas fa-plus-circle"></i> Crear Equipo Temporal
+                </h2>
+                <button type="button" onclick="closeCreateTeamModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999;">
+                    ×
+                </button>
+            </div>
+
+            <div style="background: #e3f2fd; border-left: 4px solid #0066cc; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                <i class="fas fa-info-circle" style="color: #0066cc; margin-right: 10px;"></i>
+                <strong>Nota:</strong> Este equipo se creará automáticamente cuando envíes las invitaciones. Si cancelas, no se guardará nada.
+            </div>
+
+            <form id="createTeamForm" onsubmit="return false;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #1a1a1a;">
+                        Nombre del Equipo <span style="color: red;">*</span>
+                    </label>
+                    <input type="text" id="teamName" class="form-control" placeholder="Ej: Backend Team, QA Team, etc." required 
+                           style="padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; width: 100%; box-sizing: border-box;">
+                    <div style="font-size: 0.85rem; color: #666; margin-top: 6px;">Proporciona un nombre descriptivo para el equipo.</div>
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" onclick="closeCreateTeamModal()" 
+                            style="padding: 10px 20px; background: #f0f0f0; color: #333; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                        Cancelar
+                    </button>
+                    <button type="button" onclick="addTeamToInvitation()" 
+                            style="padding: 10px 20px; background: #0066cc; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                        <i class="fas fa-check"></i> Crear Equipo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        #createTeamModal.active {
+            display: flex !important;
+        }
+    </style>
+</body>
+</html>
+
+
+

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Registro - Telito Dev Portal</title>
+
+    <!-- Bootstrap CSS (usa tu copia local) -->
+    <link rel="stylesheet" href="/assets/bootstrap/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        /* Basado en el signin.html para mantener consistencia */
+        body {
+            background: #0d1117;
+            color: #fff;
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container-fluid {
+            height: 100vh;
+            padding: 0;
+        }
+
+        .left-panel {
+            background: #0d1117;
+            color: #fff;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+        }
+        .left-panel h2 {
+            font-weight: 700;
+            font-size: 2rem;
+            margin-bottom: .6rem;
+        }
+        .left-panel p {
+            color: #b7c1c9;
+            margin-bottom: 1.2rem;
+        }
+        .left-panel .illustration {
+            max-height: 320px;
+            width: auto;
+            opacity: .95;
+            margin-top: 1rem;
+        }
+
+        .right-panel {
+            background: #ffffff;
+            color: #000;
+            padding: 2.4rem 3rem;
+            border-radius: 30px 30px 0 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-box {
+            max-width: 480px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: .75rem;
+        }
+
+        .welcome-message {
+            background: rgba(25, 135, 84, 0.1);
+            border: 2px solid rgba(25, 135, 84, 0.3);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #198754;
+        }
+
+        .welcome-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+
+        .welcome-text {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            gap: 0.5rem;
+        }
+
+        .step {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            background: #0d6efd;
+            box-shadow: 0 0 8px rgba(13, 110, 253, 0.4);
+        }
+
+        .step.completed {
+            background: #198754;
+            box-shadow: 0 0 8px rgba(25, 135, 84, 0.4);
+        }
+
+        .email-info {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .timer {
+            background: rgba(13, 110, 253, 0.1);
+            border: 2px solid rgba(13, 110, 253, 0.3);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            color: #0d6efd;
+            font-weight: 600;
+        }
+
+        .code-input-group {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .code-digit {
+            width: 50px;
+            height: 55px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            background: #fff;
+            color: #212529;
+        }
+
+        .code-digit:focus {
+            border-color: #0d6efd;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .btn-verify {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: transform .12s ease, box-shadow .12s ease;
+        }
+
+        .btn-verify:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(25, 135, 84, 0.2);
+        }
+
+        .btn-link-custom {
+            background: transparent;
+            border: 2px solid #e9ecef;
+            color: #6c757d;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-link-custom:hover {
+            border-color: #0d6efd;
+            color: #0d6efd;
+            background: rgba(13, 110, 253, 0.05);
+        }
+
+        .btn-link-custom:disabled {
+            color: #adb5bd;
+            cursor: not-allowed;
+            background: #f8f9fa;
+            border-color: #dee2e6;
+        }
+
+        .resend-section {
+            text-align: center;
+            margin: 1.5rem 0;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .back-link a {
+            background: transparent;
+            border: 2px solid #e9ecef;
+            color: #6c757d;
+            padding: 0.5rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .back-link a:hover {
+            border-color: #6c757d;
+            color: #495057;
+            background: #f8f9fa;
+        }
+
+        .small-link {
+            font-size: .95rem;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .container-fluid {
+                display: flex;
+                flex-direction: column;
+                height: auto;
+            }
+            .left-panel {
+                order: 2;
+                padding: 2rem;
+                text-align: center;
+                border-radius: 0 0 30px 30px;
+            }
+            .right-panel {
+                order: 1;
+                padding: 1.6rem;
+                border-radius: 30px 30px 0 0;
+            }
+            .left-panel .illustration {
+                width: 60%;
+                max-height: 220px;
+                margin: 0 auto;
+            }
+            .code-input-group {
+                gap: 0.35rem;
+            }
+            .code-digit {
+                width: 45px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid d-flex flex-wrap">
+    <!-- Izquierda: mensaje (igual que en signin) -->
+    <div class="col-md-6 left-panel">
+        <h2>¡Bienvenido a TelDev Portal!</h2>
+        <p>Tu registro está casi completo. Solo falta verificar tu correo electrónico para activar tu cuenta y comenzar a desarrollar.</p>
+    </div>
+
+    <!-- Derecha: formulario -->
+    <div class="col-md-6 right-panel">
+        <div class="form-box">
+            <div class="text-center mb-3">
+                <h3 class="mt-2 mb-1">Verificar tu registro</h3>
+                <p class="small-link">Activa tu cuenta desarrollador</p>
+            </div>
+
+            <div class="welcome-message">
+                <div class="welcome-title">
+                    <i class="bi bi-check-circle-fill"></i> ¡Te has registrado exitosamente!
+                </div>
+                <div class="welcome-text">
+                    Para completar tu registro y activar tu cuenta, verifica tu código de confirmación
+                </div>
+            </div>
+
+            <div class="steps">
+                <div class="step completed"></div>
+                <div class="step active"></div>
+                <div class="step"></div>
+            </div>
+
+            <div class="email-info" th:if="${email}">
+                Código enviado a: <strong th:text="${email}">correo@empresa.com</strong>
+            </div>
+
+            <div class="timer">
+                Expira en: <span id="countdown">5:00</span>
+            </div>
+
+            <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+
+            <form action="/verify-registration" method="post" id="codeForm">
+                <div class="code-input-group">
+                    <input type="text" class="code-digit" maxlength="1" name="digit1" required>
+                    <input type="text" class="code-digit" maxlength="1" name="digit2" required>
+                    <input type="text" class="code-digit" maxlength="1" name="digit3" required>
+                    <input type="text" class="code-digit" maxlength="1" name="digit4" required>
+                    <input type="text" class="code-digit" maxlength="1" name="digit5" required>
+                    <input type="text" class="code-digit" maxlength="1" name="digit6" required>
+                </div>
+
+                <div class="d-grid mb-2">
+                    <button type="submit" class="btn btn-success btn-verify">
+                        <i class="bi bi-check-circle"></i> Activar mi cuenta
+                    </button>
+                </div>
+            </form>
+
+            <div class="resend-section">
+                ¿No recibiste el código?
+                <form action="/resend-registration-code" method="post" style="display: inline;">
+                    <button type="submit" class="btn-link-custom" id="resendBtn">
+                        Reenviar código
+                    </button>
+                </form>
+            </div>
+
+            <div class="back-link">
+                <a href="/signin">
+                    <i class="bi bi-arrow-left"></i> Volver al inicio de sesión
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Auto-focus y navegación entre inputs
+    document.addEventListener('DOMContentLoaded', function() {
+        const codeInputs = document.querySelectorAll('.code-digit');
+
+        codeInputs.forEach((input, index) => {
+            input.addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+
+                if (e.target.value.length === 1 && index < codeInputs.length - 1) {
+                    codeInputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+                    codeInputs[index - 1].focus();
+                }
+            });
+
+            // Permitir pegar código completo
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData('text').replace(/[^0-9]/g, '');
+
+                if (pastedData.length === 6) {
+                    for (let i = 0; i < 6; i++) {
+                        if (codeInputs[i]) {
+                            codeInputs[i].value = pastedData[i];
+                        }
+                    }
+                    codeInputs[5].focus();
+                }
+            });
+        });
+
+        codeInputs[0].focus();
+    });
+
+    // Contador regresivo (5 minutos = 300 segundos)
+    let timeLeft = 300;
+    const timerElement = document.getElementById('countdown');
+    const resendBtn = document.getElementById('resendBtn');
+
+    const timer = setInterval(function() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+
+        timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            timerElement.textContent = 'Expirado';
+            document.querySelectorAll('.code-digit').forEach(input => input.disabled = true);
+            document.querySelector('.btn-verify').disabled = true;
+        }
+
+        timeLeft--;
+    }, 1000);
+
+    // Control de reenvío
+    let resendCooldown = 60;
+    resendBtn.disabled = true;
+
+    const resendTimer = setInterval(function() {
+        if (resendCooldown <= 0) {
+            clearInterval(resendTimer);
+            resendBtn.disabled = false;
+            resendBtn.textContent = 'Reenviar código';
+        } else {
+            resendBtn.textContent = `Reenviar (${resendCooldown}s)`;
+            resendCooldown--;
+        }
+    }, 1000);
+</script>
+</body>
+</html>
+
+

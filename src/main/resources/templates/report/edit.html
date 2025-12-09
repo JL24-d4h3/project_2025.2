@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Reporte - DevPortal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/project-repository.css}">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    
+    <!-- Quill Editor CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.0/dist/quill.snow.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --dark-color: #2c3e50;
+            --light-bg: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* HEADER */
+        .page-header {
+            background: white;
+            padding: 2rem 0;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+
+        .breadcrumb-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item.active {
+            color: var(--dark-color);
+        }
+
+        .header-content h1 {
+            margin: 0;
+            color: var(--dark-color);
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        /* ALERT */
+        .alert-warning-custom {
+            background: #fff3cd;
+            border-left: 4px solid var(--warning-color);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .alert-warning-custom i {
+            color: var(--warning-color);
+            margin-right: 0.5rem;
+        }
+
+        .alert-info-custom {
+            background: #e3f2fd;
+            border-left: 4px solid var(--info-color);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-info-custom i {
+            color: var(--info-color);
+            margin-right: 0.5rem;
+        }
+
+        /* FORM CONTAINER */
+        .edit-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 2.5rem;
+        }
+
+        .form-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .form-header-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), #3a7bc8);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .form-header-content h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .form-header-content p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+
+        /* FORM GROUPS */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-group label .required {
+            color: var(--danger-color);
+            margin-left: 0.25rem;
+        }
+
+        .form-group label i {
+            color: var(--primary-color);
+            margin-right: 0.25rem;
+        }
+
+        .form-control,
+        .form-select {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .form-control:disabled,
+        .form-select:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-text {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        .char-counter {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+
+        .char-counter.warning {
+            color: var(--warning-color);
+        }
+
+        .char-counter.danger {
+            color: var(--danger-color);
+        }
+
+        /* SELECT2 CUSTOMIZATION */
+        .select2-container--bootstrap-5 .select2-selection {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            min-height: 48px;
+        }
+
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+            line-height: 44px;
+        }
+
+        .select2-container--bootstrap-5.select2-container--focus .select2-selection {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .select2-container--bootstrap-5.select2-container--disabled .select2-selection {
+            background-color: #e9ecef;
+        }
+
+        /* QUILL EDITOR */
+        .quill-container {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+        }
+
+        .ql-toolbar {
+            border: none;
+            border-bottom: 2px solid var(--border-color);
+            border-radius: 8px 8px 0 0;
+            background: var(--light-bg);
+        }
+
+        .ql-container {
+            border: none;
+            font-size: 1rem;
+            min-height: 400px;
+        }
+
+        .ql-editor {
+            min-height: 400px;
+        }
+
+        /* STATIC INFO CARD */
+        .static-info-card {
+            background: var(--light-bg);
+            padding: 1.25rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .static-info-item {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 1rem;
+            padding: 0.5rem 0;
+        }
+
+        .static-label {
+            font-weight: 600;
+            color: #6c757d;
+        }
+
+        .static-value {
+            color: var(--dark-color);
+        }
+
+        .badge-tipo {
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* ==================== ESTILOS PARA ADJUNTOS ==================== */
+        .attachments-list {
+            margin-top: 0.75rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            background: #fafafa;
+            padding: 0.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .attachment-item-edit {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s;
+        }
+
+        .attachment-item-edit:last-child {
+            margin-bottom: 0;
+        }
+
+        .attachment-item-edit:hover {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-color: #007bff;
+        }
+
+        .attachment-icon-edit {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 4px;
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        .attachment-info-edit {
+            flex: 1;
+        }
+
+        .attachment-name-edit {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 0.2rem;
+            font-size: 0.95rem;
+        }
+
+        .attachment-size-edit {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .btn-remove-attachment {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-remove-attachment:hover {
+            background: linear-gradient(135deg, #ee5a6f 0%, #dc3545 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(220,53,69,0.3);
+        }
+
+        .btn-remove-attachment i {
+            font-size: 0.9rem;
+        }
+
+        /* FILE UPLOAD ZONE */
+        .file-upload-zone-edit {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            background: #f9f9f9;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload-zone-edit:hover {
+            border-color: #007bff;
+            background: #e7f1ff;
+        }
+
+        .file-upload-zone-edit.dragover {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .upload-icon-edit {
+            font-size: 3rem;
+            color: #007bff;
+            margin-bottom: 0.5rem;
+        }
+
+        .new-attachments-preview {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: #f0f8ff;
+            border-radius: 4px;
+            border: 1px solid #cce5ff;
+            display: none;
+        }
+
+        .new-attachments-preview.has-files {
+            display: block;
+        }
+
+        .new-file-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            border: 1px solid #b8daff;
+        }
+
+        .new-file-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .new-file-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #007bff;
+            color: white;
+            border-radius: 4px;
+            margin-right: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .new-file-info {
+            flex: 1;
+        }
+
+        .new-file-name {
+            font-weight: 500;
+            color: #004085;
+            font-size: 0.9rem;
+        }
+
+        .new-file-size {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        .btn-remove-new-file {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .btn-remove-new-file:hover {
+            color: #c82333;
+            transform: scale(1.2);
+        }
+        /* ==================== FIN ESTILOS ADJUNTOS ==================== */
+
+        .badge-tipo.API { background: #e3f2fd; color: #1976d2; }
+        .badge-tipo.TICKET { background: #fff3e0; color: #f57c00; }
+        .badge-tipo.PROYECTO { background: #f3e5f5; color: #7b1fa2; }
+        .badge-tipo.REPOSITORIO { background: #e8f5e9; color: #388e3c; }
+        .badge-tipo.DOCUMENTACION { background: #fce4ec; color: #c2185b; }
+        .badge-tipo.FORO { background: #fff9c4; color: #f57f17; }
+        .badge-tipo.GENERAL { background: #eceff1; color: #455a64; }
+
+        .badge-estado {
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-estado.BORRADOR { background: #e0e0e0; color: #424242; }
+
+        /* FORM ACTIONS */
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        .btn-form {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+            color: white;
+        }
+
+        .btn-save {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-form:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* LOADING SPINNER */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: white;
+        }
+
+        /* VALIDATION */
+        .is-invalid {
+            border-color: var(--danger-color) !important;
+        }
+
+        .invalid-feedback {
+            display: block;
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .edit-container {
+                padding: 1.5rem;
+            }
+
+            .form-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn-form {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .static-info-item {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar(username=${username}, rol=${rol})}"></div>
+
+    <div class="container-fluid py-4">
+        <!-- HEADER -->
+        <div class="page-header">
+            <div class="container">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a th:href="@{/devportal/{rol}/{username}/dashboard(rol=${rol}, username=${username})}">Inicio</a></li>
+                        <li class="breadcrumb-item"><a th:href="@{/devportal/{rol}/{username}/reports(rol=${rol}, username=${username})}">Reportes</a></li>
+                        <li class="breadcrumb-item"><a th:href="@{/devportal/{rol}/{username}/reports/detail/{id}(rol=${rol}, username=${username}, id=${reporte.reporteId})}">Detalle</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Editar</li>
+                    </ol>
+                </nav>
+                
+                <div class="header-content">
+                    <h1><i class="fas fa-edit me-2"></i> Editar Reporte</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- WARNING ALERT -->
+            <div class="alert-warning-custom">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Importante:</strong> Solo puedes editar reportes en estado BORRADOR. Una vez publicado, el reporte no podrá ser modificado.
+            </div>
+
+            <!-- EDIT FORM -->
+            <div class="edit-container">
+                <div class="form-header">
+                    <div class="form-header-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="form-header-content">
+                        <h2>Editar Reporte</h2>
+                        <p>Modifica la información del reporte. Los cambios se guardarán como borrador.</p>
+                    </div>
+                </div>
+
+                <form id="editForm">
+                    <!-- STATIC INFO -->
+                    <div class="static-info-card">
+                        <div class="static-info-item">
+                            <div class="static-label">Tipo de Reporte:</div>
+                            <div class="static-value">
+                                <span class="badge-tipo" th:classappend="${reporte.tipoReporte}" 
+                                      th:text="${reporte.tipoReporte}">API</span>
+                            </div>
+                        </div>
+                        <div class="static-info-item">
+                            <div class="static-label">Estado:</div>
+                            <div class="static-value">
+                                <span class="badge-estado" th:classappend="${reporte.estadoReporte}" 
+                                      th:text="${reporte.estadoReporte}">BORRADOR</span>
+                            </div>
+                        </div>
+                        <div class="static-info-item" th:if="${reporte.entidadRelacionadaNombre != null && reporte.entidadRelacionadaNombre != 'Sin especificar'}">
+                            <div class="static-label">Entidad Relacionada:</div>
+                            <div class="static-value" th:text="${reporte.entidadRelacionadaNombre}">Entidad</div>
+                        </div>
+                    </div>
+
+                    <div class="alert-info-custom" style="margin-top: 1.5rem;">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Nota:</strong> El tipo de reporte y la entidad relacionada no pueden modificarse. Si necesitas cambiarlos, debes crear un nuevo reporte.
+                    </div>
+
+                    <!-- TÍTULO -->
+                    <div class="form-group">
+                        <label for="tituloReporte">
+                            <i class="fas fa-heading"></i> Título del Reporte
+                            <span class="required">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="tituloReporte" name="tituloReporte" 
+                               th:value="${reporte.tituloReporte}"
+                               placeholder="Ej: Análisis de rendimiento API v2.0" 
+                               maxlength="200" 
+                               required>
+                        <div class="char-counter" id="tituloCounter">0 / 200</div>
+                        <div class="invalid-feedback"></div>
+                    </div>
+
+                    <!-- DESCRIPCIÓN -->
+                    <div class="form-group">
+                        <label for="descripcionReporte">
+                            <i class="fas fa-align-left"></i> Descripción Breve
+                            <span class="required">*</span>
+                        </label>
+                        <textarea class="form-control" id="descripcionReporte" name="descripcionReporte" 
+                                  rows="4" maxlength="500" required
+                                  placeholder="Proporciona un resumen breve del contenido del reporte..."
+                                  th:text="${reporte.descripcionReporte}"></textarea>
+                        <div class="char-counter" id="descripcionCounter">0 / 500</div>
+                        <div class="invalid-feedback"></div>
+                    </div>
+
+                    <!-- CONTENIDO -->
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-file-alt"></i> Contenido Detallado
+                            <span class="required">*</span>
+                        </label>
+                        <div class="quill-container">
+                            <div id="quillEditor"></div>
+                        </div>
+                        <input type="hidden" id="contenidoReporte" name="contenidoReporte" th:value="${reporte.contenidoReporte}">
+                        <small class="form-text">Utiliza formato, listas y enlaces para hacer tu reporte más legible.</small>
+                        <div class="invalid-feedback"></div>
+                    </div>
+
+                    <!-- ARCHIVOS ADJUNTOS ACTUALES -->
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-paperclip"></i> Archivos Adjuntos Actuales
+                        </label>
+                        
+                        <div class="attachments-list" th:if="${reporte.adjuntos != null && !#lists.isEmpty(reporte.adjuntos)}">
+                            <div class="attachment-item-edit" th:each="adjunto : ${reporte.adjuntos}" 
+                                 th:id="'adjunto-' + ${adjunto.adjuntoId}">
+                                <div class="attachment-icon-edit">
+                                    <i class="fas fa-file"></i>
+                                </div>
+                                <div class="attachment-info-edit">
+                                    <div class="attachment-name-edit" th:text="${adjunto.nombreArchivo}">archivo.pdf</div>
+                                    <div class="attachment-size-edit" 
+                                         th:text="${#numbers.formatDecimal(adjunto.tamanioBytes / 1024.0, 1, 2)} + ' KB'">
+                                        1.5 KB
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-remove-attachment" 
+                                        th:attr="data-id=${adjunto.adjuntoId}, data-nombre=${adjunto.nombreArchivo}"
+                                        onclick="eliminarAdjunto(this)">
+                                    <i class="fas fa-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <p th:if="${reporte.adjuntos == null || #lists.isEmpty(reporte.adjuntos)}" 
+                           class="text-muted" style="margin: 0; padding: 1rem; background: #f8f9fa; border-radius: 4px; text-align: center;">
+                            <i class="fas fa-info-circle"></i> No hay archivos adjuntos en este reporte
+                        </p>
+                    </div>
+
+                    <!-- AGREGAR NUEVOS ADJUNTOS -->
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-cloud-upload-alt"></i> Agregar Nuevos Adjuntos
+                        </label>
+                        <div class="file-upload-zone-edit" id="fileUploadZone">
+                            <i class="fas fa-cloud-upload-alt upload-icon-edit"></i>
+                            <p style="margin: 0.5rem 0 0 0; color: #666;">
+                                <strong>Click para seleccionar archivos</strong> o arrastra aquí
+                            </p>
+                            <small style="color: #999;">Máximo 10 MB por archivo (PDF, DOC, DOCX, XLS, XLSX, PNG, JPG, TXT, ZIP)</small>
+                            <input type="file" id="nuevosAdjuntos" name="nuevosAdjuntos" multiple style="display: none;">
+                        </div>
+                        <div id="nuevosAdjuntosList" class="new-attachments-preview"></div>
+                    </div>
+
+                    <!-- FORM ACTIONS -->
+                    <div class="form-actions">
+                        <a th:href="@{/devportal/{rol}/{username}/reports/detail/{id}(rol=${rol}, username=${username}, id=${reporte.reporteId})}" class="btn-form btn-cancel">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                        
+                        <button type="submit" class="btn-form btn-save">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Guardando...</span>
+        </div>
+    </div>
+
+    <!-- jQuery (required for Select2) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Quill Editor JS -->
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.0/dist/quill.js"></script>
+    
+    <script th:inline="javascript">
+        // Global variables
+        let quillEditor;
+        const reporteId = /*[[${reporte.reporteId}]]*/ 0;
+        const initialContenido = /*[[${reporte.contenidoReporte}]]*/ '';
+        const rol = /*[[${rol}]]*/ '';
+        const username = /*[[${username}]]*/ '';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Quill Editor
+            initializeQuillEditor();
+
+            // Initialize character counters
+            updateCharCounter('tituloReporte', 'tituloCounter', 200);
+            updateCharCounter('descripcionReporte', 'descripcionCounter', 500);
+
+            // Event listeners
+            document.getElementById('tituloReporte').addEventListener('input', function() {
+                updateCharCounter('tituloReporte', 'tituloCounter', 200);
+            });
+
+            document.getElementById('descripcionReporte').addEventListener('input', function() {
+                updateCharCounter('descripcionReporte', 'descripcionCounter', 500);
+            });
+
+            document.getElementById('editForm').addEventListener('submit', handleSubmit);
+
+            // ==================== ADJUNTOS: INICIALIZAR ====================
+            initializeFileUpload();
+        });
+
+        // ==================== ADJUNTOS: ELIMINAR EXISTENTES ====================
+        function eliminarAdjunto(button) {
+            const adjuntoId = button.getAttribute('data-id');
+            const nombreArchivo = button.getAttribute('data-nombre');
+
+            Swal.fire({
+                title: '¿Eliminar archivo?',
+                html: `Se eliminará el archivo:<br><strong>${nombreArchivo}</strong>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-trash"></i> Sí, eliminar',
+                cancelButtonText: '<i class="fas fa-times"></i> Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Llamar al endpoint DELETE
+                    fetch(`/devportal/${rol}/${username}/reports/adjuntos/${adjuntoId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Eliminar del DOM
+                            const adjuntoItem = document.getElementById('adjunto-' + adjuntoId);
+                            if (adjuntoItem) {
+                                adjuntoItem.style.transition = 'all 0.3s';
+                                adjuntoItem.style.opacity = '0';
+                                adjuntoItem.style.transform = 'translateX(-20px)';
+                                setTimeout(() => adjuntoItem.remove(), 300);
+                            }
+
+                            Swal.fire({
+                                title: '¡Eliminado!',
+                                text: 'El archivo ha sido eliminado correctamente',
+                                icon: 'success',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            throw new Error('Error al eliminar el archivo');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'No se pudo eliminar el archivo. Inténtalo de nuevo.',
+                            icon: 'error',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    });
+                }
+            });
+        }
+
+        // ==================== ADJUNTOS: AGREGAR NUEVOS ====================
+        let nuevosArchivos = [];
+
+        function initializeFileUpload() {
+            const uploadZone = document.getElementById('fileUploadZone');
+            const fileInput = document.getElementById('nuevosAdjuntos');
+            const previewContainer = document.getElementById('nuevosAdjuntosList');
+
+            if (!uploadZone || !fileInput || !previewContainer) return;
+
+            // Click en zona de upload
+            uploadZone.addEventListener('click', () => fileInput.click());
+
+            // Drag & Drop
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
+            });
+
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            });
+
+            // Selección de archivos
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+        }
+
+        function handleFiles(files) {
+            const maxSize = 10 * 1024 * 1024; // 10 MB
+            const allowedTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'image/png',
+                'image/jpeg',
+                'text/plain',
+                'application/zip'
+            ];
+
+            for (let file of files) {
+                // Validar tamaño
+                if (file.size > maxSize) {
+                    Swal.fire({
+                        title: 'Archivo muy grande',
+                        text: `El archivo "${file.name}" supera los 10 MB permitidos`,
+                        icon: 'error',
+                        confirmButtonColor: '#dc3545'
+                    });
+                    continue;
+                }
+
+                // Validar tipo
+                if (!allowedTypes.includes(file.type) && !file.name.endsWith('.zip')) {
+                    Swal.fire({
+                        title: 'Tipo de archivo no permitido',
+                        text: `El archivo "${file.name}" no está permitido`,
+                        icon: 'error',
+                        confirmButtonColor: '#dc3545'
+                    });
+                    continue;
+                }
+
+                // Agregar a array
+                nuevosArchivos.push(file);
+                mostrarNuevoArchivo(file);
+            }
+        }
+
+        function mostrarNuevoArchivo(file) {
+            const previewContainer = document.getElementById('nuevosAdjuntosList');
+            const index = nuevosArchivos.length - 1;
+
+            const fileItem = document.createElement('div');
+            fileItem.className = 'new-file-item';
+            fileItem.id = `new-file-${index}`;
+            fileItem.innerHTML = `
+                <div class="new-file-icon">
+                    <i class="fas fa-file"></i>
+                </div>
+                <div class="new-file-info">
+                    <div class="new-file-name">${file.name}</div>
+                    <div class="new-file-size">${formatBytes(file.size)}</div>
+                </div>
+                <button type="button" class="btn-remove-new-file" onclick="eliminarNuevoArchivo(${index})">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+            previewContainer.appendChild(fileItem);
+            previewContainer.classList.add('has-files');
+        }
+
+        function eliminarNuevoArchivo(index) {
+            // Eliminar del array
+            nuevosArchivos.splice(index, 1);
+
+            // Eliminar del DOM
+            const fileItem = document.getElementById(`new-file-${index}`);
+            if (fileItem) {
+                fileItem.remove();
+            }
+
+            // Ocultar contenedor si no hay archivos
+            const previewContainer = document.getElementById('nuevosAdjuntosList');
+            if (nuevosArchivos.length === 0) {
+                previewContainer.classList.remove('has-files');
+            }
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+        // ==================== FIN ADJUNTOS ====================
+
+        // Initialize Quill Editor
+        function initializeQuillEditor() {
+            quillEditor = new Quill('#quillEditor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'indent': '-1'}, { 'indent': '+1' }],
+                        [{ 'align': [] }],
+                        ['blockquote', 'code-block'],
+                        ['link', 'image'],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'Escribe el contenido detallado de tu reporte aquí...'
+            });
+
+            // Set initial content
+            if (initialContenido) {
+                quillEditor.root.innerHTML = initialContenido;
+            }
+        }
+
+        // Update character counter
+        function updateCharCounter(inputId, counterId, maxLength) {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(counterId);
+            const currentLength = input.value.length;
+            
+            counter.textContent = `${currentLength} / ${maxLength}`;
+            
+            // Color based on usage
+            counter.classList.remove('warning', 'danger');
+            if (currentLength > maxLength * 0.9) {
+                counter.classList.add('danger');
+            } else if (currentLength > maxLength * 0.7) {
+                counter.classList.add('warning');
+            }
+        }
+
+        // Validate form
+        function validateForm() {
+            let isValid = true;
+
+            // Validate título
+            const titulo = document.getElementById('tituloReporte').value.trim();
+            if (!titulo || titulo.length < 10) {
+                showFieldError('tituloReporte', 'El título debe tener al menos 10 caracteres.');
+                isValid = false;
+            } else {
+                clearFieldError('tituloReporte');
+            }
+
+            // Validate descripción
+            const descripcion = document.getElementById('descripcionReporte').value.trim();
+            if (!descripcion || descripcion.length < 20) {
+                showFieldError('descripcionReporte', 'La descripción debe tener al menos 20 caracteres.');
+                isValid = false;
+            } else {
+                clearFieldError('descripcionReporte');
+            }
+
+            // Validate contenido
+            const textContent = quillEditor.getText().trim();
+            if (!textContent || textContent.length < 50) {
+                showFieldError('quillEditor', 'El contenido debe tener al menos 50 caracteres.');
+                isValid = false;
+            } else {
+                clearFieldError('quillEditor');
+            }
+
+            return isValid;
+        }
+
+        // Show field error
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const feedback = field.parentElement.querySelector('.invalid-feedback');
+            
+            if (fieldId === 'quillEditor') {
+                field.parentElement.classList.add('is-invalid');
+            } else {
+                field.classList.add('is-invalid');
+            }
+            
+            if (feedback) {
+                feedback.textContent = message;
+                feedback.style.display = 'block';
+            }
+        }
+
+        // Clear field error
+        function clearFieldError(fieldId) {
+            const field = document.getElementById(fieldId);
+            const feedback = field.parentElement.querySelector('.invalid-feedback');
+            
+            if (fieldId === 'quillEditor') {
+                field.parentElement.classList.remove('is-invalid');
+            } else {
+                field.classList.remove('is-invalid');
+            }
+            
+            if (feedback) {
+                feedback.style.display = 'none';
+            }
+        }
+
+        // Handle form submit
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            if (!validateForm()) {
+                return;
+            }
+
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const submitBtn = document.querySelector('.btn-save');
+
+            try {
+                submitBtn.disabled = true;
+                loadingOverlay.classList.add('show');
+
+                // Get Quill content
+                const contenidoHTML = quillEditor.root.innerHTML;
+
+                // Usar FormData si hay nuevos archivos, sino JSON simple
+                if (nuevosArchivos.length > 0) {
+                    // FormData para enviar archivos + datos
+                    const formData = new FormData();
+                    
+                    formData.append('tituloReporte', document.getElementById('tituloReporte').value.trim());
+                    formData.append('descripcionReporte', document.getElementById('descripcionReporte').value.trim());
+                    formData.append('contenidoReporte', contenidoHTML);
+
+                    // Agregar archivos nuevos
+                    nuevosArchivos.forEach(file => {
+                        formData.append('nuevosAdjuntos', file);
+                    });
+
+                    // Send PUT request with FormData (sin Content-Type header, el browser lo pone automático)
+                    const response = await fetch(`/devportal/${rol}/${username}/reports/${reporteId}`, {
+                        method: 'PUT',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        Swal.fire({
+                            title: '¡Guardado!',
+                            text: 'Los cambios y archivos se guardaron correctamente',
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.href = `/devportal/${rol}/${username}/reports/detail/${reporteId}`;
+                        });
+                    } else {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.message || 'Error al guardar');
+                    }
+
+                } else {
+                    // JSON simple si no hay archivos nuevos
+                    const payload = {
+                        tituloReporte: document.getElementById('tituloReporte').value.trim(),
+                        descripcionReporte: document.getElementById('descripcionReporte').value.trim(),
+                        contenidoReporte: contenidoHTML
+                    };
+
+                    const response = await fetch(`/devportal/${rol}/${username}/reports/${reporteId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        Swal.fire({
+                            title: '¡Guardado!',
+                            text: 'Los cambios se guardaron correctamente',
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.href = `/devportal/${rol}/${username}/reports/detail/${reporteId}`;
+                        });
+                    } else {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.message || 'Error al guardar');
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: error.message || 'No se pudieron guardar los cambios',
+                    icon: 'error',
+                    confirmButtonColor: '#dc3545'
+                });
+            } finally {
+                submitBtn.disabled = false;
+                loadingOverlay.classList.remove('show');
+            }
+        }
+    </script>
+
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+
+</body>
+</html>

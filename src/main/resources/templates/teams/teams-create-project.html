@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Equipo en Proyecto - Dev Portal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/project-repository.css}">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <style>
+        :root {
+            --primary-color: #2596be;
+            --primary-dark: #1e7a9a;
+            --primary-light: #e3f2fd;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --border-light: #e0e0e0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+        
+        .form-container { 
+            padding: 1.5rem; 
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+        
+        .form-main { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+        }
+        
+        .form-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .form-section h3 {
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control {
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
+            padding: 0.75rem 1rem;
+            transition: all 0.2s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(37, 150, 190, 0.15);
+        }
+        
+        .project-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .project-item {
+            background: white;
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            position: relative;
+        }
+        
+        .project-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        
+        .project-item input[type="checkbox"] {
+            margin-top: 0.25rem;
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+        
+        .project-info {
+            flex: 1;
+        }
+        
+        .project-item input[type="checkbox"]:checked {
+            accent-color: var(--primary-color);
+        }
+        
+        .project-item.selected {
+            background-color: var(--primary-light);
+            border-color: var(--primary-color);
+        }
+        
+        .project-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        
+        .project-description {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .btn-primary { 
+            background: var(--primary-color); 
+            color: white; 
+            padding: 0.75rem 1.5rem; 
+            text-decoration: none; 
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .empty-message {
+            text-align: center;
+            padding: 2rem;
+            background-color: #fff3cd;
+            border-radius: var(--radius-md);
+            color: #856404;
+            margin-top: 1rem;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 2rem;
+            justify-content: flex-end;
+        }
+        
+        .section-subtitle {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .permisos-select {
+            background: #e3f2fd;
+            border: 2px solid var(--primary-color);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            margin-top: 1rem;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .permisos-select.show {
+            display: block !important;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .permisos-select label {
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .permisos-select select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            border: 2px solid #ccc;
+            border-radius: var(--radius-sm);
+            background: white;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .permisos-select select:hover {
+            border-color: var(--primary-color);
+            background-color: #fafbfc;
+            box-shadow: 0 2px 8px rgba(37, 150, 190, 0.15);
+        }
+
+        .permisos-select select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(37, 150, 190, 0.1), 0 0 0 2px var(--primary-color);
+        }
+
+        .permisos-select select option {
+            padding: 0.5rem;
+            background: white;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <main class="form-container content-after-navbar">
+        <div class="form-main">
+            <div class="form-card">
+                <form method="POST" th:action="@{/devportal/{rol}/{username}/teams/created-at-P(rol=${rol}, username=${username})}">
+                    <!-- Team Name Section -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-tag"></i> Nombre del Equipo</h3>
+                        <div class="form-group">
+                            <label for="nombreEquipo">Nombre:</label>
+                            <input type="text" class="form-control" id="nombreEquipo" name="nombreEquipo" 
+                                   placeholder="Ej: Backend Team, QA Team" required>
+                        </div>
+                    </div>
+
+                    <!-- Projects Section -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-folder"></i> Seleccionar Proyectos</h3>
+                        <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1rem;">
+                            <i class="fas fa-info-circle"></i> Puedes seleccionar uno o más proyectos. El equipo estará asociado a todos ellos.
+                        </p>
+                        
+                        <!-- Group Projects -->
+                        <div class="section-subtitle">
+                            <i class="fas fa-users"></i> Proyectos Grupales
+                        </div>
+                        <div th:if="${!proyectosGrupales.isEmpty()}" class="project-list">
+                            <div th:each="proyecto : ${proyectosGrupales}" class="project-item">
+                                <input type="checkbox" name="proyectosIds" th:value="${proyecto.proyectoId}" 
+                                       class="project-checkbox">
+                                <div class="project-info">
+                                    <div class="project-name" th:text="${proyecto.nombreProyecto}">Nombre del Proyecto</div>
+                                    <div class="project-description" th:text="${proyecto.descripcion}">Descripción</div>
+                                    <div class="permisos-select">
+                                        <label>Permisos del equipo:</label>
+                                        <select th:attr="name=${'permisos_' + proyecto.proyectoId}">
+                                            <option value="LECTOR">Lector (solo lectura)</option>
+                                            <option value="EDITOR" selected>Editor (acceso completo)</option>
+                                            <option value="COMENTADOR">Comentador (lectura + comentarios)</option>
+                                            <option value="ADMINISTRADOR">Administrador (gestión total)</option>
+                                            <option value="PERSONALIZADO">Personalizado (permisos específicos)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div th:if="${proyectosGrupales.isEmpty()}" class="empty-message">
+                            <i class="fas fa-info-circle"></i> No tienes proyectos grupales disponibles (solo se muestran los que has creado)
+                        </div>
+
+                        <!-- Enterprise Projects -->
+                        <div class="section-subtitle">
+                            <i class="fas fa-building"></i> Proyectos Empresariales
+                        </div>
+                        <div th:if="${!proyectosEmpresariales.isEmpty()}" class="project-list">
+                            <div th:each="proyecto : ${proyectosEmpresariales}" class="project-item">
+                                <input type="checkbox" name="proyectosIds" th:value="${proyecto.proyectoId}" 
+                                       class="project-checkbox">
+                                <div class="project-info">
+                                    <div class="project-name" th:text="${proyecto.nombreProyecto}">Nombre del Proyecto</div>
+                                    <div class="project-description" th:text="${proyecto.descripcion}">Descripción</div>
+                                    <div class="permisos-select">
+                                        <label>Permisos del equipo:</label>
+                                        <select th:attr="name=${'permisos_' + proyecto.proyectoId}">
+                                            <option value="LECTOR">Lector (solo lectura)</option>
+                                            <option value="EDITOR" selected>Editor (acceso completo)</option>
+                                            <option value="COMENTADOR">Comentador (lectura + comentarios)</option>
+                                            <option value="ADMINISTRADOR">Administrador (gestión total)</option>
+                                            <option value="PERSONALIZADO">Personalizado (permisos específicos)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div th:if="${proyectosEmpresariales.isEmpty()}" class="empty-message">
+                            <i class="fas fa-info-circle"></i> No tienes proyectos empresariales disponibles (solo se muestran los que has creado)
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="button-group">
+                        <a th:href="@{/devportal/{rol}/{username}/teams(rol=${rol}, username=${username})}" class="btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-plus"></i> Crear Equipo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/navbar.js}"></script>
+    <script>
+        document.querySelectorAll('.project-item').forEach(item => {
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            const permisosDiv = item.querySelector('.permisos-select');
+            const select = permisosDiv.querySelector('select');
+            
+            // Hacer que todo el item sea clickeable
+            item.addEventListener('click', function(e) {
+                if (e.target !== checkbox && !e.target.closest('.permisos-select')) {
+                    checkbox.click();
+                }
+            });
+            
+            // Prevenir que los clicks en el select afecten el checkbox
+            select.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Actualizar visual cuando cambia el checkbox
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    item.classList.add('selected');
+                    permisosDiv.classList.add('show');
+                } else {
+                    item.classList.remove('selected');
+                    permisosDiv.classList.remove('show');
+                }
+            });
+            
+            // Inicializar visual estado
+            if (checkbox.checked) {
+                item.classList.add('selected');
+                permisosDiv.classList.add('show');
+            }
+        });
+        
+        // Validación del formulario
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const checkedProjects = document.querySelectorAll('input[name="proyectosIds"]:checked');
+            if (checkedProjects.length === 0) {
+                e.preventDefault();
+                alert('Por favor, selecciona al menos un proyecto');
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+

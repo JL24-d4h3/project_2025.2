@@ -1,0 +1,171 @@
+﻿<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Feedback - DevPortal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <style>
+        :root { --primary: #2596be; --primary-dark: #1e7a9a; }
+        .create-container { padding: 2rem; background: #f8f9fa; min-height: 100vh; }
+        .create-main { max-width: 900px; margin: 0 auto; }
+        .create-header { background: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .breadcrumb { font-size: 0.875rem; margin-bottom: 0.75rem; display: flex; gap: 0.5rem; align-items: center; }
+        .breadcrumb a { color: var(--primary); text-decoration: none; }
+        .page-title { font-size: 1.75rem; font-weight: 600; margin: 0.5rem 0 0 0; display: flex; align-items: center; gap: 0.75rem; }
+        .form-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-section-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 2px solid #e0e0e0; }
+        .rating-stars { 
+            display: flex; 
+            gap: 0.5rem; 
+            font-size: 2rem; 
+            margin-bottom: 0.5rem; 
+        }
+        .rating-stars i { 
+            cursor: pointer; 
+            color: #e0e0e0; 
+            transition: all 0.2s ease;
+        }
+        .rating-stars i:hover { 
+            color: #ffa726;
+            transform: scale(1.1);
+        }
+        .rating-stars i.active { 
+            color: #ffa726;
+        }
+        .char-counter { font-size: 0.875rem; color: #999; text-align: right; margin-top: 0.35rem; }
+        .char-counter.warning { color: #f57c00; }
+        .char-counter.danger { color: #d32f2f; }
+        .form-actions { display: flex; gap: 1rem; justify-content: flex-end; padding-top: 1.5rem; border-top: 1px solid #e0e0e0; }
+        .btn-primary { background: var(--primary); color: white; padding: 0.75rem 2rem; border-radius: 4px; border: none; font-weight: 500; }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-dark); }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-secondary { background: #f5f5f5; color: #666; padding: 0.75rem 2rem; border-radius: 4px; border: 1px solid #e0e0e0; text-decoration: none; }
+        .btn-outline { background: white; color: var(--primary); padding: 0.75rem 2rem; border-radius: 4px; border: 2px solid var(--primary); }
+        .btn-outline:hover { background: var(--primary); color: white; }
+        .preview-card { border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+        .preview-card .card-header { padding: 1.25rem; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; }
+        .preview-card .card-header h4 { margin: 0 0 0.5rem 0; font-size: 1.125rem; font-weight: 600; }
+        .preview-card .rating { display: flex; gap: 0.25rem; color: #ffa726; }
+        .preview-card .card-body { padding: 1.25rem; }
+        .preview-card .card-footer { padding: 1rem 1.25rem; background: #f8f9fa; border-top: 1px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+<div th:replace="~{fragments/navbar :: navbar(currentNavSection='feedback')}"></div>
+<div class="create-container">
+    <main class="create-main content-after-navbar">
+        <div class="create-header">
+            <div class="breadcrumb">
+                <a th:href="@{/devportal/{rol}/{username}/dashboard(rol=${rol}, username=${username})}"><i class="fas fa-home"></i> Dashboard</a>
+                <i class="fas fa-chevron-right"></i>
+                <a th:href="@{/devportal/{rol}/{username}/feedback(rol=${rol}, username=${username})}">Feedbacks</a>
+                <i class="fas fa-chevron-right"></i>
+                <span>Crear</span>
+            </div>
+            <h2 class="page-title"><i class="fas fa-plus-circle" style="color: #2596be;"></i> Crear Nuevo Feedback</h2>
+        </div>
+        <div id="alertContainer"></div>
+        <div class="form-card">
+            <h3 class="form-section-title">Seleccionar Documentación</h3>
+            <form id="createFeedbackForm">
+                <div class="mb-4">
+                    <label for="documentationId" class="form-label">Documentación <span class="text-danger">*</span></label>
+                    <select id="documentationId" name="documentationId" class="form-select" required><option value="">Selecciona una documentación...</option></select>
+                    <div class="form-text"><i class="fas fa-info-circle"></i> Busca la documentación sobre la que quieres dar feedback</div>
+                </div>
+                <h3 class="form-section-title mt-4">Detalles del Feedback</h3>
+                <div class="mb-4">
+                    <label class="form-label">Puntuación <span class="text-danger">*</span></label>
+                    <div class="rating-stars" id="ratingStars">
+                        <i class="far fa-star" data-rating="1"></i>
+                        <i class="far fa-star" data-rating="2"></i>
+                        <i class="far fa-star" data-rating="3"></i>
+                        <i class="far fa-star" data-rating="4"></i>
+                        <i class="far fa-star" data-rating="5"></i>
+                    </div>
+                    <input type="hidden" id="rating" name="rating" value="" required>
+                    <div class="form-text"><i class="fas fa-info-circle"></i> Haz clic en las estrellas para calificar</div>
+                </div>
+                <div class="mb-4">
+                    <label for="comment" class="form-label">Comentario <span class="text-danger">*</span></label>
+                    <textarea id="comment" name="comment" class="form-control" rows="6" minlength="10" maxlength="2000" required placeholder="Describe tu feedback de forma detallada. ¿Qué te gustó? ¿Qué se podría mejorar?"></textarea>
+                    <div class="char-counter"><span id="charCount">0</span> / 2000 caracteres</div>
+                </div>
+                <div class="form-actions">
+                    <a th:href="@{/devportal/{rol}/{username}/feedback(rol=${rol}, username=${username})}" class="btn-secondary"><i class="fas fa-times"></i> Cancelar</a>
+                    <button type="button" class="btn-outline" onclick="showPreview()"><i class="fas fa-eye"></i> Vista Previa</button>
+                    <button type="submit" class="btn-primary" id="submitBtn"><i class="fas fa-paper-plane"></i> Enviar Feedback</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #2596be; color: white;">
+                <h5 class="modal-title"><i class="fas fa-eye"></i> Vista Previa del Feedback</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="preview-card">
+                    <div class="card-header">
+                        <h4 id="previewDocName">Nombre de la Documentación</h4>
+                        <div class="rating" id="previewRating">
+                            <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
+                        </div>
+                    </div>
+                    <div class="card-body"><p id="previewComment" style="color: #666; line-height: 1.6;">Tu comentario aparecerá aquí...</p></div>
+                    <div class="card-footer"><span><i class="fas fa-calendar"></i> <span id="previewDate"></span></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script th:inline="javascript">
+const rol=/*[[${rol}]]*/'dev';const username=/*[[${username}]]*/'usuario';
+
+// Inicializar Select2 con listado inicial
+$(document).ready(function(){
+    $('#documentationId').select2({
+        theme:'bootstrap-5',
+        placeholder:'Busca o selecciona una documentación...',
+        allowClear:true,
+        minimumInputLength:0, // Cambiado de 2 a 0 para mostrar listado inicial
+        ajax:{
+            url:`/devportal/${rol}/${username}/feedback/search-documentations`,
+            dataType:'json',
+            delay:300,
+            data:function(params){
+                return{q:params.term || ''}; // Si no hay término, envía string vacío
+            },
+            processResults:function(data){
+                return{results:data.results||[]};
+            },
+            cache:true
+        }
+    });
+    
+    // Cargar y abrir el dropdown automáticamente al hacer focus
+    $('#documentationId').on('select2:open', function() {
+        if (!$('#documentationId').val()) {
+            // Trigger búsqueda vacía para mostrar listado inicial
+            $('#documentationId').data('select2').trigger('query', {});
+        }
+    });
+});let selectedRating=0;document.querySelectorAll('#ratingStars i').forEach(star=>{star.addEventListener('click',function(){selectedRating=parseInt(this.getAttribute('data-rating'));document.getElementById('rating').value=selectedRating;updateStars(selectedRating);});star.addEventListener('mouseenter',function(){updateStars(parseInt(this.getAttribute('data-rating')));});});document.getElementById('ratingStars').addEventListener('mouseleave',function(){updateStars(selectedRating);});function updateStars(rating){document.querySelectorAll('#ratingStars i').forEach((star,index)=>{if(index<rating){star.classList.remove('far');star.classList.add('fas','active');}else{star.classList.remove('fas','active');star.classList.add('far');}});}const commentField=document.getElementById('comment');const charCountSpan=document.getElementById('charCount');const charCounter=document.querySelector('.char-counter');commentField.addEventListener('input',function(){const length=this.value.length;charCountSpan.textContent=length;charCounter.classList.remove('warning','danger');if(length>1800)charCounter.classList.add('danger');else if(length>1500)charCounter.classList.add('warning');});function showPreview(){const docSelect=$('#documentationId');const docName=docSelect.select2('data')[0]?.text||'Selecciona una documentación';const rating=parseInt(document.getElementById('rating').value)||0;const comment=document.getElementById('comment').value||'Tu comentario aparecerá aquí...';document.getElementById('previewDocName').textContent=docName;const previewStars=document.querySelectorAll('#previewRating i');previewStars.forEach((star,index)=>{if(index<rating){star.classList.remove('far');star.classList.add('fas');}else{star.classList.remove('fas');star.classList.add('far');}});document.getElementById('previewComment').textContent=comment;const today=new Date();document.getElementById('previewDate').textContent=today.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});const modal=new bootstrap.Modal(document.getElementById('previewModal'));modal.show();}document.getElementById('createFeedbackForm').addEventListener('submit',async function(e){e.preventDefault();const documentationId=document.getElementById('documentationId').value;const rating=document.getElementById('rating').value;const comment=document.getElementById('comment').value.trim();if(!documentationId){showAlert('danger','Debes seleccionar una documentación');return;}if(!rating){showAlert('danger','Debes calificar con estrellas');return;}if(!comment||comment.length<10){showAlert('danger','El comentario debe tener al menos 10 caracteres');return;}const feedbackData={documentationId:parseInt(documentationId),rating:parseFloat(rating),comment:comment};const submitBtn=document.getElementById('submitBtn');submitBtn.disabled=true;submitBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Enviando...';try{const response=await fetch(`/devportal/${rol}/${username}/feedback/create`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(feedbackData)});const data=await response.json();if(data.success){showAlert('success','Feedback creado exitosamente');setTimeout(()=>{window.location.href=data.redirectUrl;},1500);}else{showAlert('danger',data.message||'Error al crear el feedback');submitBtn.disabled=false;submitBtn.innerHTML='<i class="fas fa-paper-plane"></i> Enviar Feedback';}}catch(error){console.error('Error:',error);showAlert('danger','Error al procesar la solicitud');submitBtn.disabled=false;submitBtn.innerHTML='<i class="fas fa-paper-plane"></i> Enviar Feedback';}});function showAlert(type,message){const alertContainer=document.getElementById('alertContainer');const alertClass=type==='success'?'alert-success':'alert-danger';const iconClass=type==='success'?'fa-check-circle':'fa-exclamation-circle';alertContainer.innerHTML=`<div class="alert ${alertClass}"><i class="fas ${iconClass}"></i> ${message}</div>`;alertContainer.scrollIntoView({behavior:'smooth'});if(type==='success')setTimeout(()=>{alertContainer.innerHTML='';},3000);}
+</script>
+
+<div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+
+</body>
+</html>

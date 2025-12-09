@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${feedback.documentationSection} + ' - Feedback - DevPortal'">Detalle Feedback</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/project-repository.css}">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <style>
+        :root {
+            --primary-color: #2596be;
+            --primary-dark: #1e7a9a;
+            --primary-light: #e3f2fd;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --border-light: #e0e0e0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        .feedback-detail-container {
+            padding: 2rem;
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+
+        .feedback-detail-main {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feedback-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+        }
+
+        .breadcrumb {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-dark);
+        }
+
+        .feedback-id-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .feedback-id-badge i {
+            color: var(--primary-color);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.375rem 1rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-PENDIENTE {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-REVISADO {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .status-RESUELTO {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .feedback-content-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .info-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .feedback-description {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--primary-color);
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+            color: white;
+        }
+
+        .btn-review {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-review:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-resolve {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-resolve:hover {
+            background: #218838;
+        }
+
+        .btn-delete {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .timestamp-info {
+            display: flex;
+            gap: 2rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .timestamp-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .timestamp-item i {
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .feedback-detail-container {
+                padding: 1rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-action {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar(username=${username}, rol=${rol})}"></div>
+
+    <div class="feedback-detail-container">
+        <div class="feedback-detail-main">
+            <!-- Header -->
+            <div class="feedback-header">
+                <nav class="breadcrumb">
+                    <a th:href="@{/devportal/{rol}/{username}/dashboard(rol=${rol}, username=${username})}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <span>/</span>
+                    <a th:href="@{/devportal/{rol}/{username}/feedback(rol=${rol}, username=${username})}">
+                        Feedback
+                    </a>
+                    <span>/</span>
+                    <span th:text="${feedback.documentationSection}">Documentación</span>
+                </nav>
+
+                <div class="feedback-id-badge">
+                    <i class="fas fa-comment-dots"></i>
+                    <span th:text="${feedback.documentationSection}">Nombre de la Documentación</span>
+                    <span style="font-size: 0.9rem; color: #999; font-weight: 400; margin-left: 0.5rem;" 
+                          th:text="'(F-' + ${feedback.feedbackId} + ')'">
+                        (F-1)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Información Principal -->
+            <div class="feedback-content-card">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Información del Feedback
+                </h3>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Documentación</span>
+                        <span class="info-value" th:text="${feedback.documentationSection}">Sección documentación</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">API Relacionada</span>
+                        <span class="info-value" th:text="${feedback.apiName}">Nombre API</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Creado por</span>
+                        <span class="info-value" th:text="${feedback.userFullName} + ' (' + ${feedback.userName} + ')'">Nombre Usuario (username)</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Fecha de creación</span>
+                        <span class="info-value" th:text="${#temporals.format(feedback.createdAt, 'dd/MM/yyyy HH:mm')}">28/10/2025 10:30</span>
+                    </div>
+
+                    <div class="info-item" th:if="${feedback.rating != null}">
+                        <span class="info-label">Calificación</span>
+                        <div class="rating-stars">
+                            <i th:each="star : ${#numbers.sequence(1, 5)}" 
+                               th:classappend="${star <= feedback.rating ? 'fas fa-star' : 'far fa-star'}"
+                               style="color: #ffa726; font-size: 1.25rem;"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <h4 class="section-title mt-4">
+                    <i class="fas fa-file-alt"></i>
+                    Comentario
+                </h4>
+
+                <div class="feedback-description" th:text="${feedback.comment}">
+                    Comentario del feedback...
+                </div>
+
+                <div class="timestamp-info mt-3">
+                    <div class="timestamp-item">
+                        <i class="fas fa-calendar-plus"></i>
+                        <span>Creado: <strong th:text="${#temporals.format(feedback.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 12:00</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="action-buttons">
+                <a th:href="@{/devportal/{rol}/{username}/feedback(rol=${rol}, username=${username})}" 
+                   class="btn-action btn-back">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver
+                </a>
+
+                <!-- Botón Eliminar (solo para creador del feedback) -->
+                <button th:if="${!isReceiver}"
+                        class="btn-action btn-delete"
+                        onclick="deleteFeedback()">
+                    <i class="fas fa-trash"></i>
+                    Eliminar Feedback
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const feedbackId = /*[[${feedback.feedbackId}]]*/ 0;
+        const rol = /*[[${rol}]]*/ '';
+        const username = /*[[${username}]]*/ '';
+
+        async function deleteFeedback() {
+            if (!confirm('¿Estás seguro de que deseas eliminar este feedback? Esta acción no se puede deshacer.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/devportal/${rol}/${username}/feedback/${feedbackId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ Feedback eliminado exitosamente');
+                    window.location.href = `/devportal/${rol}/${username}/feedback`;
+                } else {
+                    alert('❌ Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al eliminar el feedback');
+            }
+        }
+        /*]]>*/
+    </script>
+
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+
+</body>
+</html>
+
+
+

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Reporte - DevPortal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/project-repository.css}">
+    <style>
+        :root {  --primary: #2596be; --primary-dark: #1e7a9a; --success: #4caf50; }
+        .create-container { padding: 2rem; background: #f8f9fa; min-height: 100vh; }
+        .create-main { max-width: 1000px; margin: 0 auto; }
+        .create-header { background: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .breadcrumb { font-size: 0.875rem; margin-bottom: 0.75rem; display: flex; gap: 0.5rem; align-items: center; }
+        .breadcrumb a { color: var(--primary); text-decoration: none; }
+        .page-title { font-size: 1.75rem; font-weight: 600; margin: 0.5rem 0 0 0; display: flex; align-items: center; gap: 0.75rem; }
+        .wizard-progress { background: white; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .progress-steps { display: flex; justify-content: space-between; position: relative; margin-bottom: 1rem; }
+        .progress-steps::before { content: ''; position: absolute; top: 20px; left: 0; right: 0; height: 2px; background: #e0e0e0; z-index: 0; }
+        .progress-line { position: absolute; top: 20px; left: 0; height: 2px; background: var(--primary); z-index: 1; transition: width 0.3s; }
+        .step { flex: 1; text-align: center; position: relative; z-index: 2; }
+        .step-circle { width: 40px; height: 40px; border-radius: 50%; background: white; border: 2px solid #e0e0e0; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; margin-bottom: 0.5rem; transition: all 0.3s; }
+        .step.active .step-circle { background: var(--primary); border-color: var(--primary); color: white; }
+        .step.completed .step-circle { background: var(--success); border-color: var(--success); color: white; }
+        .step-label { font-size: 0.875rem; color: #666; }
+        .step.active .step-label { color: var(--primary); font-weight: 600; }
+        .wizard-content { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 1.5rem; min-height: 500px; }
+        .step-content { display: none; }
+        .step-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .step-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; color: #333; }
+        .step-description { color: #666; margin-bottom: 2rem; }
+        .form-label { font-weight: 500; }
+        .form-label .required { color: #dc3545; }
+        .entity-selector { display: none; }
+        .entity-selector.active { display: block; }
+        .file-upload-zone { border: 2px dashed #e0e0e0; border-radius: 8px; padding: 3rem 2rem; text-align: center; cursor: pointer; transition: all 0.3s; background: #fafafa; }
+        .file-upload-zone:hover { border-color: var(--primary); background: rgba(37, 150, 190, 0.05); }
+        .file-upload-zone.drag-over { border-color: var(--primary); background: rgba(37, 150, 190, 0.1); }
+        .upload-icon { font-size: 3rem; color: var(--primary); margin-bottom: 1rem; }
+        .file-list { margin-top: 1.5rem; }
+        .file-item { display: flex; align-items: center; padding: 0.75rem; background: #f8f9fa; border-radius: 4px; margin-bottom: 0.5rem; }
+        .file-icon { width: 40px; height: 40px; background: var(--primary); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; margin-right: 1rem; }
+        .file-info { flex: 1; }
+        .file-name { font-weight: 500; margin-bottom: 0.25rem; }
+        .file-size { font-size: 0.875rem; color: #666; }
+        .file-remove { background: none; border: none; color: #dc3545; cursor: pointer; padding: 0.5rem; }
+        .preview-card { background: #f8f9fa; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .preview-label { font-size: 0.875rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+        .preview-value { color: #333; font-size: 1rem; }
+        .preview-content { 
+            max-height: 400px; 
+            overflow-y: auto; 
+            background: white; 
+            padding: 1rem; 
+            border-radius: 4px; 
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.6;
+            color: #333;
+        }
+        .wizard-actions { display: flex; justify-content: space-between; gap: 1rem; padding: 1.5rem; background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-wizard { padding: 0.75rem 2rem; font-weight: 500; border-radius: 4px; transition: all 0.3s; border: none; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-outline { border: 1px solid #e0e0e0; background: white; color: #333; }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 9999; }
+        .loading-overlay.show { display: flex; }
+        .spinner { width: 50px; height: 50px; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .alert-info-custom { background: rgba(37, 150, 190, 0.1); border-left: 4px solid var(--primary); padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+<div th:replace="~{fragments/navbar :: navbar(currentNavSection='reports')}"></div>
+<div class="create-container">
+    <main class="create-main content-after-navbar">
+        <div class="create-main">
+            <!-- Header -->
+            <div class="create-header">
+                <div class="breadcrumb">
+                    <a th:href="@{/devportal/{rol}/{username}/dashboard(rol=${rol}, username=${username})}"><i class="fas fa-home"></i> Dashboard</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <a th:href="@{/devportal/{rol}/{username}/reports(rol=${rol}, username=${username})}">Reportes</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Crear</span>
+                </div>
+                <h1 class="page-title"><i class="fas fa-plus-circle" style="color: #2596be;"></i> Crear Nuevo Reporte</h1>
+            </div>
+
+            <!-- Wizard Progress -->
+            <div class="wizard-progress">
+                <div class="progress-steps">
+                    <div class="progress-line" id="progressLine" style="width: 0%"></div>
+                    <div class="step active" data-step="1">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">Tipo y Entidad</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Información Detallada</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">Adjuntos</div>
+                    </div>
+                    <div class="step" data-step="4">
+                        <div class="step-circle">4</div>
+                        <div class="step-label">Revisión</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wizard Content -->
+            <div class="wizard-content">
+                <!-- Step 1: Tipo y Entidad -->
+                <div class="step-content active" id="step1">
+                    <h2 class="step-title">Tipo de Reporte y Entidad Relacionada</h2>
+                    <p class="step-description">Selecciona qué tipo de reporte deseas crear y la entidad relacionada</p>
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Tipo de Reporte <span class="required">*</span></label>
+                            <select class="form-select" id="tipoReporte" required>
+                                <option value="">Selecciona un tipo...</option>
+                                <option value="API">API - Problemas con APIs</option>
+                                <option value="DOCUMENTACION">Documentación - Mejoras o errores en la documentación</option>
+                                <option value="FORO">Foro - Reportar contenido del foro</option>
+                                <option value="PROYECTO">Proyecto - Issues relacionados a proyectos</option>
+                                <option value="REPOSITORIO">Repositorio - Problemas con repositorios</option>
+                                <option value="TICKET">Ticket - Reportar un ticket existente</option>
+                                <option value="GENERAL">General - Otros reportes</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="alert-info-custom mt-3">
+                        <i class="fas fa-info-circle"></i>
+                        Según el tipo seleccionado, elige la entidad específica que deseas reportar.
+                    </div>
+
+                    <!-- API Selector -->
+                    <div class="entity-selector mt-3" id="selectorAPI">
+                        <label class="form-label">Selecciona una API</label>
+                        <select class="form-select" id="selectAPI">
+                            <option value="">Cargando...</option>
+                        </select>
+                    </div>
+
+                    <!-- Documentación Selector -->
+                    <div class="entity-selector mt-3" id="selectorDOCUMENTACION">
+                        <label class="form-label">Selecciona una Documentación</label>
+                        <select class="form-select" id="selectDOCUMENTACION">
+                            <option value="">Cargando...</option>
+                        </select>
+                    </div>
+
+                    <!-- Foro Selector -->
+                    <div class="entity-selector mt-3" id="selectorFORO">
+                        <label class="form-label">Selecciona un Tema de Foro</label>
+                        <select class="form-select" id="selectFORO">
+                            <option value="">Cargando...</option>
+                        </select>
+                    </div>
+
+                    <!-- Proyecto Selector -->
+                    <div class="entity-selector mt-3" id="selectorPROYECTO">
+                        <label class="form-label">Selecciona un Proyecto</label>
+                        <select class="form-select" id="selectPROYECTO">
+                            <option value="">Cargando...</option>
+                        </select>
+                    </div>
+
+                    <!-- Repositorio Selector -->
+                    <div class="entity-selector mt-3" id="selectorREPOSITORIO">
+                        <label class="form-label">Selecciona un Repositorio</label>
+                        <select class="form-select" id="selectREPOSITORIO">
+                            <option value="">Cargando...</option>
+                        </select>
+                    </div>
+
+                    <!-- Ticket Selector -->
+                    <div class="entity-selector mt-3" id="selectorTICKET">
+                        <label class="form-label">Selecciona un Ticket</label>
+                        <select class="form-select" id="selectTICKET">
+                            <option value="">Cargando...</option>
+                        </select>
+                    </div>
+
+                    <!-- General (sin entidad) -->
+                    <div class="entity-selector mt-3" id="selectorGENERAL">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            Este reporte es de tipo general y no está asociado a ninguna entidad específica.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Información Detallada -->
+                <div class="step-content" id="step2">
+                    <h2 class="step-title">Información Detallada del Reporte</h2>
+                    <p class="step-description">Proporciona los detalles del problema o situación a reportar</p>
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label">Título del Reporte <span class="required">*</span></label>
+                            <input type="text" class="form-control" id="tituloReporte" 
+                                   placeholder="Ej: Error en endpoint de autenticación" 
+                                   maxlength="255" required>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Descripción Breve <span class="required">*</span></label>
+                            <textarea class="form-control" id="descripcionReporte" rows="3" 
+                                      placeholder="Resume en pocas palabras el problema o situación a reportar" 
+                                      maxlength="500" required></textarea>
+                            <small class="text-muted">Máximo 500 caracteres</small>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Contenido Detallado <span class="required">*</span></label>
+                            <textarea class="form-control" id="contenidoReporte" rows="10" 
+                                      placeholder="Describe detalladamente el problema, los pasos para reproducirlo, el comportamiento esperado vs. el actual, etc."
+                                      required></textarea>
+                            <small class="text-muted">Puedes incluir código, logs o cualquier información relevante</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Adjuntos -->
+                <div class="step-content" id="step3">
+                    <h2 class="step-title">Adjuntos</h2>
+                    <p class="step-description">Agrega archivos que ayuden a entender mejor el reporte (opcional)</p>
+
+                    <div class="file-upload-zone" id="fileUploadZone">
+                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                        <h4>Arrastra archivos aquí o haz clic para seleccionar</h4>
+                        <p class="text-muted">Máximo 10MB por archivo. Formatos: PDF, PNG, JPG, DOC, XLS, TXT</p>
+                        <input type="file" id="fileInput" multiple hidden accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx,.txt">
+                    </div>
+
+                    <div class="file-list" id="fileList"></div>
+
+                    <div class="mt-3">
+                        <label class="form-label">Descripción de los adjuntos (opcional)</label>
+                        <textarea class="form-control" id="descripcionAdjuntos" rows="3" 
+                                  placeholder="Describe qué contienen los archivos adjuntos"></textarea>
+                    </div>
+                </div>
+
+                <!-- Step 4: Revisión -->
+                <div class="step-content" id="step4">
+                    <h2 class="step-title">Revisión Final</h2>
+                    <p class="step-description">Verifica que toda la información sea correcta antes de enviar</p>
+
+                    <div class="preview-card">
+                        <div class="preview-label">Tipo de Reporte</div>
+                        <div class="preview-value" id="previewTipo">-</div>
+                    </div>
+
+                    <div class="preview-card">
+                        <div class="preview-label">Título</div>
+                        <div class="preview-value" id="previewTitulo">-</div>
+                    </div>
+
+                    <div class="preview-card">
+                        <div class="preview-label">Descripción Breve</div>
+                        <div class="preview-value" id="previewDescripcion">-</div>
+                    </div>
+
+                    <div class="preview-card">
+                        <div class="preview-label">Contenido Detallado</div>
+                        <div class="preview-content" id="previewContenido">-</div>
+                    </div>
+
+                    <div class="preview-card">
+                        <div class="preview-label">Entidad Relacionada</div>
+                        <div class="preview-value" id="previewEntidad">-</div>
+                    </div>
+
+                    <div class="preview-card">
+                        <div class="preview-label">Archivos Adjuntos</div>
+                        <div class="preview-value" id="previewAdjuntos">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wizard Actions -->
+            <div class="wizard-actions">
+                <button type="button" class="btn btn-wizard btn-outline" id="btnPrev" style="display: none;">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <div style="margin-left: auto; display: flex; gap: 1rem;">
+                    <button type="button" class="btn btn-wizard btn-primary" id="btnNext">
+                        Siguiente <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="button" class="btn btn-wizard btn-outline" id="btnSaveDraft" style="display: none;">
+                        <i class="fas fa-save"></i> Guardar Borrador
+                    </button>
+                    <button type="button" class="btn btn-wizard btn-success" id="btnPublish" style="display: none;">
+                        <i class="fas fa-paper-plane"></i> Publicar Reporte
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script th:inline="javascript">
+        let currentStep = 1;
+        const totalSteps = 4;
+        let uploadedFiles = [];
+        const rol = /*[[${rol}]]*/ 'po';
+        const username = /*[[${username}]]*/ 'usuario';
+        const currentUserId = /*[[${currentUser.usuarioId}]]*/ 0;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initEventListeners();
+            updateStepUI();
+        });
+
+        function initEventListeners() {
+            document.getElementById('btnNext').addEventListener('click', nextStep);
+            document.getElementById('btnPrev').addEventListener('click', prevStep);
+            document.getElementById('btnSaveDraft').addEventListener('click', () => submitReport('BORRADOR'));
+            document.getElementById('btnPublish').addEventListener('click', () => submitReport('PUBLICADO'));
+            document.getElementById('tipoReporte').addEventListener('change', handleTipoChange);
+            
+            const uploadZone = document.getElementById('fileUploadZone');
+            const fileInput = document.getElementById('fileInput');
+            
+            uploadZone.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleFileSelect);
+            uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+            uploadZone.addEventListener('dragleave', () => { uploadZone.classList.remove('drag-over'); });
+            uploadZone.addEventListener('drop', (e) => { e.preventDefault(); uploadZone.classList.remove('drag-over'); handleFileSelect({ target: { files: e.dataTransfer.files } }); });
+        }
+
+        function nextStep() {
+            if (!validateStep(currentStep)) return;
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateStepUI();
+                if (currentStep === 4) updatePreview();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) { currentStep--; updateStepUI(); }
+        }
+
+        function updateStepUI() {
+            document.querySelectorAll('.step-content').forEach((el, index) => {
+                el.classList.toggle('active', index + 1 === currentStep);
+            });
+            document.querySelectorAll('.step').forEach((el, index) => {
+                const stepNum = index + 1;
+                el.classList.toggle('active', stepNum === currentStep);
+                el.classList.toggle('completed', stepNum < currentStep);
+            });
+            const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            document.getElementById('progressLine').style.width = progress + '%';
+            document.getElementById('btnPrev').style.display = currentStep > 1 ? 'block' : 'none';
+            document.getElementById('btnNext').style.display = currentStep < totalSteps ? 'block' : 'none';
+            document.getElementById('btnSaveDraft').style.display = currentStep === totalSteps ? 'block' : 'none';
+            document.getElementById('btnPublish').style.display = currentStep === totalSteps ? 'block' : 'none';
+        }
+
+        function validateStep(step) {
+            if (step === 1) {
+                const tipo = document.getElementById('tipoReporte').value;
+                if (!tipo) {
+                    alert('Por favor selecciona un tipo de reporte');
+                    return false;
+                }
+                
+                if (tipo !== 'GENERAL') {
+                    const selector = document.getElementById('select' + tipo);
+                    if (!selector.value) {
+                        alert('Por favor selecciona la entidad relacionada');
+                        return false;
+                    }
+                }
+                return true;
+            }
+            
+            if (step === 2) {
+                const titulo = document.getElementById('tituloReporte').value.trim();
+                const descripcion = document.getElementById('descripcionReporte').value.trim();
+                const contenido = document.getElementById('contenidoReporte').value.trim();
+                
+                if (!titulo || !descripcion || !contenido) {
+                    alert('Por favor completa todos los campos obligatorios');
+                    return false;
+                }
+                
+                if (contenido.length < 20) {
+                    alert('El contenido detallado debe tener al menos 20 caracteres');
+                    return false;
+                }
+                
+                return true;
+            }
+            
+            return true;
+        }
+
+        async function handleTipoChange() {
+            const tipo = this.value;
+            document.querySelectorAll('.entity-selector').forEach(el => el.classList.remove('active'));
+            if (!tipo) return;
+            const selector = document.getElementById('selector' + tipo);
+            if (selector) {
+                selector.classList.add('active');
+                if (tipo !== 'GENERAL') await loadEntities(tipo);
+            }
+        }
+
+        async function loadEntities(tipo) {
+            const selectElement = document.getElementById('select' + tipo);
+            
+            // Destruir Select2 si ya existe para evitar bugs visuales
+            if ($(selectElement).hasClass('select2-hidden-accessible')) {
+                $(selectElement).select2('destroy');
+            }
+            
+            selectElement.innerHTML = '<option value="">Cargando...</option>';
+            try {
+                const response = await fetch(`/devportal/${rol}/${username}/reports/entities/${tipo}`);
+                const entities = await response.json();
+                selectElement.innerHTML = '<option value="">Selecciona...</option>';
+                entities.forEach(entity => {
+                    const option = document.createElement('option');
+                    option.value = entity.id;
+                    option.textContent = entity.nombre;
+                    selectElement.appendChild(option);
+                });
+                $(selectElement).select2({ theme: 'bootstrap-5', placeholder: 'Buscar...', allowClear: true });
+            } catch (error) {
+                console.error('Error loading entities:', error);
+                selectElement.innerHTML = '<option value="">Error al cargar</option>';
+            }
+        }
+
+        function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            files.forEach(file => {
+                if (file.size > 10 * 1024 * 1024) { alert(`El archivo ${file.name} excede el tamaño máximo de 10MB`); return; }
+                uploadedFiles.push(file);
+                addFileToList(file);
+            });
+            event.target.value = '';
+        }
+
+        function addFileToList(file) {
+            const fileList = document.getElementById('fileList');
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <div class="file-icon"><i class="fas fa-file"></i></div>
+                <div class="file-info">
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-size">${formatFileSize(file.size)}</div>
+                </div>
+                <button type="button" class="file-remove" onclick="removeFile('${file.name}')"><i class="fas fa-times"></i></button>
+            `;
+            fileList.appendChild(fileItem);
+        }
+
+        function removeFile(fileName) {
+            uploadedFiles = uploadedFiles.filter(f => f.name !== fileName);
+            updateFileList();
+        }
+
+        function updateFileList() {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            uploadedFiles.forEach(file => addFileToList(file));
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function updatePreview() {
+            const tipo = document.getElementById('tipoReporte').value;
+            const titulo = document.getElementById('tituloReporte').value;
+            const descripcion = document.getElementById('descripcionReporte').value;
+            const contenido = document.getElementById('contenidoReporte').value;
+            document.getElementById('previewTipo').textContent = document.getElementById('tipoReporte').selectedOptions[0].text;
+            document.getElementById('previewTitulo').textContent = titulo;
+            document.getElementById('previewDescripcion').textContent = descripcion;
+            document.getElementById('previewContenido').textContent = contenido;
+            let entidadText = 'No aplica (Reporte General)';
+            if (tipo !== 'GENERAL') {
+                const selector = document.getElementById('select' + tipo);
+                if (selector && selector.value) entidadText = selector.selectedOptions[0].text;
+            }
+            document.getElementById('previewEntidad').textContent = entidadText;
+            const adjuntosText = uploadedFiles.length > 0 ? uploadedFiles.map(f => f.name).join(', ') : 'Sin archivos adjuntos';
+            document.getElementById('previewAdjuntos').textContent = adjuntosText;
+        }
+
+        async function submitReport(estado) {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.add('show');
+            try {
+                const tipo = document.getElementById('tipoReporte').value;
+                const titulo = document.getElementById('tituloReporte').value;
+                const descripcion = document.getElementById('descripcionReporte').value;
+                const contenido = document.getElementById('contenidoReporte').value;
+                const descripcionAdjuntos = document.getElementById('descripcionAdjuntos').value;
+                let entidadId = null;
+                if (tipo !== 'GENERAL') {
+                    const selector = document.getElementById('select' + tipo);
+                    entidadId = selector.value || null;
+                }
+                const formData = new FormData();
+                formData.append('tipoReporte', tipo);
+                formData.append('tituloReporte', titulo);
+                formData.append('descripcionReporte', descripcion);
+                formData.append('contenidoReporte', contenido);
+                formData.append('estadoReporte', estado);
+                formData.append('autorUsuarioId', currentUserId);
+                
+                // SIEMPRE enviar entidadId (incluso si es null) para que el servidor lo reciba
+                formData.append('entidadId', entidadId || '');
+                
+                if (descripcionAdjuntos) formData.append('descripcionAdjuntos', descripcionAdjuntos);
+                uploadedFiles.forEach(file => { formData.append('adjuntos', file); });
+                const response = await fetch(`/devportal/${rol}/${username}/reports/create`, {
+                    method: 'POST',
+                    body: formData
+                });
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(estado === 'BORRADOR' ? '¡Reporte guardado como borrador!' : '¡Reporte publicado exitosamente!');
+                    window.location.href = `/devportal/${rol}/${username}/reports/sent`;
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + (error.message || 'No se pudo crear el reporte'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al enviar el reporte. Intenta de nuevo.');
+            } finally {
+                loadingOverlay.classList.remove('show');
+            }
+        }
+    </script>
+
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+
+</body>
+</html>

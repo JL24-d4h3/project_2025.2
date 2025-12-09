@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+    <!-- Fragment para botón de impersonación -->
+    <div th:fragment="impersonation-button">
+        <li class="nav-item" id="stopImpersonationBtn" style="display: none;">
+            <button type="button" class="nav-link" 
+                    style="border: none; background: none; color: #ff9800; font-weight: 500; cursor: pointer; padding: 8px 16px;"
+                    onmouseover="this.style.color='#f57c00'" 
+                    onmouseout="this.style.color='#ff9800'"
+                    title="Dejar de Impersonar Usuario"
+                    onclick="stopImpersonation()">
+                <i class="fas fa-user-times" style="margin-right: 5px;"></i>Dejar de Impersonar
+            </button>
+        </li>
+    </div>
+
+    <!-- Fragment para banner de impersonación -->
+    <div th:fragment="impersonation-banner">
+        <div id="impersonationBanner" class="alert alert-warning text-center" 
+             style="margin: 0; border-radius: 0; position: sticky; top: 0; z-index: 1000; display: none;">
+            <i class="fas fa-user-secret"></i> 
+            <strong>Modo Impersonación Activa</strong> - Navegando como usuario impersonado
+            <button type="button" class="btn btn-sm btn-outline-warning ml-2" onclick="stopImpersonation()">
+                <i class="fas fa-times"></i> Dejar de Impersonar
+            </button>
+        </div>
+    </div>
+
+    <!-- Fragment para scripts de impersonación -->
+    <script th:fragment="impersonation-scripts">
+        // Verificar si hay una impersonación activa al cargar la página
+        $(document).ready(function() {
+            checkImpersonationStatus();
+        });
+
+        function checkImpersonationStatus() {
+            fetch('/impersonacion/check-status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.isImpersonating) {
+                        document.getElementById('stopImpersonationBtn').style.display = 'block';
+                        
+                        // Mostrar banner si existe
+                        const banner = document.getElementById('impersonationBanner');
+                        if (banner) {
+                            banner.style.display = 'block';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.log('No hay impersonación activa o error al verificar:', error);
+                });
+        }
+
+        function stopImpersonation() {
+            if (confirm('¿Estás seguro que deseas dejar de impersonar este usuario?')) {
+                // Mostrar indicador de carga
+                const banner = document.getElementById('impersonationBanner');
+                if (banner) {
+                    banner.innerHTML = `
+                        <i class="fas fa-spinner fa-spin"></i> Finalizando impersonación...
+                    `;
+                }
+                
+                fetch('/impersonacion/finalizar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Mostrar mensaje de éxito y redirigir
+                        alert('Impersonación finalizada exitosamente. Regresando a la vista de SuperAdmin...');
+                        window.location.href = data.redirectUrl;
+                    } else {
+                        alert('Error al finalizar la impersonación: ' + data.message);
+                        // Restaurar banner original
+                        checkImpersonationStatus();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error de conexión al finalizar la impersonación');
+                    // Restaurar banner original
+                    checkImpersonationStatus();
+                });
+            }
+        }
+    </script>
+</body>
+</html>
+
+

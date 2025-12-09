@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - DevPortal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <style>
+        :root {
+            --primary: #2596be;
+            --primary-dark: #1e7a9a;
+            --success: #4caf50;
+            --danger: #f44336;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-muted: #999;
+        }
+
+        .report-container { padding: 1.5rem; min-height: 100vh; background: #f8f9fa; }
+        .report-main { max-width: 1400px; margin: 0 auto; }
+        
+        /* Header */
+        .report-header { margin-bottom: 2rem; background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .breadcrumb { margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; }
+        .breadcrumb a { color: var(--primary); text-decoration: none; }
+        .page-title { margin: 0; font-size: 1.75rem; font-weight: 600; display: flex; align-items: center; gap: 0.75rem; }
+        
+        /* Tabs */
+        .tabs-container { background: white; border-radius: 12px; margin-bottom: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .tabs-nav { display: flex; border-bottom: 2px solid #f0f0f0; padding: 0 1.5rem; }
+        .tab-btn { padding: 1rem 1.5rem; border: none; background: none; color: var(--text-secondary); font-weight: 500; cursor: pointer; position: relative; display: flex; align-items: center; gap: 0.75rem; }
+        .tab-btn.active { color: var(--primary); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: var(--primary); }
+        .tab-count { background: #f0f0f0; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; min-width: 24px; text-align: center; }
+        .tab-btn.active .tab-count { background: var(--primary); color: white; }
+        
+        /* Filters */
+        .filters-section { padding: 1.5rem; border-bottom: 1px solid #f0f0f0; }
+        .filters-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 1rem; }
+        .filter-group label { display: block; font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .filter-group input, .filter-group select { width: 100%; padding: 0.5rem; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 0.875rem; }
+        
+        /* Reports Grid */
+        .reports-content { padding: 1.5rem; min-height: 500px; }
+        .reports-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        
+        /* Report Card */
+        .report-card { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #e0e0e0; transition: all 0.2s; overflow: hidden; }
+        .report-card:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.12); }
+        .report-card-header { padding: 1.25rem; border-bottom: 1px solid #f0f0f0; }
+        .report-card-title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.75rem; }
+        .report-card-title { margin: 0; font-size: 1.125rem; font-weight: 600; color: var(--text-primary); line-height: 1.3; flex: 1; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            display: -webkit-box; 
+            -webkit-line-clamp: 2; 
+            -webkit-box-orient: vertical; 
+            max-height: 2.6em;
+        }
+        .report-card-badges { display: flex; flex-direction: column; gap: 0.5rem; align-items: flex-end; flex-shrink: 0; }
+        
+        .badge-tipo { padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .badge-tipo-API { background: #e3f2fd; color: #1976d2; }
+        .badge-tipo-TICKET { background: #fff3e0; color: #f57c00; }
+        .badge-tipo-PROYECTO { background: #f3e5f5; color: #7b1fa2; }
+        .badge-tipo-REPOSITORIO { background: #e8f5e9; color: #388e3c; }
+        .badge-tipo-DOCUMENTACION { background: #fce4ec; color: #c2185b; }
+        .badge-tipo-FORO { background: #fff8e1; color: #f57f17; }
+        .badge-tipo-GENERAL { background: #eceff1; color: #455a64; }
+        
+        .badge-estado { padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+        .badge-estado-BORRADOR { background: #fff3e0; color: #f57c00; }
+        .badge-estado-PUBLICADO { background: #e8f5e9; color: #388e3c; }
+        .badge-estado-REVISADO { background: #e3f2fd; color: #1976d2; }
+        
+        .report-card-body { padding: 1.25rem; }
+        .report-description { color: var(--text-secondary); font-size: 0.9375rem; line-height: 1.5; margin-bottom: 1rem; }
+        .report-content-preview { background: #f8f9fa; padding: 1rem; border-radius: 4px; color: var(--text-secondary); font-size: 0.875rem; line-height: 1.5; max-height: 120px; overflow: hidden; position: relative; }
+        .report-content-preview::after { content: '...'; position: absolute; bottom: 0.5rem; right: 0.5rem; background: #f8f9fa; padding-left: 1rem; }
+        
+        .report-card-footer { padding: 1.25rem; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+        .report-meta { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
+        .report-author { font-size: 0.875rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.5rem; }
+        .report-date { font-size: 0.875rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem; }
+        
+        .report-actions { display: flex; gap: 0.5rem; }
+        .btn-action { padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.875rem; font-weight: 500; border: none; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; }
+        .btn-view { background: var(--primary); color: white; }
+        .btn-view:hover { background: var(--primary-dark); color: white; }
+        .btn-pdf { background: #dc3545; color: white; }
+        .btn-pdf:hover { background: #c82333; color: white; }
+        .btn-edit { background: #fff; border: 1px solid #e0e0e0; color: var(--text-primary); }
+        .btn-edit:hover { background: #f8f9fa; color: var(--text-primary); }
+        .btn-publish { background: var(--success); color: white; }
+        .btn-publish:hover { background: #388e3c; color: white; }
+        .btn-delete { background: var(--danger); color: white; }
+        .btn-delete:hover { background: #c62828; color: white; }
+        
+        /* Pagination */
+        .pagination-container { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 2rem; }
+        .pagination-btn { padding: 0.5rem 1rem; border: 1px solid #e0e0e0; background: white; color: var(--text-primary); border-radius: 4px; cursor: pointer; }
+        .pagination-btn:hover:not(:disabled) { background: var(--primary); color: white; }
+        .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .empty-state { text-align: center; padding: 4rem 2rem; }
+        .empty-state i { font-size: 4rem; color: var(--text-muted); margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+<div th:replace="~{fragments/navbar :: navbar(currentNavSection='reports')}"></div>
+
+<div class="report-container content-after-navbar">
+    <main class="report-main">
+        
+        <div class="report-header">
+            <div>
+                <div class="breadcrumb">
+                    <a th:href="@{/devportal/{rol}/{username}/dashboard(rol=${rol}, username=${username})}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Reportes</span>
+                </div>
+                <h1 class="page-title">
+                    <i class="fas fa-flag" style="color: #2596be;"></i> Reportes
+                </h1>
+            </div>
+            <div class="d-flex gap-2">
+                <a th:href="@{/devportal/{rol}/{username}/reports/metrics/preview(rol=${rol}, username=${username})}" 
+                   class="btn btn-success">
+                    <i class="fas fa-chart-line"></i> Métricas del Dashboard
+                </a>
+                <a th:href="@{/devportal/{rol}/{username}/reports/create(rol=${rol}, username=${username})}" 
+                   class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Crear Reporte
+                </a>
+            </div>
+        </div>
+        
+        <div class="tabs-container">
+            <div class="tabs-nav">
+                <button class="tab-btn" th:classappend="${activeTab == 'sent' ? 'active' : ''}" 
+                        th:onclick="'location.href=\'' + @{/devportal/{rol}/{username}/reports/sent(rol=${rol}, username=${username})} + '\''">
+                    <i class="fas fa-paper-plane"></i> 
+                    <span>Mis Reportes</span>
+                    <span class="tab-count" th:text="${sentCount != null ? sentCount : 0}">0</span>
+                </button>
+                <button class="tab-btn" th:classappend="${activeTab == 'received' ? 'active' : ''}" 
+                        th:onclick="'location.href=\'' + @{/devportal/{rol}/{username}/reports/received(rol=${rol}, username=${username})} + '\''">
+                    <i class="fas fa-inbox"></i> 
+                    <span>Reportes Recibidos</span>
+                    <span class="tab-count" th:text="${receivedCount != null ? receivedCount : 0}">0</span>
+                </button>
+            </div>
+            
+            <div class="filters-section">
+                <form method="get" th:action="@{/devportal/{rol}/{username}/reports/{tab}(rol=${rol}, username=${username}, tab=${activeTab})}">
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label>Buscar</label>
+                            <input type="text" name="search" placeholder="Buscar por título o descripción..." th:value="${searchTerm}">
+                        </div>
+                        <div class="filter-group">
+                            <label>Tipo</label>
+                            <select name="tipo">
+                                <option value="">Todos</option>
+                                <option value="GENERAL" th:selected="${tipoFiltro?.name() == 'GENERAL'}">General</option>
+                                <option value="API" th:selected="${tipoFiltro?.name() == 'API'}">API</option>
+                                <option value="TICKET" th:selected="${tipoFiltro?.name() == 'TICKET'}">Ticket</option>
+                                <option value="PROYECTO" th:selected="${tipoFiltro?.name() == 'PROYECTO'}">Proyecto</option>
+                                <option value="REPOSITORIO" th:selected="${tipoFiltro?.name() == 'REPOSITORIO'}">Repositorio</option>
+                                <option value="DOCUMENTACION" th:selected="${tipoFiltro?.name() == 'DOCUMENTACION'}">Documentación</option>
+                                <option value="FORO" th:selected="${tipoFiltro?.name() == 'FORO'}">Foro</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Estado</label>
+                            <select name="estado">
+                                <option value="">Todos</option>
+                                <option value="BORRADOR" th:selected="${estadoFiltro?.name() == 'BORRADOR'}">Borrador</option>
+                                <option value="PUBLICADO" th:selected="${estadoFiltro?.name() == 'PUBLICADO'}">Publicado</option>
+                                <option value="REVISADO" th:selected="${estadoFiltro?.name() == 'REVISADO'}">Revisado</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>&nbsp;</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button type="submit" class="btn btn-primary" style="flex: 1;">
+                                    <i class="fas fa-filter"></i> Filtrar
+                                </button>
+                                <a th:href="@{/devportal/{rol}/{username}/reports/{tab}(rol=${rol}, username=${username}, tab=${activeTab})}" 
+                                   class="btn btn-outline-secondary" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; padding: 0.5rem;">
+                                    <i class="fas fa-times"></i> Limpiar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="reports-content">
+                <div class="empty-state" th:if="${#lists.isEmpty(reports)}">
+                    <i class="fas fa-inbox"></i>
+                    <h3 th:text="${activeTab == 'sent' ? 'No has enviado reportes' : 'No has recibido reportes'}">No hay reportes</h3>
+                </div>
+                
+                <div class="reports-grid" th:if="${!#lists.isEmpty(reports)}">
+                    <div class="report-card" th:each="report : ${reports}">
+                        <div class="report-card-header">
+                            <div class="report-card-title-row">
+                                <h3 class="report-card-title" th:text="${report.tituloReporte}">Título</h3>
+                                <div class="report-card-badges">
+                                    <span class="badge-tipo" th:classappend="${'badge-tipo-' + report.tipoReporte}" th:text="${report.tipoReporte}">Tipo</span>
+                                    <span class="badge-estado" th:classappend="${'badge-estado-' + report.estadoReporte}" th:text="${report.estadoReporte}">Estado</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="report-card-body">
+                            <p class="report-description" th:text="${report.descripcionReporte}">Descripción...</p>
+                            
+                            <!-- Entidad Relacionada -->
+                            <div class="report-entity" 
+                                 th:if="${report.entidadRelacionadaNombre != null && report.entidadRelacionadaNombre != 'Sin especificar'}"
+                                 style="background: #f8f9fa; padding: 0.75rem; border-radius: 4px; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                                <i class="fas fa-link" style="color: var(--primary);"></i>
+                                <strong th:text="${report.tipoReporte + ':'}">API:</strong>
+                                <span th:text="${report.entidadRelacionadaNombre}" style="color: var(--text-secondary);">Google Stripe</span>
+                            </div>
+                            
+                            <div class="report-content-preview" th:text="${report.contenidoReportePreview}">Contenido...</div>
+                        </div>
+                        
+                        <div class="report-card-footer">
+                            <div class="report-meta">
+                                <div class="report-author" th:if="${report.esRecibido}">
+                                    <i class="fas fa-user"></i>
+                                    <span th:text="${report.remitenteNombreCompleto}">Remitente</span>
+                                </div>
+                                <div class="report-date">
+                                    <i class="fas fa-calendar"></i>
+                                    <span th:text="${#temporals.format(report.creadoEn, 'dd/MM/yyyy')}">Fecha</span>
+                                </div>
+                                <!-- Contador de adjuntos -->
+                                <div class="report-attachments" th:if="${report.cantidadAdjuntos != null && report.cantidadAdjuntos > 0}"
+                                     style="font-size: 0.875rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-paperclip" style="color: var(--primary);"></i>
+                                    <span th:text="${report.cantidadAdjuntos} + ' adjunto' + (${report.cantidadAdjuntos > 1} ? 's' : '')">1 adjunto</span>
+                                </div>
+                            </div>
+                            
+                            <div class="report-actions">
+                                <a th:href="@{/devportal/{rol}/{username}/reports/detail/{id}(rol=${rol}, username=${username}, id=${report.reporteId})}" class="btn-action btn-view">
+                                    <i class="fas fa-eye"></i> Ver
+                                </a>
+                                <!-- Descargar PDF -->
+                                <a th:href="@{/devportal/{rol}/{username}/reports/{id}/export/pdf(rol=${rol}, username=${username}, id=${report.reporteId})}" 
+                                   class="btn-action btn-pdf" 
+                                   title="Descargar reporte en PDF">
+                                    <i class="fas fa-file-pdf"></i>
+                                </a>
+                                <!-- Editar: solo si es autor Y borrador -->
+                                <a th:if="${report.autorUsername == username && report.estadoReporte == 'BORRADOR'}" 
+                                   th:href="@{/devportal/{rol}/{username}/reports/edit/{id}(rol=${rol}, username=${username}, id=${report.reporteId})}" 
+                                   class="btn-action btn-edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <!-- Publicar: solo si es autor Y borrador -->
+                                <button th:if="${report.autorUsername == username && report.estadoReporte == 'BORRADOR'}" 
+                                        onclick="publishReport(this)" 
+                                        th:attr="data-id=${report.reporteId}" 
+                                        class="btn-action btn-publish">
+                                    <i class="fas fa-paper-plane"></i> Publicar
+                                </button>
+                                <!-- Eliminar: solo si es autor Y borrador -->
+                                <button th:if="${report.autorUsername == username && report.estadoReporte == 'BORRADOR'}" 
+                                        onclick="deleteReport(this)" 
+                                        th:attr="data-id=${report.reporteId}" 
+                                        class="btn-action btn-delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pagination-container" th:if="${!#lists.isEmpty(reports) && totalPages > 1}">
+                    <button class="pagination-btn" th:disabled="${currentPage == 0}"
+                            th:onclick="'location.href=\'' + @{/devportal/{rol}/{username}/reports/{tab}(rol=${rol}, username=${username}, tab=${activeTab}, page=${currentPage - 1})} + '\''">
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </button>
+                    <span>Página <span th:text="${currentPage + 1}">1</span> de <span th:text="${totalPages}">1</span></span>
+                    <button class="pagination-btn" th:disabled="${currentPage >= totalPages - 1}"
+                            th:onclick="'location.href=\'' + @{/devportal/{rol}/{username}/reports/{tab}(rol=${rol}, username=${username}, tab=${activeTab}, page=${currentPage + 1})} + '\''">
+                        Siguiente <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    const rol = /*[[${rol}]]*/ 'po';
+    const username = /*[[${username}]]*/ 'usuario';
+    
+    function publishReport(btn) {
+        const id = btn.getAttribute('data-id');
+        if (!confirm('¿Publicar este reporte? Ya no podrás editarlo.')) return;
+        
+        fetch(`/devportal/${rol}/${username}/reports/${id}/publish`, { method: 'POST' })
+            .then(r => r.ok ? (alert('Publicado'), location.reload()) : alert('Error'))
+            .catch(() => alert('Error'));
+    }
+    
+    function deleteReport(btn) {
+        const id = btn.getAttribute('data-id');
+        if (!confirm('¿Eliminar este reporte?')) return;
+        
+        fetch(`/devportal/${rol}/${username}/reports/${id}`, { method: 'DELETE' })
+            .then(r => r.ok ? (alert('Eliminado'), location.reload()) : alert('Error'))
+            .catch(() => alert('Error'));
+    }
+</script>
+
+<div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+
+</body>
+</html>

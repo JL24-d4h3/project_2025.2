@@ -1,0 +1,4272 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Nueva API - DevPortal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <!-- CodeMirror for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/default.css">
+    
+    <style>
+        :root {
+            --primary-color: #2596be;
+            --primary-dark: #1e7a9a;
+            --primary-light: #e3f2fd;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --border-light: #e0e0e0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+
+        /* Prevenir scroll horizontal */
+        html, body {
+            overflow-x: hidden;
+            max-width: 100%;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .projects-container { 
+            padding: 1.5rem; 
+            min-height: 100vh;
+            background: #f8f9fa;
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        
+        .projects-main { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+        }
+        
+        .projects-header { 
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .header-left {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .breadcrumb { 
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .breadcrumb a { 
+            color: var(--primary-color); 
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .breadcrumb a:hover {
+            color: var(--primary-dark);
+        }
+        
+        .page-title { 
+            margin: 0; 
+            color: var(--text-primary);
+            font-size: 1.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .form-section {
+            padding: 2rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(37, 150, 190, 0.25);
+        }
+
+        .btn-primary { 
+            background: var(--primary-color); 
+            color: white; 
+            padding: 0.75rem 1.5rem; 
+            text-decoration: none; 
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            border: 1px solid var(--primary-color);
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid #6c757d;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            border-color: #5a6268;
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary-color);
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--primary-color);
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Main Wizard Tabs (pestañas principales del formulario) */
+        .wizard-tabs-container {
+            background: white;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 0;
+        }
+
+        .wizard-tabs {
+            display: flex;
+            justify-content: space-between;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .wizard-tab {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .wizard-tab-link {
+            display: block;
+            padding: 1.25rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+        }
+
+        .wizard-tab-link:hover {
+            background: #f8f9fa;
+            color: var(--text-primary);
+        }
+
+        .wizard-tab.active .wizard-tab-link {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            background: white;
+        }
+
+        .wizard-tab.completed .wizard-tab-link {
+            color: var(--success-color);
+        }
+
+        .wizard-tab-icon {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .wizard-tab-title {
+            display: block;
+            font-size: 0.875rem;
+        }
+
+        .wizard-tab-number {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            border-radius: 50%;
+            background: var(--border-light);
+            color: var(--text-secondary);
+            font-weight: bold;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .wizard-tab.active .wizard-tab-number {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .wizard-tab.completed .wizard-tab-number {
+            background: var(--success-color);
+            color: white;
+        }
+
+        /* Wizard Content */
+        .wizard-content {
+            background: white;
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .wizard-step {
+            display: none;
+        }
+
+        .wizard-step.active {
+            display: block;
+        }
+
+        /* Wizard Navigation */
+        .wizard-navigation {
+            display: flex;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            background: #f8f9fa;
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        }
+
+        .wizard-nav-left, .wizard-nav-right {
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Contract Editor Styles */
+        .contract-editor-container {
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .editor-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .editor-tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .editor-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            background: white;
+        }
+
+        .editor-tab:hover:not(.active) {
+            color: var(--text-primary);
+            background: #e9ecef;
+        }
+
+        .editor-content {
+            position: relative;
+        }
+
+        .editor-panel {
+            display: none;
+            padding: 1rem;
+        }
+
+        .editor-panel.active {
+            display: block;
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .file-upload-area:hover,
+        .file-upload-area.dragover {
+            border-color: var(--primary-color);
+            background: var(--primary-light);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-area.dragover .upload-icon {
+            color: var(--primary-color);
+        }
+
+        #contractContent {
+            min-height: 400px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        /* Chip Selector Styles */
+        .chip-selector-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.625rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            min-height: 120px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .chip-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: white;
+            border: 2px solid var(--border-light);
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .chip-item:hover {
+            border-color: var(--primary-color);
+            background: var(--primary-light);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(37, 150, 190, 0.15);
+        }
+
+        .chip-item.selected {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        .chip-icon {
+            font-size: 0.875rem;
+            opacity: 0.7;
+        }
+
+        .chip-item.selected .chip-icon {
+            opacity: 1;
+        }
+
+        .chip-check {
+            display: none;
+            font-size: 0.875rem;
+            margin-left: 0.25rem;
+        }
+
+        .chip-item.selected .chip-check {
+            display: inline-block;
+        }
+
+        /* Scroll personalizado para chips */
+        .chip-selector-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chip-selector-container::-webkit-scrollbar-track {
+            background: #e9ecef;
+            border-radius: 4px;
+        }
+
+        .chip-selector-container::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .chip-selector-container::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Validation styles */
+        .is-invalid {
+            border-color: var(--danger-color);
+        }
+
+        .is-valid {
+            border-color: var(--success-color);
+        }
+
+        .invalid-feedback {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .valid-feedback {
+            color: var(--success-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .name-validation-status {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            display: none;
+        }
+
+        .name-validation-status.checking {
+            display: block;
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .name-validation-status.available {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .name-validation-status.unavailable {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Form actions */
+        .form-actions {
+            background: #f8f9fa;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .form-actions-left {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .form-actions-right {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .projects-container {
+                padding: 1rem;
+            }
+            
+            .projects-header {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            
+            .form-section {
+                padding: 1.5rem;
+            }
+            
+            .wizard-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .wizard-tab {
+                flex: 1 1 50%;
+                min-width: 50%;
+            }
+            
+            .wizard-tab-title {
+                font-size: 0.75rem;
+            }
+            
+            .wizard-tab-icon {
+                font-size: 1.25rem;
+                margin-bottom: 0.25rem;
+            }
+            
+            .wizard-navigation {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .wizard-nav-left,
+            .wizard-nav-right {
+                justify-content: center;
+                width: 100%;
+            }
+
+            .editor-tabs {
+                flex-direction: column;
+            }
+        }
+
+        /* CodeMirror customization */
+        .CodeMirror {
+            border: none;
+            height: 400px;
+            font-size: 0.875rem;
+        }
+
+        .CodeMirror-focused {
+            outline: none;
+        }
+
+        /* Tab 2 - Contract Mode Selector */
+        .contract-mode-selector .btn-group {
+            box-shadow: var(--shadow-sm);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .contract-mode-selector .btn-outline-primary {
+            flex: 1;
+            padding: 1rem;
+            font-weight: 500;
+            border-color: var(--border-light);
+            color: var(--text-secondary);
+            transition: all 0.3s;
+        }
+
+        .contract-mode-selector .btn-check:checked + .btn-outline-primary {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .contract-mode-selector .btn-outline-primary:hover:not(:has(input:checked)) {
+            background: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        /* Section Subtitle */
+        .section-subtitle {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Dynamic List Items (servers, paths, schemas) */
+        .dynamic-item {
+            background: #f8f9fa;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .dynamic-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .dynamic-item-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dynamic-item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: 1px solid var(--border-light);
+            color: var(--text-secondary);
+            padding: 0.375rem 0.625rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .btn-icon:hover {
+            background: white;
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-icon.btn-danger:hover {
+            background: var(--danger-color);
+            color: white;
+            border-color: var(--danger-color);
+        }
+
+        .btn-icon.btn-success:hover {
+            background: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        /* Collapsible Content */
+        .collapsible-content {
+            display: none;
+        }
+
+        .collapsible-content.expanded {
+            display: block;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            background: #f8f9fa;
+            border: 2px dashed var(--border-light);
+            border-radius: var(--radius-md);
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        /* HTTP Method Badges */
+        .http-method-badge {
+            display: inline-block;
+            padding: 0.25rem 0.625rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-right: 0.5rem;
+        }
+
+        .http-method-badge.get { background: #28a745; color: white; }
+        .http-method-badge.post { background: #007bff; color: white; }
+        .http-method-badge.put { background: #ffc107; color: #333; }
+        .http-method-badge.delete { background: #dc3545; color: white; }
+        .http-method-badge.patch { background: #17a2b8; color: white; }
+
+        /* Security Type Badges */
+        .security-type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.625rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 500;
+            background: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        /* Small form labels */
+        .form-label-sm {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Parameter rows */
+        .g-2 {
+            --bs-gutter-x: 0.5rem;
+            --bs-gutter-y: 0.5rem;
+        }
+
+        /* ===== ESTILOS TAB 3: CMS ===== */
+        
+        /* CMS Editor Tabs */
+        .cms-editor-tabs {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 2px solid var(--border-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .cms-editor-tab {
+            background: transparent;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s ease;
+        }
+
+        .cms-editor-tab:hover {
+            color: var(--primary-color);
+            background: var(--primary-light);
+        }
+
+        .cms-editor-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .cms-editor-tab i {
+            margin-right: 0.25rem;
+        }
+
+        /* CMS Editor Panels */
+        .cms-editor-panel {
+            min-height: 200px;
+        }
+
+        /* CMS Preview Container */
+        .cms-preview-container {
+            padding: 1.5rem;
+            background: #fafafa;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            min-height: 200px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .cms-preview-container h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-light);
+            padding-bottom: 0.5rem;
+        }
+
+        .cms-preview-container h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .cms-preview-container h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .cms-preview-container p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .cms-preview-container code {
+            background: #fff;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: #e83e8c;
+            border: 1px solid var(--border-light);
+        }
+
+        .cms-preview-container pre {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .cms-preview-container pre code {
+            background: transparent;
+            border: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        .cms-preview-container ul {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        .cms-preview-container li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .cms-preview-container a {
+            color: var(--primary-color);
+            text-decoration: none;
+            border-bottom: 1px solid var(--primary-color);
+        }
+
+        .cms-preview-container a:hover {
+            color: var(--primary-dark);
+            border-bottom-color: var(--primary-dark);
+        }
+
+        .cms-preview-container strong {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .cms-preview-container em {
+            font-style: italic;
+        }
+
+        /* Enlaces de referencia */
+        .input-group .form-control-sm {
+            font-size: 0.875rem;
+        }
+
+        .input-group .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        /* ===== ESTILOS TAB 4: REVISIÓN ===== */
+        
+        .review-section {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .review-header h4 {
+            margin: 0;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .review-header h4 i {
+            color: var(--primary-color);
+            margin-right: 0.5rem;
+        }
+
+        .review-content {
+            padding: 1.5rem;
+        }
+
+        .review-item {
+            margin-bottom: 1rem;
+        }
+
+        .review-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .review-item label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .review-item > div {
+            color: var(--text-primary);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .review-item .badge {
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+        }
+
+        .badge-primary {
+            background-color: #2596be;
+            color: white;
+        }
+
+        .badge-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .badge-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .badge-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .review-contract-preview {
+            background: #f8f9fa;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .review-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .review-stat-card {
+            background: #f8f9fa;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .review-stat-card .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: block;
+        }
+
+        .review-stat-card .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .review-cms-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .review-cms-item {
+            padding: 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.75rem;
+            background: #f8f9fa;
+        }
+
+        .review-cms-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .review-cms-item h5 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .review-cms-item .cms-type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.625rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+        }
+
+        .review-cms-item .cms-type-badge.GUIA { background: #e3f2fd; color: #1976d2; }
+        .review-cms-item .cms-type-badge.TUTORIAL { background: #e8f5e9; color: #388e3c; }
+        .review-cms-item .cms-type-badge.VIDEO { background: #fff3e0; color: #f57c00; }
+        .review-cms-item .cms-type-badge.SNIPPET { background: #f3e5f5; color: #7b1fa2; }
+        .review-cms-item .cms-type-badge.OTRO { background: #f5f5f5; color: #616161; }
+
+        .review-cms-item .cms-content-preview {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin: 0.5rem 0;
+            line-height: 1.5;
+        }
+
+        .review-cms-item .cms-enlaces-count {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        /* Estilos para área de carga de archivos */
+        .upload-area {
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color) !important;
+            background: var(--primary-light) !important;
+        }
+
+        .upload-area:active {
+            transform: scale(0.98);
+        }
+
+        .recurso-item {
+            transition: all 0.2s ease;
+        }
+
+        .recurso-item:hover {
+            background: #e9ecef !important;
+            transform: translateX(2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Banner de Impersonación -->
+    <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <div class="projects-container">
+        <!-- Banner de impersonación si aplica -->
+        <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+        
+        <main class="projects-main content-after-navbar">
+            <!-- Header -->
+            <div class="projects-header">
+                <div class="header-left">
+                    <div class="breadcrumb">
+                        <a th:href="@{/devportal/{userRole}/{username}/dashboard(userRole=${userRole}, username=${username})}">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                        <i class="fas fa-chevron-right"></i>
+                        <a th:href="@{/devportal/{userRole}/{username}/apis(userRole=${userRole}, username=${username})}">
+                            APIs
+                        </a>
+                        <i class="fas fa-chevron-right"></i>
+                        <span>Crear Nueva API</span>
+                    </div>
+                    
+                    <h2 class="page-title">
+                        <i class="fas fa-plus-circle" style="color: #2596be;"></i>
+                        Crear Nueva API
+                    </h2>
+                </div>
+            </div>
+
+            <!-- Wizard de Creación de API -->
+            <div class="wizard-tabs-container">
+                <ul class="wizard-tabs">
+                    <li class="wizard-tab active" data-step="1">
+                        <a class="wizard-tab-link" onclick="goToStep(1)">
+                            <span class="wizard-tab-number">1</span>
+                            <span class="wizard-tab-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </span>
+                            <span class="wizard-tab-title">Información General</span>
+                        </a>
+                    </li>
+                    <li class="wizard-tab" data-step="2">
+                        <a class="wizard-tab-link" onclick="goToStep(2)">
+                            <span class="wizard-tab-number">2</span>
+                            <span class="wizard-tab-icon">
+                                <i class="fas fa-file-code"></i>
+                            </span>
+                            <span class="wizard-tab-title">Contrato OpenAPI</span>
+                        </a>
+                    </li>
+                    <li class="wizard-tab" data-step="3">
+                        <a class="wizard-tab-link" onclick="goToStep(3)">
+                            <span class="wizard-tab-number">3</span>
+                            <span class="wizard-tab-icon">
+                                <i class="fas fa-book"></i>
+                            </span>
+                            <span class="wizard-tab-title">Secciones Extras</span>
+                        </a>
+                    </li>
+                    <li class="wizard-tab" data-step="4">
+                        <a class="wizard-tab-link" onclick="goToStep(4)">
+                            <span class="wizard-tab-number">4</span>
+                            <span class="wizard-tab-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </span>
+                            <span class="wizard-tab-title">Revisión y Guardar</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Formulario -->
+            <form id="createApiForm" th:action="@{/devportal/{userRole}/{username}/apis/create(userRole=${userRole}, username=${username})}" method="post" enctype="multipart/form-data">
+                
+                <!-- Campos ocultos para usuario -->
+                <input type="hidden" name="userRole" th:value="${userRole}"/>
+                <input type="hidden" name="username" th:value="${username}"/>
+                
+                <!-- Campo oculto para el contrato (se llenará en Paso 2) -->
+                <textarea id="contractContent" name="contractContent" style="display:none;"></textarea>
+                
+                <div class="wizard-content">
+                    
+                    <!-- PASO 1: Información General -->
+                    <div class="wizard-step active" id="step1">
+                    
+                    <!-- Información Básica de la API -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-info-circle" style="color: #2596be;"></i>
+                            Información Básica de la API
+                        </h3>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="apiName" class="form-label">
+                                        Nombre de la API <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="apiName" name="apiName" required 
+                                           placeholder="Ej: Payment Gateway API, User Management API">
+                                    <div class="name-validation-status" id="nameValidationStatus">
+                                        <i class="fas fa-spinner fa-spin"></i> Verificando disponibilidad...
+                                    </div>
+                                    <div class="invalid-feedback" id="nameInvalidFeedback"></div>
+                                    <div class="valid-feedback" id="nameValidFeedback">El nombre está disponible</div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle"></i> El nombre debe ser único y descriptivo
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="apiVersion" class="form-label">
+                                        Versión Inicial <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="apiVersion" name="apiVersion" value="1.0.0" required 
+                                           pattern="^(\d+\.)?(\d+\.)?(\*|\d+)$" placeholder="1.0.0">
+                                    <div class="invalid-feedback">
+                                        Formato válido: 1.0.0, 2.1.3, etc.
+                                    </div>
+                                    <small class="text-muted">Usa versionado semántico (Major.Minor.Patch)</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="baseUrl" class="form-label">
+                                        URL Base (opcional)
+                                    </label>
+                                    <input type="url" class="form-control" id="baseUrl" name="baseUrl" 
+                                           placeholder="https://api.ejemplo.com/v1">
+                                    <small class="text-muted">URL donde está desplegada la API</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="apiDescription" class="form-label">
+                                        Descripción General <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea class="form-control" id="apiDescription" name="apiDescription" rows="4" required 
+                                              placeholder="Describe el propósito de tu API, qué servicios ofrece y para qué casos de uso está diseñada..."></textarea>
+                                    <div class="invalid-feedback">
+                                        La descripción es obligatoria
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-lightbulb"></i> Incluye información sobre funcionalidad principal, audiencia objetivo y casos de uso
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info" style="margin-top: 1rem;">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Nota:</strong> Tu API se creará en estado <strong>BORRADOR</strong>. 
+                            Podrás solicitar su revisión para publicación después de completar toda la documentación.
+                        </div>
+                    </div>
+
+                    <!-- Categorización y Organización -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-tags" style="color: #2596be;"></i>
+                            Categorización y Organización
+                        </h3>
+                        
+                        <p class="text-muted mb-4">
+                            Ayuda a otros usuarios a encontrar tu API seleccionando categorías y etiquetas relevantes
+                        </p>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-folder"></i> Categorías <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="chip-selector-container" id="categoriesChips">
+                                        <div th:each="categoria : ${categorias}" 
+                                             class="chip-item" 
+                                             th:data-value="${categoria.idCategoria}"
+                                             th:data-name="${categoria.nombreCategoria}"
+                                             onclick="toggleChip(this, 'categories')">
+                                            <i class="fas fa-folder chip-icon"></i>
+                                            <span th:text="${categoria.nombreCategoria}">Categoría</span>
+                                            <i class="fas fa-check chip-check"></i>
+                                        </div>
+                                    </div>
+                                    <!-- Select oculto para enviar datos al backend -->
+                                    <select id="categories" name="categories" multiple style="display: none;">
+                                        <option th:each="categoria : ${categorias}" 
+                                                th:value="${categoria.idCategoria}">
+                                        </option>
+                                    </select>
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle"></i> Selecciona al menos una categoría
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-tag"></i> Etiquetas
+                                    </label>
+                                    <div class="chip-selector-container" id="tagsChips">
+                                        <div th:each="etiqueta : ${etiquetas}" 
+                                             class="chip-item" 
+                                             th:data-value="${etiqueta.tagId}"
+                                             th:data-name="${etiqueta.nombreTag}"
+                                             onclick="toggleChip(this, 'tags')">
+                                            <i class="fas fa-tag chip-icon"></i>
+                                            <span th:text="${etiqueta.nombreTag}">Etiqueta</span>
+                                            <i class="fas fa-check chip-check"></i>
+                                        </div>
+                                    </div>
+                                    <!-- Select oculto para enviar datos al backend -->
+                                    <select id="tags" name="tags" multiple style="display: none;">
+                                        <option th:each="etiqueta : ${etiquetas}" 
+                                                th:value="${etiqueta.tagId}">
+                                        </option>
+                                    </select>
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle"></i> Opcional - Ayuda a otros a encontrar tu API
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enlaces y Referencias Externas -->
+                    <div class="form-section" style="border-bottom: none;">
+                        <h3 class="section-title">
+                            <i class="fas fa-link" style="color: #2596be;"></i>
+                            Enlaces y Referencias (Opcional)
+                        </h3>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="documentationUrl" class="form-label">
+                                        <i class="fas fa-external-link-alt"></i> Documentación Externa
+                                    </label>
+                                    <input type="url" class="form-control" id="documentationUrl" name="documentationUrl" 
+                                           placeholder="https://docs.ejemplo.com/api">
+                                    <small class="text-muted">
+                                        Si ya tienes documentación publicada en otro sitio, puedes enlazarla aquí
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    <!-- FIN PASO 1 -->
+
+                    <!-- PASO 2: Contrato OpenAPI -->
+                    <div class="wizard-step" id="step2">
+                        
+                        <!-- Selector de Modo -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-file-code" style="color: #2596be;"></i>
+                                Contrato OpenAPI 3.0
+                            </h3>
+                            
+                            <p class="text-muted mb-4">
+                                Define el contrato de tu API usando OpenAPI 3.0. Puedes construirlo mediante un formulario o subir/pegar tu archivo existente.
+                            </p>
+                            
+                            <div class="contract-mode-selector mb-4">
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="contractMode" id="modeForm" value="form" checked>
+                                    <label class="btn btn-outline-primary" for="modeForm">
+                                        <i class="fas fa-wpforms"></i>
+                                        Formulario Estructurado
+                                    </label>
+                                    
+                                    <input type="radio" class="btn-check" name="contractMode" id="modeUpload" value="upload">
+                                    <label class="btn btn-outline-primary" for="modeUpload">
+                                        <i class="fas fa-upload"></i>
+                                        Subir / Pegar Contrato
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- MODO FORMULARIO -->
+                        <div id="contractFormMode" class="contract-mode-content">
+                            
+                            <!-- Información del API (info) -->
+                            <div class="form-section">
+                                <h4 class="section-subtitle">
+                                    <i class="fas fa-info-circle"></i>
+                                    Información del API (info)
+                                </h4>
+                                <p class="text-muted small mb-3">Estos campos se completarán automáticamente con la información del Paso 1</p>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Título</label>
+                                            <input type="text" class="form-control" id="openapiTitle" readonly>
+                                            <small class="text-muted">Del campo "Nombre de la API"</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Versión</label>
+                                            <input type="text" class="form-control" id="openapiVersion" readonly>
+                                            <small class="text-muted">Del campo "Versión Inicial"</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Descripción</label>
+                                    <textarea class="form-control" id="openapiDescription" rows="2" readonly></textarea>
+                                    <small class="text-muted">Del campo "Descripción General"</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Servidores (servers) -->
+                            <div class="form-section">
+                                <h4 class="section-subtitle">
+                                    <i class="fas fa-server"></i>
+                                    Servidores (servers)
+                                </h4>
+                                <p class="text-muted small mb-3">Define las URLs base donde está desplegada tu API</p>
+                                
+                                <div id="serversList">
+                                    <div class="empty-state">
+                                        <i class="fas fa-server"></i>
+                                        <p>No hay servidores agregados. Se agregará uno automáticamente.</p>
+                                    </div>
+                                </div>
+                                
+                                <button type="button" class="btn-outline" onclick="addServer()">
+                                    <i class="fas fa-plus"></i>
+                                    Agregar Servidor
+                                </button>
+                            </div>
+                            
+                            <!-- Rutas/Endpoints (paths) -->
+                            <div class="form-section">
+                                <h4 class="section-subtitle">
+                                    <i class="fas fa-route"></i>
+                                    Rutas y Endpoints (paths)
+                                </h4>
+                                <p class="text-muted small mb-3">Define los endpoints de tu API con sus operaciones HTTP</p>
+                                
+                                <div id="pathsList">
+                                    <div class="empty-state">
+                                        <i class="fas fa-route"></i>
+                                        <p>No hay rutas agregadas. Define los endpoints de tu API.</p>
+                                    </div>
+                                </div>
+                                
+                                <button type="button" class="btn-outline" onclick="addPath()">
+                                    <i class="fas fa-plus"></i>
+                                    Agregar Ruta
+                                </button>
+                            </div>
+                            
+                            <!-- Esquemas de Datos (schemas) -->
+                            <div class="form-section">
+                                <h4 class="section-subtitle">
+                                    <i class="fas fa-database"></i>
+                                    Esquemas de Datos (schemas)
+                                </h4>
+                                <p class="text-muted small mb-3">Define los modelos de datos que usa tu API</p>
+                                
+                                <div id="schemasList">
+                                    <div class="empty-state">
+                                        <i class="fas fa-database"></i>
+                                        <p>No hay esquemas agregados. Define los modelos de datos.</p>
+                                    </div>
+                                </div>
+                                
+                                <button type="button" class="btn-outline" onclick="addSchema()">
+                                    <i class="fas fa-plus"></i>
+                                    Agregar Esquema
+                                </button>
+                            </div>
+                            
+                            <!-- Seguridad (security) -->
+                            <div class="form-section" style="border-bottom: none;">
+                                <h4 class="section-subtitle">
+                                    <i class="fas fa-lock"></i>
+                                    Esquemas de Seguridad (securitySchemes)
+                                </h4>
+                                <p class="text-muted small mb-3">Define los mecanismos de autenticación de tu API</p>
+                                
+                                <div id="securitySchemesList">
+                                    <div class="empty-state">
+                                        <i class="fas fa-lock"></i>
+                                        <p>No hay esquemas de seguridad. Define cómo se autentica la API.</p>
+                                    </div>
+                                </div>
+                                
+                                <button type="button" class="btn-outline" onclick="addSecurityScheme()">
+                                    <i class="fas fa-plus"></i>
+                                    Agregar Esquema de Seguridad
+                                </button>
+                            </div>
+                            
+                        </div>
+                        <!-- FIN MODO FORMULARIO -->
+                        
+                        <!-- MODO SUBIR/PEGAR -->
+                        <div id="contractUploadMode" class="contract-mode-content" style="display:none;">
+                            
+                            <div class="form-section">
+                                <h4 class="section-subtitle">
+                                    <i class="fas fa-upload"></i>
+                                    Subir o Pegar Contrato OpenAPI
+                                </h4>
+                                
+                                <!-- Tabs: Upload vs Write -->
+                                <div class="contract-editor-container">
+                                    <div class="editor-tabs">
+                                        <button type="button" class="editor-tab active" data-tab="write" onclick="switchEditorTab('write')">
+                                            <i class="fas fa-edit"></i> Escribir/Pegar
+                                        </button>
+                                        <button type="button" class="editor-tab" data-tab="upload" onclick="switchEditorTab('upload')">
+                                            <i class="fas fa-upload"></i> Subir Archivo
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="editor-content">
+                                        <!-- Panel: Escribir/Pegar -->
+                                        <div id="writePanel" class="editor-panel active">
+                                            <textarea id="contractEditor" style="display:none;"></textarea>
+                                        </div>
+                                        
+                                        <!-- Panel: Subir Archivo -->
+                                        <div id="uploadPanel" class="editor-panel">
+                                            <div class="file-upload-area" id="fileUploadArea">
+                                                <div class="upload-icon">
+                                                    <i class="fas fa-cloud-upload-alt"></i>
+                                                </div>
+                                                <h5>Arrastra y suelta tu archivo aquí</h5>
+                                                <p class="text-muted">o haz clic para seleccionar</p>
+                                                <p class="text-muted small">
+                                                    <i class="fas fa-info-circle"></i>
+                                                    Formatos soportados: .json, .yaml, .yml
+                                                </p>
+                                                <input type="file" id="contractFile" accept=".json,.yaml,.yml,.txt" style="display:none;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Validación OpenAPI -->
+                                <div class="mt-3">
+                                    <div class="alert alert-info" style="font-size: 0.875rem;">
+                                        <i class="fas fa-info-circle"></i>
+                                        <strong>Validación Automática:</strong> El contrato se valida automáticamente mientras escribes/pegas. 
+                                        También puedes validarlo manualmente con el botón de abajo.
+                                    </div>
+                                    
+                                    <button type="button" class="btn-outline" onclick="validateUploadedContract()">
+                                        <i class="fas fa-check-circle"></i>
+                                        Validar Contrato OpenAPI
+                                    </button>
+                                    
+                                    <!-- Resultado de validación OpenAPI (se llena dinámicamente) -->
+                                    <div id="contractValidationResult" style="margin-top: 1rem;"></div>
+                                    
+                                    <!-- Mensajes de fallback (solo si el validador no está disponible) -->
+                                    <div id="contractInvalidFeedback" class="invalid-feedback" style="display:none;">
+                                        El contrato OpenAPI no puede estar vacío
+                                    </div>
+                                    <div id="contractValidFeedback" class="valid-feedback" style="display:none;">
+                                        <i class="fas fa-check"></i> Contrato válido
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <!-- FIN MODO SUBIR/PEGAR -->
+                        
+                        <!-- Preview del YAML Generado (solo visible en modo formulario) -->
+                        <div class="form-section" id="yamlPreviewSection" style="border-bottom: none;">
+                            <h4 class="section-subtitle">
+                                <i class="fas fa-eye"></i>
+                                Vista Previa del Contrato YAML
+                            </h4>
+                            <button type="button" class="btn-outline mb-3" onclick="generateYamlPreview()">
+                                <i class="fas fa-sync"></i>
+                                Generar Vista Previa
+                            </button>
+                            <div class="contract-editor-container">
+                                <pre id="yamlPreview" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; max-height: 400px; overflow-y: auto; font-family: 'Consolas', monospace; font-size: 0.875rem;"></pre>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <!-- FIN PASO 2 -->
+
+                    <!-- PASO 3: Secciones Extras (CMS) -->
+                    <div class="wizard-step" id="step3">
+                        <div class="form-container">
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="fas fa-book" style="color: #2596be;"></i>
+                                    Secciones de Documentación Extras
+                                </h3>
+                                <p class="text-muted mb-4">
+                                    Agrega contenido adicional para ayudar a los desarrolladores: guías paso a paso, 
+                                    tutoriales, ejemplos de código, videos, y más.
+                                </p>
+
+                                <div class="alert alert-info mb-4">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Documentación Híbrida:</strong> Combina tu contrato OpenAPI (Tab 2) con contenido 
+                                    educativo personalizado. Esto diferencia tu portal de los simples catálogos de APIs.
+                                </div>
+
+                                <!-- Lista de Secciones CMS -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h4 class="section-subtitle mb-0">
+                                        <i class="fas fa-file-alt"></i>
+                                        Secciones de Contenido
+                                    </h4>
+                                    <button type="button" class="btn-primary" onclick="addCmsSection()">
+                                        <i class="fas fa-plus"></i>
+                                        Agregar Sección
+                                    </button>
+                                </div>
+
+                                <div id="cmsSectionsList">
+                                    <div class="empty-state">
+                                        <i class="fas fa-book-open"></i>
+                                        <p>No hay secciones agregadas. Agrega guías, tutoriales o ejemplos.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- FIN PASO 3 -->
+
+                    <!-- PASO 4: Revisión y Guardar -->
+                    <div class="wizard-step" id="step4">
+                        <div class="form-container">
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="fas fa-check-circle" style="color: #2596be;"></i>
+                                    Revisión Final
+                                </h3>
+                                <p class="text-muted mb-4">Revisa toda la información antes de guardar tu API como borrador.</p>
+                                
+                                <!-- Resumen Paso 1: Información General -->
+                                <div class="review-section mb-4">
+                                    <div class="review-header">
+                                        <h4><i class="fas fa-info-circle"></i> Información General</h4>
+                                        <button type="button" class="btn-sm btn-secondary" onclick="goToStep(1)">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </button>
+                                    </div>
+                                    <div class="review-content">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="review-item">
+                                                    <label>Nombre:</label>
+                                                    <div id="review-name"></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="review-item">
+                                                    <label>Versión:</label>
+                                                    <div id="review-version"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="review-item">
+                                            <label>Descripción:</label>
+                                            <div id="review-description"></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="review-item">
+                                                    <label>Categorías:</label>
+                                                    <div id="review-categories"></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="review-item">
+                                                    <label>Tags:</label>
+                                                    <div id="review-tags"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Resumen Paso 2: Contrato OpenAPI -->
+                                <div class="review-section mb-4">
+                                    <div class="review-header">
+                                        <h4><i class="fas fa-file-contract"></i> Contrato OpenAPI</h4>
+                                        <button type="button" class="btn-sm btn-secondary" onclick="goToStep(2)">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </button>
+                                    </div>
+                                    <div class="review-content">
+                                        <div id="review-contract-mode" class="mb-3"></div>
+                                        <div id="review-contract-stats"></div>
+                                        <div id="review-contract-preview" class="mt-3"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Resumen Paso 3: Secciones CMS (si existen) -->
+                                <div class="review-section mb-4" id="review-cms-section" style="display: none;">
+                                    <div class="review-header">
+                                        <h4><i class="fas fa-book"></i> Secciones de Documentación</h4>
+                                        <button type="button" class="btn-sm btn-secondary" onclick="goToStep(3)">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </button>
+                                    </div>
+                                    <div class="review-content">
+                                        <div id="review-cms-content"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Mensaje de confirmación -->
+                                <div class="alert alert-info" style="border-left: 4px solid #2596be;">
+                                    <i class="fas fa-info-circle"></i>
+                                    <strong>Nota:</strong> Tu API se guardará como <strong>BORRADOR</strong>. 
+                                    Podrás editarla y publicarla más adelante desde el panel de APIs.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- FIN PASO 4 -->
+
+                    <!-- Navegación del Wizard -->
+                    <div class="wizard-navigation">
+                        <div class="wizard-nav-left">
+                            <a th:href="@{/devportal/{userRole}/{username}/apis(userRole=${userRole}, username=${username})}" 
+                               class="btn-secondary">
+                                <i class="fas fa-times"></i>
+                                Cancelar
+                            </a>
+                            <button type="button" class="btn-secondary" id="btnPrevious" onclick="previousStep()" style="display:none;">
+                                <i class="fas fa-arrow-left"></i>
+                                Anterior
+                            </button>
+                        </div>
+                        
+                        <div class="wizard-nav-right">
+                            <button type="button" class="btn-primary" id="btnNext" onclick="nextStep()">
+                                Siguiente
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                            <button type="submit" class="btn-primary" id="createApiBtn" style="display:none;" disabled>
+                                <i class="fas fa-save"></i>
+                                Guardar como Borrador
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- CodeMirror JS -->
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/javascript/javascript.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/yaml/yaml.js"></script>
+    
+    <!-- OpenAPI Validator (CDN) - Múltiples fallbacks -->
+    <script src="https://unpkg.com/@apidevtools/swagger-parser@10.1.0/dist/swagger-parser.min.js" 
+            onerror="console.error('CDN 1 failed, trying CDN 2...'); this.onerror=null; this.src='https://cdn.jsdelivr.net/npm/@apidevtools/swagger-parser@10.1.0/dist/swagger-parser.min.js'"></script>
+    
+    <!-- OpenAPI Validator Local (se carga después del CDN) -->
+    <script th:src="@{/js/openapi-validator.js}" defer></script>
+    
+    <script th:inline="none">
+        // Variables globales
+        let contractEditor = null;
+        let isNameValid = false;
+        let nameCheckTimeout = null;
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeWizard();
+            initializeNameValidation();
+            initializeMultiSelect();
+            initializeFormValidation();
+            initializeContractModeSelector();
+            
+            // Verificar disponibilidad de SwaggerParser después de 2 segundos
+            setTimeout(function() {
+                if (typeof SwaggerParser === 'undefined') {
+                    console.error('❌ SwaggerParser no disponible. Validación client-side deshabilitada.');
+                    mostrarAdvertenciaValidador();
+                } else {
+                    console.log('✅ SwaggerParser disponible. Validación client-side habilitada.');
+                }
+            }, 2000);
+        });
+        
+        // Mostrar advertencia visual si SwaggerParser no está disponible
+        function mostrarAdvertenciaValidador() {
+            const resultDiv = document.getElementById('contractValidationResult');
+            if (resultDiv && resultDiv.innerHTML.trim() === '') {
+                resultDiv.className = 'validation-result warning';
+                resultDiv.innerHTML = `
+                    <div class="validation-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h5>⚠️ Validación client-side no disponible</h5>
+                    </div>
+                    <div class="validation-details">
+                        <p>El validador de OpenAPI no se pudo cargar (posible problema de red o CDN bloqueado).</p>
+                        <p><strong>No te preocupes:</strong> El backend validará tu contrato al crear la API.</p>
+                        <p>Puedes continuar con el siguiente paso.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // ========== FUNCIONES DEL WIZARD ==========
+        
+        function initializeWizard() {
+            updateWizardNavigation();
+        }
+
+        function goToStep(step) {
+            if (step < 1 || step > totalSteps) return;
+            
+            // Ocultar paso actual
+            document.getElementById('step' + currentStep).classList.remove('active');
+            document.querySelector('.wizard-tab[data-step="' + currentStep + '"]').classList.remove('active');
+            
+            // Mostrar nuevo paso
+            currentStep = step;
+            document.getElementById('step' + currentStep).classList.add('active');
+            document.querySelector('.wizard-tab[data-step="' + currentStep + '"]').classList.add('active');
+            
+            // Actualizar navegación
+            updateWizardNavigation();
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Sincronizar datos cuando se entra al Paso 2
+            if (currentStep === 2) {
+                syncStep1Data();
+                if (contractEditor) {
+                    setTimeout(() => contractEditor.refresh(), 100);
+                }
+            }
+            
+            // Cargar resumen cuando se entra al Paso 4
+            if (currentStep === 4) {
+                loadReviewSummary();
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                // Validar paso actual antes de avanzar
+                if (!validateCurrentStep()) {
+                    return;
+                }
+                
+                // Marcar paso actual como completado
+                document.querySelector('.wizard-tab[data-step="' + currentStep + '"]').classList.add('completed');
+                goToStep(currentStep + 1);
+            }
+        }
+        
+        // Validar el paso actual antes de avanzar
+        function validateCurrentStep() {
+            switch(currentStep) {
+                case 1:
+                    return validateStep1();
+                case 2:
+                    return validateStep2();
+                case 3:
+                    return validateStep3();
+                default:
+                    return true;
+            }
+        }
+        
+        // Validar Paso 1: Información General
+        function validateStep1() {
+            const errors = [];
+            let firstInvalidField = null;
+            
+            // Limpiar validaciones anteriores
+            document.querySelectorAll('#step1 .form-control, #step1 .form-select').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+            
+            // 1. Validar nombre (debe existir y ser único)
+            const apiNameInput = document.getElementById('apiName');
+            const apiName = apiNameInput.value.trim();
+            if (!apiName) {
+                errors.push('El nombre de la API es obligatorio');
+                apiNameInput.classList.add('is-invalid');
+                if (!firstInvalidField) firstInvalidField = apiNameInput;
+            } else if (!isNameValid) {
+                errors.push('El nombre de la API ya está en uso. Elige otro nombre.');
+                apiNameInput.classList.add('is-invalid');
+                if (!firstInvalidField) firstInvalidField = apiNameInput;
+            }
+            
+            // 2. Validar versión
+            const apiVersionInput = document.getElementById('apiVersion');
+            const apiVersion = apiVersionInput.value.trim();
+            if (!apiVersion) {
+                errors.push('La versión de la API es obligatoria');
+                apiVersionInput.classList.add('is-invalid');
+                if (!firstInvalidField) firstInvalidField = apiVersionInput;
+            }
+            
+            // 3. Validar descripción (mínimo 20 caracteres)
+            const apiDescriptionInput = document.getElementById('apiDescription');
+            const apiDescription = apiDescriptionInput.value.trim();
+            if (!apiDescription) {
+                errors.push('La descripción de la API es obligatoria');
+                apiDescriptionInput.classList.add('is-invalid');
+                if (!firstInvalidField) firstInvalidField = apiDescriptionInput;
+            } else if (apiDescription.length < 20) {
+                errors.push('La descripción debe tener al menos 20 caracteres');
+                apiDescriptionInput.classList.add('is-invalid');
+                if (!firstInvalidField) firstInvalidField = apiDescriptionInput;
+            }
+            
+            // 4. Validar que haya al menos 1 categoría seleccionada
+            const categoriesSelect = document.getElementById('categories');
+            if (categoriesSelect.selectedOptions.length === 0) {
+                errors.push('Debes seleccionar al menos una categoría');
+                categoriesSelect.classList.add('is-invalid');
+                if (!firstInvalidField) firstInvalidField = categoriesSelect;
+            }
+            
+            // Mostrar errores si existen
+            if (errors.length > 0) {
+                showValidationErrors('Paso 1: Información General', errors);
+                
+                // Hacer scroll al primer campo inválido
+                if (firstInvalidField) {
+                    firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => firstInvalidField.focus(), 300);
+                }
+                
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Validar Paso 2: Contrato OpenAPI
+        function validateStep2() {
+            const errors = [];
+            const contractMode = document.querySelector('input[name="contractMode"]:checked').value;
+            
+            if (contractMode === 'form') {
+                // Modo formulario: validar estructura OpenAPI
+                
+                // 1. Validar información básica (sincronizada del Paso 1)
+                const title = document.getElementById('openapiTitle').value.trim();
+                const version = document.getElementById('openapiVersion').value.trim();
+                const description = document.getElementById('openapiDescription').value.trim();
+                
+                if (!title || !version || !description) {
+                    errors.push('Los campos de información básica son obligatorios');
+                }
+                
+                // 2. Validar que haya al menos 1 servidor
+                if (servers.length === 0 || !servers.some(s => s.url)) {
+                    errors.push('Debes agregar al menos un servidor con URL válida');
+                }
+                
+                // 3. Validar que haya al menos 1 ruta con operaciones
+                if (paths.length === 0) {
+                    errors.push('Debes agregar al menos una ruta (endpoint)');
+                } else {
+                    // Validar que cada ruta tenga path
+                    const pathsWithoutRoute = paths.filter(p => !p.path);
+                    if (pathsWithoutRoute.length > 0) {
+                        errors.push('Todas las rutas deben tener un path definido (ej: /pokemon/{id})');
+                    }
+                    
+                    // Validar que haya al menos 1 operación definida
+                    const totalOperations = paths.reduce((sum, p) => sum + p.operations.length, 0);
+                    if (totalOperations === 0) {
+                        errors.push('Debes agregar al menos una operación HTTP (GET, POST, etc.) a tus rutas');
+                    }
+                }
+                
+            } else {
+                // Modo upload/paste: validar que haya contenido
+                if (!contractEditor) {
+                    errors.push('El editor de contratos no está inicializado');
+                } else {
+                    const content = contractEditor.getValue().trim();
+                    if (!content) {
+                        errors.push('Debes pegar o subir un contrato OpenAPI válido');
+                    } else if (content.length < 50) {
+                        errors.push('El contrato parece estar incompleto. Verifica que sea un archivo OpenAPI válido.');
+                    } else if (typeof OpenAPIValidator !== 'undefined' && typeof SwaggerParser !== 'undefined') {
+                        // Si el validador está disponible, verificar que el contrato sea válido
+                        const contratoValidado = OpenAPIValidator.getContratoValidado();
+                        if (!contratoValidado) {
+                            errors.push('Debes validar el contrato OpenAPI usando el botón "Validar Contrato" antes de continuar');
+                        }
+                    } else if (typeof SwaggerParser === 'undefined') {
+                        // Si SwaggerParser no está disponible, permitir continuar con advertencia
+                        console.warn('⚠️ Validación omitida: SwaggerParser CDN no disponible. El backend validará el contrato.');
+                        // NO agregamos error - permitimos continuar
+                    }
+                }
+            }
+            
+            // Mostrar errores si existen
+            if (errors.length > 0) {
+                showValidationErrors('Paso 2: Contrato OpenAPI', errors);
+                return false;
+            }
+            
+            // Generar preview si es modo formulario
+            if (contractMode === 'form') {
+                generateYamlPreview();
+            }
+            
+            return true;
+        }
+        
+        // Validar Paso 3: Secciones CMS (opcional pero si existen deben estar completas)
+        function validateStep3() {
+            const errors = [];
+            
+            // Las secciones CMS son opcionales, pero si existen deben estar completas
+            if (cmsSections.length > 0) {
+                cmsSections.forEach((section, index) => {
+                    const sectionNum = index + 1;
+                    
+                    // Validar título
+                    if (!section.titulo || section.titulo.trim().length === 0) {
+                        errors.push(`Sección ${sectionNum}: El título es obligatorio`);
+                    }
+                    
+                    // Validar contenido (mínimo 10 caracteres)
+                    if (!section.contenido || section.contenido.trim().length < 10) {
+                        errors.push(`Sección ${sectionNum}: El contenido debe tener al menos 10 caracteres`);
+                    }
+                    
+                    // Validar enlaces (si existen, deben tener título y URL)
+                    if (section.enlaces && section.enlaces.length > 0) {
+                        section.enlaces.forEach((enlace, eIndex) => {
+                            if (!enlace.titulo || !enlace.url) {
+                                errors.push(`Sección ${sectionNum}, Enlace ${eIndex + 1}: Título y URL son obligatorios`);
+                            } else if (!isValidUrl(enlace.url)) {
+                                errors.push(`Sección ${sectionNum}, Enlace ${eIndex + 1}: URL inválida`);
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // Mostrar errores si existen
+            if (errors.length > 0) {
+                showValidationErrors('Paso 3: Secciones Extras (CMS)', errors);
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Validar formato de URL
+        function isValidUrl(string) {
+            try {
+                const url = new URL(string);
+                return url.protocol === 'http:' || url.protocol === 'https:';
+            } catch (_) {
+                return false;
+            }
+        }
+        
+        // Mostrar errores de validación en modal/alert
+        function showValidationErrors(stepName, errors) {
+            let message = `⚠️ ${stepName}\n\nCorrige los siguientes errores antes de continuar:\n\n`;
+            errors.forEach((error, index) => {
+                message += `${index + 1}. ${error}\n`;
+            });
+            
+            alert(message);
+        }
+
+        function previousStep() {
+            if (currentStep > 1) {
+                goToStep(currentStep - 1);
+            }
+        }
+
+        function updateWizardNavigation() {
+            const btnPrevious = document.getElementById('btnPrevious');
+            const btnNext = document.getElementById('btnNext');
+            const btnSubmit = document.getElementById('createApiBtn');
+            
+            // Mostrar/ocultar botón "Anterior"
+            if (currentStep > 1) {
+                btnPrevious.style.display = 'inline-flex';
+            } else {
+                btnPrevious.style.display = 'none';
+            }
+            
+            // Mostrar/ocultar botón "Siguiente" vs "Guardar"
+            if (currentStep < totalSteps) {
+                btnNext.style.display = 'inline-flex';
+                btnSubmit.style.display = 'none';
+            } else {
+                btnNext.style.display = 'none';
+                btnSubmit.style.display = 'inline-flex';
+            }
+            
+            // Actualizar estado visual de los tabs completados
+            updateTabsCompletionStatus();
+        }
+        
+        // Actualizar estado visual de tabs completados
+        function updateTabsCompletionStatus() {
+            // Verificar Tab 1
+            const tab1 = document.querySelector('.wizard-tab[data-step="1"]');
+            if (validateStep1Silent()) {
+                tab1.classList.add('completed');
+            } else {
+                tab1.classList.remove('completed');
+            }
+            
+            // Verificar Tab 2 (solo si Tab 1 está completo)
+            const tab2 = document.querySelector('.wizard-tab[data-step="2"]');
+            if (validateStep1Silent() && validateStep2Silent()) {
+                tab2.classList.add('completed');
+            } else {
+                tab2.classList.remove('completed');
+            }
+            
+            // Verificar Tab 3 (solo si Tab 1 y 2 están completos)
+            const tab3 = document.querySelector('.wizard-tab[data-step="3"]');
+            if (validateStep1Silent() && validateStep2Silent() && validateStep3Silent()) {
+                tab3.classList.add('completed');
+            } else {
+                tab3.classList.remove('completed');
+            }
+        }
+        
+        // Versiones silenciosas de validación (sin alertas ni scroll)
+        function validateStep1Silent() {
+            const apiName = document.getElementById('apiName').value.trim();
+            const apiVersion = document.getElementById('apiVersion').value.trim();
+            const apiDescription = document.getElementById('apiDescription').value.trim();
+            const categoriesSelect = document.getElementById('categories');
+            
+            return apiName && isNameValid && apiVersion && 
+                   apiDescription && apiDescription.length >= 20 &&
+                   categoriesSelect.selectedOptions.length > 0;
+        }
+        
+        function validateStep2Silent() {
+            const contractMode = document.querySelector('input[name="contractMode"]:checked').value;
+            
+            if (contractMode === 'form') {
+                const title = document.getElementById('openapiTitle').value.trim();
+                const version = document.getElementById('openapiVersion').value.trim();
+                const description = document.getElementById('openapiDescription').value.trim();
+                
+                const hasValidServers = servers.length > 0 && servers.some(s => s.url);
+                const hasValidPaths = paths.length > 0 && paths.every(p => p.path);
+                const hasOperations = paths.reduce((sum, p) => sum + p.operations.length, 0) > 0;
+                
+                return title && version && description && hasValidServers && hasValidPaths && hasOperations;
+            } else {
+                if (!contractEditor) return false;
+                const content = contractEditor.getValue().trim();
+                return content && content.length >= 50;
+            }
+        }
+        
+        function validateStep3Silent() {
+            // Tab 3 es opcional, siempre es válido
+            if (cmsSections.length === 0) return true;
+            
+            // Si hay secciones, deben estar completas
+            return cmsSections.every(section => {
+                const hasTitle = section.titulo && section.titulo.trim().length > 0;
+                const hasContent = section.contenido && section.contenido.trim().length >= 10;
+                const validEnlaces = !section.enlaces || section.enlaces.length === 0 || 
+                                   section.enlaces.every(e => e.titulo && e.url && isValidUrl(e.url));
+                
+                return hasTitle && hasContent && validEnlaces;
+            });
+        }
+        
+        // Cargar resumen para Tab 4
+        function loadReviewSummary() {
+            // ===== PASO 1: Información General =====
+            document.getElementById('review-name').textContent = document.getElementById('apiName').value.trim() || '(sin definir)';
+            document.getElementById('review-version').textContent = document.getElementById('apiVersion').value.trim() || '(sin definir)';
+            document.getElementById('review-description').textContent = document.getElementById('apiDescription').value.trim() || '(sin definir)';
+            
+            // Categorías seleccionadas
+            const categoriesSelect = document.getElementById('categories');
+            const selectedCategories = Array.from(categoriesSelect.selectedOptions).map(opt => opt.text);
+            if (selectedCategories.length > 0) {
+                document.getElementById('review-categories').innerHTML = selectedCategories.map(cat => 
+                    `<span class="badge badge-primary">${cat}</span>`
+                ).join(' ');
+            } else {
+                document.getElementById('review-categories').innerHTML = '<span class="text-muted">(ninguna)</span>';
+            }
+            
+            // Tags seleccionados
+            const tagsSelect = document.getElementById('tags');
+            const selectedTags = Array.from(tagsSelect.selectedOptions).map(opt => opt.text);
+            if (selectedTags.length > 0) {
+                document.getElementById('review-tags').innerHTML = selectedTags.map(tag => 
+                    `<span class="badge badge-secondary">${tag}</span>`
+                ).join(' ');
+            } else {
+                document.getElementById('review-tags').innerHTML = '<span class="text-muted">(ninguno)</span>';
+            }
+            
+            // ===== PASO 2: Contrato OpenAPI =====
+            const contractMode = document.querySelector('input[name="contractMode"]:checked').value;
+            
+            if (contractMode === 'form') {
+                document.getElementById('review-contract-mode').innerHTML = 
+                    '<span class="badge badge-info"><i class="fas fa-edit"></i> Generado desde Formulario</span>';
+                
+                // Estadísticas del contrato
+                const serversCount = servers.filter(s => s.url).length;
+                const pathsCount = paths.filter(p => p.path).length;
+                const operationsCount = paths.reduce((sum, p) => sum + p.operations.length, 0);
+                const schemasCount = schemas.length;
+                
+                document.getElementById('review-contract-stats').innerHTML = `
+                    <div class="review-stats">
+                        <div class="review-stat-card">
+                            <span class="stat-number">${serversCount}</span>
+                            <div class="stat-label">Servidores</div>
+                        </div>
+                        <div class="review-stat-card">
+                            <span class="stat-number">${pathsCount}</span>
+                            <div class="stat-label">Rutas</div>
+                        </div>
+                        <div class="review-stat-card">
+                            <span class="stat-number">${operationsCount}</span>
+                            <div class="stat-label">Operaciones</div>
+                        </div>
+                        <div class="review-stat-card">
+                            <span class="stat-number">${schemasCount}</span>
+                            <div class="stat-label">Esquemas</div>
+                        </div>
+                    </div>
+                `;
+                
+                // Preview del YAML generado (primeras 20 líneas)
+                const yamlPreview = document.getElementById('yamlPreview');
+                if (yamlPreview) {
+                    const yamlContent = yamlPreview.textContent;
+                    const lines = yamlContent.split('\n').slice(0, 20);
+                    const preview = lines.join('\n') + (yamlContent.split('\n').length > 20 ? '\n\n... (continúa)' : '');
+                    
+                    document.getElementById('review-contract-preview').innerHTML = `
+                        <div class="review-contract-preview"><pre>${escapeHtml(preview)}</pre></div>
+                    `;
+                }
+                
+            } else {
+                document.getElementById('review-contract-mode').innerHTML = 
+                    '<span class="badge badge-success"><i class="fas fa-upload"></i> Subido/Pegado Manualmente</span>';
+                
+                if (contractEditor) {
+                    const content = contractEditor.getValue();
+                    const lines = content.split('\n');
+                    const linesCount = lines.length;
+                    const charsCount = content.length;
+                    
+                    document.getElementById('review-contract-stats').innerHTML = `
+                        <div class="review-stats">
+                            <div class="review-stat-card">
+                                <span class="stat-number">${linesCount}</span>
+                                <div class="stat-label">Líneas</div>
+                            </div>
+                            <div class="review-stat-card">
+                                <span class="stat-number">${charsCount}</span>
+                                <div class="stat-label">Caracteres</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Preview del contenido (primeras 20 líneas)
+                    const previewLines = lines.slice(0, 20);
+                    const preview = previewLines.join('\n') + (lines.length > 20 ? '\n\n... (continúa)' : '');
+                    
+                    document.getElementById('review-contract-preview').innerHTML = `
+                        <div class="review-contract-preview"><pre>${escapeHtml(preview)}</pre></div>
+                    `;
+                }
+            }
+            
+            // ===== PASO 3: Secciones CMS =====
+            if (cmsSections.length > 0) {
+                document.getElementById('review-cms-section').style.display = 'block';
+                
+                const cmsHtml = cmsSections.map((section, index) => {
+                    const enlacesCount = section.enlaces ? section.enlaces.length : 0;
+                    const recursosCount = section.recursos ? section.recursos.length : 0;
+                    const contentPreview = section.contenido.substring(0, 150) + (section.contenido.length > 150 ? '...' : '');
+                    
+                    return `
+                        <div class="review-cms-item">
+                            <h5>
+                                ${index + 1}. ${escapeHtml(section.titulo)}
+                                <span class="cms-type-badge ${section.tipo}">${section.tipo}</span>
+                            </h5>
+                            <div class="cms-content-preview">${escapeHtml(contentPreview)}</div>
+                            ${enlacesCount > 0 ? `<div class="cms-enlaces-count"><i class="fas fa-link"></i> ${enlacesCount} enlace(s) de referencia</div>` : ''}
+                            ${recursosCount > 0 ? `<div class="cms-enlaces-count"><i class="fas fa-paperclip"></i> ${recursosCount} archivo(s) adjunto(s)</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+                
+                document.getElementById('review-cms-content').innerHTML = cmsHtml;
+            } else {
+                document.getElementById('review-cms-section').style.display = 'none';
+            }
+        }
+        
+        // Función auxiliar para escapar HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ========== FIN FUNCIONES DEL WIZARD ==========
+
+        // Inicializar CodeMirror
+        function initializeCodeEditor() {
+            const contractTextarea = document.getElementById('contractContent');
+            
+            contractEditor = CodeMirror.fromTextArea(contractTextarea, {
+                mode: 'application/json',
+                theme: 'default',
+                lineNumbers: true,
+                lineWrapping: true,
+                indentUnit: 2,
+                tabSize: 2,
+                autoCloseBrackets: true,
+                matchBrackets: true
+            });
+
+            // Validar contenido cuando cambie
+            contractEditor.on('change', function() {
+                validateContract();
+                updateSubmitButton();
+            });
+        }
+
+        // Inicializar tabs del editor
+        function initializeEditorTabs() {
+            const tabs = document.querySelectorAll('.editor-tab');
+            const panels = document.querySelectorAll('.editor-panel');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetTab = this.dataset.tab;
+                    
+                    // Actualizar tabs activos
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Actualizar panels activos
+                    panels.forEach(p => p.classList.remove('active'));
+                    document.getElementById(targetTab + 'Panel').classList.add('active');
+                    
+                    // Refrescar CodeMirror cuando se active
+                    if (targetTab === 'write' && contractEditor) {
+                        setTimeout(() => contractEditor.refresh(), 100);
+                    }
+                });
+            });
+        }
+
+        // Inicializar carga de archivos
+        function initializeFileUpload() {
+            const uploadArea = document.getElementById('fileUploadArea');
+            const fileInput = document.getElementById('contractFile');
+
+            // Click para seleccionar archivo
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelection(files[0]);
+                }
+            });
+
+            // Cambio de archivo
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleFileSelection(e.target.files[0]);
+                }
+            });
+        }
+
+        // Manejar selección de archivo
+        function handleFileSelection(file) {
+            const allowedTypes = ['application/json', 'text/yaml', 'text/yml', 'text/plain'];
+            const allowedExtensions = ['.json', '.yaml', '.yml', '.txt'];
+            
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+                alert('Tipo de archivo no soportado. Use archivos .json, .yaml, .yml o .txt');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                contractEditor.setValue(e.target.result);
+                
+                // Cambiar a tab de escritura para mostrar el contenido
+                document.querySelector('[data-tab="write"]').click();
+                
+                // Detectar modo basado en el contenido
+                const content = e.target.result.trim();
+                if (content.startsWith('{') || content.startsWith('[')) {
+                    contractEditor.setOption('mode', 'application/json');
+                } else {
+                    contractEditor.setOption('mode', 'yaml');
+                }
+                
+                validateContract();
+                updateSubmitButton();
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Inicializar validación de nombre
+        function initializeNameValidation() {
+            const nameInput = document.getElementById('apiName');
+            const statusDiv = document.getElementById('nameValidationStatus');
+
+            nameInput.addEventListener('input', function() {
+                const name = this.value.trim();
+                
+                // Limpiar timeout anterior
+                if (nameCheckTimeout) {
+                    clearTimeout(nameCheckTimeout);
+                }
+
+                if (name.length < 3) {
+                    hideNameValidation();
+                    isNameValid = false;
+                    updateSubmitButton();
+                    updateTabsCompletionStatus();
+                    return;
+                }
+
+                // Mostrar estado de verificación
+                showNameValidation('checking');
+                
+                // Esperar 500ms antes de hacer la verificación
+                nameCheckTimeout = setTimeout(() => {
+                    checkApiNameAvailability(name);
+                }, 500);
+            });
+        }
+
+        // Verificar disponibilidad del nombre
+        function checkApiNameAvailability(name) {
+            // Hacer llamada AJAX real al controlador
+            const userRole = document.querySelector('input[name="userRole"]')?.value || 'dev';
+            const username = document.querySelector('input[name="username"]')?.value || 'user';
+            
+            fetch(`/devportal/${userRole}/${username}/apis/check-name?name=${encodeURIComponent(name)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.available) {
+                    showNameValidation('available');
+                    isNameValid = true;
+                } else {
+                    showNameValidation('unavailable');
+                    isNameValid = false;
+                }
+                updateSubmitButton();
+                updateTabsCompletionStatus();
+            })
+            .catch(error => {
+                console.error('Error checking name availability:', error);
+                showNameValidation('unavailable');
+                isNameValid = false;
+                updateSubmitButton();
+                updateTabsCompletionStatus();
+            });
+        }
+
+        // Mostrar estado de validación del nombre
+        function showNameValidation(status) {
+            const statusDiv = document.getElementById('nameValidationStatus');
+            const nameInput = document.getElementById('apiName');
+            
+            statusDiv.className = 'name-validation-status ' + status;
+            
+            if (status === 'checking') {
+                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando disponibilidad...';
+                nameInput.classList.remove('is-valid', 'is-invalid');
+            } else if (status === 'available') {
+                statusDiv.innerHTML = '<i class="fas fa-check"></i> El nombre está disponible';
+                nameInput.classList.add('is-valid');
+                nameInput.classList.remove('is-invalid');
+            } else if (status === 'unavailable') {
+                statusDiv.innerHTML = '<i class="fas fa-times"></i> Este nombre ya está en uso. Elige otro nombre.';
+                nameInput.classList.add('is-invalid');
+                nameInput.classList.remove('is-valid');
+            }
+        }
+
+        // Ocultar validación del nombre
+        function hideNameValidation() {
+            const statusDiv = document.getElementById('nameValidationStatus');
+            const nameInput = document.getElementById('apiName');
+            
+            statusDiv.style.display = 'none';
+            nameInput.classList.remove('is-valid', 'is-invalid');
+        }
+
+        // Inicializar chip selectors
+        function initializeMultiSelect() {
+            // No se necesita inicialización adicional
+            // Los chips usan onclick directo en el HTML
+        }
+
+        // Toggle chip selection (llamada desde HTML)
+        function toggleChip(chipElement, selectId) {
+            const value = chipElement.getAttribute('data-value');
+            const select = document.getElementById(selectId);
+            const option = select.querySelector(`option[value="${value}"]`);
+            
+            if (chipElement.classList.contains('selected')) {
+                // Deseleccionar
+                chipElement.classList.remove('selected');
+                if (option) option.selected = false;
+            } else {
+                // Seleccionar
+                chipElement.classList.add('selected');
+                if (option) option.selected = true;
+            }
+            
+            // Actualizar validación y estado de tabs
+            updateSubmitButton();
+            updateTabsCompletionStatus();
+        }
+
+        // Validar contrato
+        function validateContract() {
+            const content = contractEditor.getValue().trim();
+            const contractInvalid = document.getElementById('contractInvalidFeedback');
+            
+            if (content.length === 0) {
+                contractInvalid.style.display = 'block';
+                return false;
+            } else {
+                contractInvalid.style.display = 'none';
+                return true;
+            }
+        }
+
+        // Inicializar validación del formulario
+        function initializeFormValidation() {
+            const form = document.getElementById('createApiForm');
+            const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+            
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    updateSubmitButton();
+                    updateTabsCompletionStatus();
+                });
+                input.addEventListener('change', function() {
+                    updateSubmitButton();
+                    updateTabsCompletionStatus();
+                });
+            });
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault(); // Siempre prevenir el envío normal del formulario
+                
+                if (!validateForm()) {
+                    return false;
+                }
+                
+                // Actualizar el textarea oculto con el contenido del contrato
+                const contractMode = document.querySelector('input[name="contractMode"]:checked').value;
+                if (contractMode === 'form') {
+                    // Generar YAML desde formulario
+                    generateYamlPreview();
+                } else {
+                    // Usar contenido del editor
+                    if (contractEditor) {
+                        document.getElementById('contractContent').value = contractEditor.getValue();
+                    }
+                }
+                
+                // Deshabilitar el botón de envío para prevenir envíos múltiples
+                const submitBtn = document.getElementById('createApiBtn');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
+                
+                // Crear FormData del formulario
+                const formData = new FormData(form);
+                
+                // Construir JSON de secciones CMS (sin archivos)
+                if (cmsSections && cmsSections.length > 0) {
+                    const seccionesCmsData = cmsSections.map((section, index) => ({
+                        titulo: section.titulo,
+                        tipoContenido: section.tipo, // ✅ FIX: Usar 'tipo' del objeto section
+                        orden: section.orden || index + 1,
+                        contenido: section.contenido || '', // ✅ Texto Markdown
+                        enlaces: section.enlaces || [], // ✅ Enlaces de referencia
+                        // No incluir archivos aquí (se envían por separado)
+                        archivos: [] // Se llenarán en el backend
+                    }));
+                    
+                    // Agregar JSON de secciones al FormData
+                    formData.append('seccionesCmsJson', JSON.stringify(seccionesCmsData));
+                    
+                    // Agregar archivos de las secciones CMS
+                    cmsSections.forEach((section, sectionIndex) => {
+                        if (section.recursos && section.recursos.length > 0) {
+                            section.recursos.forEach((recurso, recursoIndex) => {
+                                if (recurso.file) {
+                                    formData.append(`cmsFiles_${sectionIndex}_${recursoIndex}`, recurso.file);
+                                }
+                            });
+                        }
+                    });
+                }
+                
+                // Enviar usando fetch
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Mostrar popup de éxito temporal
+                        showSuccessPopup(data.message);
+                        
+                        // Redirigir después de 2 segundos
+                        setTimeout(() => {
+                            window.location.href = data.redirectUrl;
+                        }, 2000);
+                    } else {
+                        // Mostrar popup de error
+                        showErrorPopup(data.message || 'Error desconocido');
+                        
+                        // Rehabilitar el botón
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fas fa-plus"></i> Crear API';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showErrorPopup('Error al crear la API: ' + error.message);
+                    
+                    // Rehabilitar el botón
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-plus"></i> Crear API';
+                });
+            });
+        }
+
+        // Validar formulario completo
+        function validateForm() {
+            const requiredFields = [
+                { id: 'apiName', message: 'El nombre de la API es obligatorio' },
+                { id: 'apiVersion', message: 'La versión es obligatoria' },
+                { id: 'apiDescription', message: 'La descripción es obligatoria' }
+            ];
+
+            let isValid = true;
+
+            // Validar campos requeridos
+            requiredFields.forEach(field => {
+                const input = document.getElementById(field.id);
+                if (!input.value.trim()) {
+                    input.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+
+            // Validar nombre único
+            if (!isNameValid) {
+                isValid = false;
+            }
+
+            // Validar contrato (DESHABILITADO - Se implementará en Paso 2)
+            // if (!validateContract()) {
+            //     isValid = false;
+            // }
+
+            return isValid;
+        }
+
+        // Actualizar estado del botón submit
+        function updateSubmitButton() {
+            const submitBtn = document.getElementById('createApiBtn');
+            const requiredInputs = document.querySelectorAll('input[required], textarea[required]');
+            
+            // Solo validar nombre y campos requeridos (contrato se validará en Paso 2)
+            let allValid = isNameValid;
+            
+            requiredInputs.forEach(input => {
+                if (!input.value.trim()) {
+                    allValid = false;
+                }
+            });
+
+            submitBtn.disabled = !allValid;
+        }
+
+        // ========== FUNCIONES DEL TAB 2: CONTRATO OPENAPI ==========
+        
+        // Variables globales para Tab 2
+        let servers = [];
+        let paths = [];
+        let schemas = [];
+        let securitySchemes = [];
+        let serverCounter = 0;
+        let pathCounter = 0;
+        let schemaCounter = 0;
+        let securityCounter = 0;
+
+        // Inicializar selector de modo de contrato
+        function initializeContractModeSelector() {
+            const modeRadios = document.querySelectorAll('input[name="contractMode"]');
+            
+            modeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    switchContractMode(this.value);
+                });
+            });
+            
+            // Inicializar servidor por defecto
+            addServer();
+            
+            // Sincronizar campos del Paso 1
+            syncStep1Data();
+        }
+
+        // Cambiar modo de contrato (formulario vs subir/pegar)
+        function switchContractMode(mode) {
+            const formMode = document.getElementById('contractFormMode');
+            const uploadMode = document.getElementById('contractUploadMode');
+            const previewSection = document.getElementById('yamlPreviewSection');
+            
+            if (mode === 'form') {
+                formMode.style.display = 'block';
+                uploadMode.style.display = 'none';
+                previewSection.style.display = 'block';
+            } else {
+                formMode.style.display = 'none';
+                uploadMode.style.display = 'block';
+                previewSection.style.display = 'none';
+                
+                // Inicializar CodeMirror para modo upload
+                if (!contractEditor) {
+                    initializeCodeEditor();
+                    initializeFileUpload();
+                }
+            }
+        }
+
+        // Inicializar CodeMirror (solo para modo upload)
+        function initializeCodeEditor() {
+            const contractTextarea = document.getElementById('contractEditor');
+            
+            contractEditor = CodeMirror.fromTextArea(contractTextarea, {
+                mode: 'yaml',
+                theme: 'default',
+                lineNumbers: true,
+                lineWrapping: true,
+                indentUnit: 2,
+                tabSize: 2,
+                autoCloseBrackets: true,
+                matchBrackets: true
+            });
+
+            // Validación en tiempo real con debounce (solo si el validador está cargado)
+            let debounceTimer = null;
+            contractEditor.on('change', function() {
+                clearTimeout(debounceTimer);
+                
+                // Esperar 1 segundo después de que el usuario deja de escribir
+                debounceTimer = setTimeout(() => {
+                    if (typeof OpenAPIValidator !== 'undefined' && contractEditor.getValue().trim().length > 0) {
+                        const resultDiv = document.getElementById('contractValidationResult');
+                        OpenAPIValidator.validarContrato(contractEditor.getValue(), resultDiv);
+                    }
+                }, 1000);
+            });
+        }
+
+        // Cambiar entre tabs del editor (Write vs Upload)
+        function switchEditorTab(tab) {
+            const tabs = document.querySelectorAll('.editor-tab');
+            const panels = document.querySelectorAll('.editor-panel');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            panels.forEach(p => p.classList.remove('active'));
+            
+            document.querySelector(`.editor-tab[data-tab="${tab}"]`).classList.add('active');
+            document.getElementById(tab + 'Panel').classList.add('active');
+            
+            if (tab === 'write' && contractEditor) {
+                setTimeout(() => contractEditor.refresh(), 100);
+            }
+        }
+
+        // Inicializar carga de archivos
+        function initializeFileUpload() {
+            const uploadArea = document.getElementById('fileUploadArea');
+            const fileInput = document.getElementById('contractFile');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelection(files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleFileSelection(e.target.files[0]);
+                }
+            });
+        }
+
+        // Manejar selección de archivo
+        function handleFileSelection(file) {
+            const allowedTypes = ['application/json', 'text/yaml', 'text/yml', 'text/plain'];
+            const allowedExtensions = ['.json', '.yaml', '.yml', '.txt'];
+            
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
+                alert('Tipo de archivo no soportado. Use archivos .json, .yaml, .yml');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                contractEditor.setValue(e.target.result);
+                
+                // Cambiar a tab de escritura
+                switchEditorTab('write');
+                
+                // Detectar modo
+                const content = e.target.result.trim();
+                if (content.startsWith('{') || content.startsWith('[')) {
+                    contractEditor.setOption('mode', 'application/json');
+                } else {
+                    contractEditor.setOption('mode', 'yaml');
+                }
+                
+                validateUploadedContract();
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Validar contrato subido/pegado con OpenAPI Validator
+        function validateUploadedContract() {
+            if (!contractEditor) return false;
+            
+            const content = contractEditor.getValue().trim();
+            const resultDiv = document.getElementById('contractValidationResult');
+            const invalidFeedback = document.getElementById('contractInvalidFeedback');
+            const validFeedback = document.getElementById('contractValidFeedback');
+            
+            if (content.length === 0) {
+                invalidFeedback.style.display = 'block';
+                validFeedback.style.display = 'none';
+                resultDiv.innerHTML = '';
+                return false;
+            }
+            
+            // Usar el validador OpenAPI real
+            if (typeof OpenAPIValidator !== 'undefined') {
+                OpenAPIValidator.validarContrato(content, resultDiv);
+                // Retornar true si el validador está disponible (el resultado se mostrará en el div)
+                invalidFeedback.style.display = 'none';
+                validFeedback.style.display = 'none';
+                return true;
+            } else {
+                // Fallback si el validador no está cargado
+                invalidFeedback.style.display = 'none';
+                validFeedback.style.display = 'block';
+                return true;
+            }
+        }
+
+        // Sincronizar datos del Paso 1
+        function syncStep1Data() {
+            const apiName = document.getElementById('apiName').value;
+            const apiVersion = document.getElementById('apiVersion').value;
+            const apiDescription = document.getElementById('apiDescription').value;
+            
+            document.getElementById('openapiTitle').value = apiName;
+            document.getElementById('openapiVersion').value = apiVersion;
+            document.getElementById('openapiDescription').value = apiDescription;
+        }
+
+        // ===== SERVIDORES =====
+        
+        function addServer() {
+            const serverId = ++serverCounter;
+            const serversList = document.getElementById('serversList');
+            
+            const server = {
+                id: serverId,
+                url: '',
+                description: ''
+            };
+            servers.push(server);
+            
+            const displayNumber = servers.length; // Usar posición en array
+            
+            const serverHtml = `
+                <div class="dynamic-item" id="server-${serverId}">
+                    <div class="dynamic-item-header">
+                        <div class="dynamic-item-title">
+                            <i class="fas fa-server"></i>
+                            Servidor ${displayNumber}
+                        </div>
+                        <div class="dynamic-item-actions">
+                            <button type="button" class="btn-icon btn-danger" onclick="removeServer(${serverId})" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="collapsible-content expanded">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label class="form-label">URL <span class="text-danger">*</span></label>
+                                    <input type="url" class="form-control" id="server-url-${serverId}" 
+                                           placeholder="https://api.ejemplo.com/v1"
+                                           onchange="updateServer(${serverId}, 'url', this.value)">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Descripción</label>
+                                    <input type="text" class="form-control" id="server-desc-${serverId}" 
+                                           placeholder="Producción"
+                                           onchange="updateServer(${serverId}, 'description', this.value)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            if (serversList.querySelector('.empty-state')) {
+                serversList.innerHTML = '';
+            }
+            
+            serversList.insertAdjacentHTML('beforeend', serverHtml);
+        }
+
+        function updateServer(id, field, value) {
+            const server = servers.find(s => s.id === id);
+            if (server) {
+                server[field] = value;
+                updateTabsCompletionStatus();
+            }
+        }
+
+        function removeServer(id) {
+            servers = servers.filter(s => s.id !== id);
+            document.getElementById(`server-${id}`).remove();
+            
+            if (servers.length === 0) {
+                document.getElementById('serversList').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-server"></i>
+                        <p>No hay servidores agregados. Agrega al menos uno.</p>
+                    </div>
+                `;
+            } else {
+                // Renumerar servidores restantes
+                renumberServers();
+            }
+        }
+
+        function renumberServers() {
+            servers.forEach((server, index) => {
+                const displayNumber = index + 1;
+                const serverElement = document.getElementById(`server-${server.id}`);
+                if (serverElement) {
+                    const titleElement = serverElement.querySelector('.dynamic-item-title');
+                    if (titleElement) {
+                        titleElement.innerHTML = `<i class="fas fa-server"></i> Servidor ${displayNumber}`;
+                    }
+                }
+            });
+        }
+
+        // ===== RUTAS/ENDPOINTS =====
+        
+        function addPath() {
+            const pathId = ++pathCounter;
+            const pathsList = document.getElementById('pathsList');
+            
+            const path = {
+                id: pathId,
+                path: '',
+                operations: []
+            };
+            paths.push(path);
+            
+            const displayNumber = paths.length; // Usar posición en array
+            
+            const pathHtml = `
+                <div class="dynamic-item" id="path-${pathId}">
+                    <div class="dynamic-item-header">
+                        <div class="dynamic-item-title">
+                            <i class="fas fa-route"></i>
+                            Ruta ${displayNumber}
+                        </div>
+                        <div class="dynamic-item-actions">
+                            <button type="button" class="btn-icon" onclick="toggleCollapse('path-${pathId}')" title="Expandir/Contraer">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <button type="button" class="btn-icon btn-danger" onclick="removePath(${pathId})" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="collapsible-content expanded" id="path-${pathId}-content">
+                        <div class="mb-3">
+                            <label class="form-label">Ruta <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="path-route-${pathId}" 
+                                   placeholder="/pokemon/{id} o /pokemon?limit=20"
+                                   onchange="updatePath(${pathId}, 'path', this.value)">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i> 
+                                Usa <code>{nombreParametro}</code> para parámetros de ruta (path). 
+                                Los parámetros query se agregan en cada operación.
+                            </small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Operaciones HTTP</label>
+                            <div id="path-${pathId}-operations"></div>
+                            <button type="button" class="btn-outline btn-sm mt-2" onclick="addOperation(${pathId})">
+                                <i class="fas fa-plus"></i>
+                                Agregar Operación
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            if (pathsList.querySelector('.empty-state')) {
+                pathsList.innerHTML = '';
+            }
+            
+            pathsList.insertAdjacentHTML('beforeend', pathHtml);
+        }
+
+        function updatePath(id, field, value) {
+            const path = paths.find(p => p.id === id);
+            if (path) {
+                path[field] = value;
+                updateTabsCompletionStatus();
+            }
+        }
+
+        function removePath(id) {
+            paths = paths.filter(p => p.id !== id);
+            document.getElementById(`path-${id}`).remove();
+            
+            if (paths.length === 0) {
+                document.getElementById('pathsList').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-route"></i>
+                        <p>No hay rutas agregadas. Define los endpoints de tu API.</p>
+                    </div>
+                `;
+            } else {
+                // Renumerar rutas restantes
+                renumberPaths();
+            }
+        }
+
+        function renumberPaths() {
+            paths.forEach((path, index) => {
+                const displayNumber = index + 1;
+                const pathElement = document.getElementById(`path-${path.id}`);
+                if (pathElement) {
+                    const titleElement = pathElement.querySelector('.dynamic-item-title');
+                    if (titleElement) {
+                        titleElement.innerHTML = `<i class="fas fa-route"></i> Ruta ${displayNumber}`;
+                    }
+                }
+            });
+        }
+
+        function addOperation(pathId) {
+            const path = paths.find(p => p.id === pathId);
+            if (!path) return;
+            
+            const opId = path.operations.length;
+            const operation = {
+                id: opId,
+                method: 'get',
+                summary: '',
+                description: '',
+                parameters: [] // Array de parámetros
+            };
+            path.operations.push(operation);
+            
+            const operationsDiv = document.getElementById(`path-${pathId}-operations`);
+            const opHtml = `
+                <div class="border rounded p-3 mb-2" id="path-${pathId}-op-${opId}" style="background: #fafafa;">
+                    <div class="row mb-2">
+                        <div class="col-md-3">
+                            <label class="form-label form-label-sm">Método</label>
+                            <select class="form-select form-select-sm" onchange="updateOperation(${pathId}, ${opId}, 'method', this.value)">
+                                <option value="get">GET</option>
+                                <option value="post">POST</option>
+                                <option value="put">PUT</option>
+                                <option value="delete">DELETE</option>
+                                <option value="patch">PATCH</option>
+                            </select>
+                        </div>
+                        <div class="col-md-7">
+                            <label class="form-label form-label-sm">Resumen</label>
+                            <input type="text" class="form-control form-control-sm" placeholder="Ej: Get Pokemon by ID"
+                                   onchange="updateOperation(${pathId}, ${opId}, 'summary', this.value)">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label form-label-sm">&nbsp;</label>
+                            <button type="button" class="btn-icon btn-sm btn-danger w-100" onclick="removeOperation(${pathId}, ${opId})" title="Eliminar operación">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Parámetros de la operación -->
+                    <div class="mt-2">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label form-label-sm mb-0">
+                                <i class="fas fa-sliders-h"></i> Parámetros
+                            </label>
+                            <button type="button" class="btn-outline btn-sm" onclick="addParameter(${pathId}, ${opId})" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                <i class="fas fa-plus"></i> Agregar Parámetro
+                            </button>
+                        </div>
+                        <div id="path-${pathId}-op-${opId}-params"></div>
+                    </div>
+                </div>
+            `;
+            
+            operationsDiv.insertAdjacentHTML('beforeend', opHtml);
+        }
+
+        function updateOperation(pathId, opId, field, value) {
+            const path = paths.find(p => p.id === pathId);
+            if (path && path.operations[opId]) {
+                path.operations[opId][field] = value;
+                updateTabsCompletionStatus();
+            }
+        }
+
+        function removeOperation(pathId, opId) {
+            const path = paths.find(p => p.id === pathId);
+            if (path) {
+                path.operations.splice(opId, 1);
+                document.getElementById(`path-${pathId}-op-${opId}`).remove();
+            }
+        }
+
+        // ===== PARÁMETROS =====
+        
+        function addParameter(pathId, opId) {
+            const path = paths.find(p => p.id === pathId);
+            if (!path || !path.operations[opId]) return;
+            
+            const operation = path.operations[opId];
+            const paramId = operation.parameters.length;
+            
+            const parameter = {
+                id: paramId,
+                name: '',
+                in: 'query',
+                required: false,
+                type: 'string',
+                description: ''
+            };
+            operation.parameters.push(parameter);
+            
+            const paramsDiv = document.getElementById(`path-${pathId}-op-${opId}-params`);
+            const paramHtml = `
+                <div class="border rounded p-2 mb-2" id="path-${pathId}-op-${opId}-param-${paramId}" style="background: white;">
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <input type="text" class="form-control form-control-sm" placeholder="Nombre"
+                                   onchange="updateParameter(${pathId}, ${opId}, ${paramId}, 'name', this.value)">
+                            <small class="text-muted" style="font-size: 0.7rem;">Ej: id, limit</small>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select form-select-sm" onchange="updateParameter(${pathId}, ${opId}, ${paramId}, 'in', this.value)">
+                                <option value="query">Query</option>
+                                <option value="path">Path</option>
+                                <option value="header">Header</option>
+                                <option value="cookie">Cookie</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <select class="form-select form-select-sm" onchange="updateParameter(${pathId}, ${opId}, ${paramId}, 'type', this.value)">
+                                <option value="string">string</option>
+                                <option value="integer">integer</option>
+                                <option value="number">number</option>
+                                <option value="boolean">boolean</option>
+                                <option value="array">array</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control form-control-sm" placeholder="Descripción"
+                                   onchange="updateParameter(${pathId}, ${opId}, ${paramId}, 'description', this.value)">
+                        </div>
+                        <div class="col-md-1">
+                            <div class="form-check" style="padding-top: 0.25rem;">
+                                <input type="checkbox" class="form-check-input" id="param-${pathId}-${opId}-${paramId}-req"
+                                       onchange="updateParameter(${pathId}, ${opId}, ${paramId}, 'required', this.checked)">
+                                <label class="form-check-label" for="param-${pathId}-${opId}-${paramId}-req" style="font-size: 0.75rem;">
+                                    Req.
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn-icon btn-sm btn-danger w-100" onclick="removeParameter(${pathId}, ${opId}, ${paramId})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            paramsDiv.insertAdjacentHTML('beforeend', paramHtml);
+        }
+
+        function updateParameter(pathId, opId, paramId, field, value) {
+            const path = paths.find(p => p.id === pathId);
+            if (path && path.operations[opId] && path.operations[opId].parameters[paramId]) {
+                path.operations[opId].parameters[paramId][field] = value;
+            }
+        }
+
+        function removeParameter(pathId, opId, paramId) {
+            const path = paths.find(p => p.id === pathId);
+            if (path && path.operations[opId]) {
+                path.operations[opId].parameters.splice(paramId, 1);
+                document.getElementById(`path-${pathId}-op-${opId}-param-${paramId}`).remove();
+            }
+        }
+
+        // ===== ESQUEMAS =====
+        
+        function addSchema() {
+            const schemaId = ++schemaCounter;
+            const schemasList = document.getElementById('schemasList');
+            
+            const schema = {
+                id: schemaId,
+                name: '',
+                type: 'object',
+                properties: []
+            };
+            schemas.push(schema);
+            
+            const displayNumber = schemas.length; // Usar posición en array
+            
+            const schemaHtml = `
+                <div class="dynamic-item" id="schema-${schemaId}">
+                    <div class="dynamic-item-header">
+                        <div class="dynamic-item-title">
+                            <i class="fas fa-database"></i>
+                            Esquema ${displayNumber}
+                        </div>
+                        <div class="dynamic-item-actions">
+                            <button type="button" class="btn-icon" onclick="toggleCollapse('schema-${schemaId}')" title="Expandir/Contraer">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <button type="button" class="btn-icon btn-danger" onclick="removeSchema(${schemaId})" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="collapsible-content expanded" id="schema-${schemaId}-content">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre del Esquema <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="schema-name-${schemaId}" 
+                                   placeholder="User, Product, Order..."
+                                   onchange="updateSchema(${schemaId}, 'name', this.value)">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tipo</label>
+                            <select class="form-select" onchange="updateSchema(${schemaId}, 'type', this.value)">
+                                <option value="object">object</option>
+                                <option value="array">array</option>
+                                <option value="string">string</option>
+                                <option value="number">number</option>
+                                <option value="boolean">boolean</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Propiedades (simplificado)</label>
+                            <textarea class="form-control" rows="3" 
+                                      placeholder='{"id": "integer", "name": "string", "email": "string"}'
+                                      onchange="updateSchema(${schemaId}, 'properties', this.value)"></textarea>
+                            <small class="text-muted">Formato JSON simple: {"campo": "tipo"}</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            if (schemasList.querySelector('.empty-state')) {
+                schemasList.innerHTML = '';
+            }
+            
+            schemasList.insertAdjacentHTML('beforeend', schemaHtml);
+        }
+
+        function updateSchema(id, field, value) {
+            const schema = schemas.find(s => s.id === id);
+            if (schema) {
+                schema[field] = value;
+            }
+        }
+
+        function removeSchema(id) {
+            schemas = schemas.filter(s => s.id !== id);
+            document.getElementById(`schema-${id}`).remove();
+            
+            if (schemas.length === 0) {
+                document.getElementById('schemasList').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-database"></i>
+                        <p>No hay esquemas agregados. Define los modelos de datos.</p>
+                    </div>
+                `;
+            } else {
+                // Renumerar esquemas restantes
+                renumberSchemas();
+            }
+        }
+
+        function renumberSchemas() {
+            schemas.forEach((schema, index) => {
+                const displayNumber = index + 1;
+                const schemaElement = document.getElementById(`schema-${schema.id}`);
+                if (schemaElement) {
+                    const titleElement = schemaElement.querySelector('.dynamic-item-title');
+                    if (titleElement) {
+                        titleElement.innerHTML = `<i class="fas fa-database"></i> Esquema ${displayNumber}`;
+                    }
+                }
+            });
+        }
+
+        // ===== SEGURIDAD =====
+        
+        function addSecurityScheme() {
+            const securityId = ++securityCounter;
+            const securityList = document.getElementById('securitySchemesList');
+            
+            const security = {
+                id: securityId,
+                name: '',
+                type: 'apiKey',
+                in: 'header',
+                schemeName: 'Authorization'
+            };
+            securitySchemes.push(security);
+            
+            const displayNumber = securitySchemes.length; // Usar posición en array
+            
+            const securityHtml = `
+                <div class="dynamic-item" id="security-${securityId}">
+                    <div class="dynamic-item-header">
+                        <div class="dynamic-item-title">
+                            <i class="fas fa-lock"></i>
+                            Seguridad ${displayNumber}
+                        </div>
+                        <div class="dynamic-item-actions">
+                            <button type="button" class="btn-icon btn-danger" onclick="removeSecurityScheme(${securityId})" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="collapsible-content expanded">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" placeholder="bearerAuth"
+                                           onchange="updateSecurityScheme(${securityId}, 'name', this.value)">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Tipo</label>
+                                    <select class="form-select" onchange="updateSecurityScheme(${securityId}, 'type', this.value)">
+                                        <option value="apiKey">API Key</option>
+                                        <option value="http">HTTP (Bearer, Basic)</option>
+                                        <option value="oauth2">OAuth2</option>
+                                        <option value="openIdConnect">OpenID Connect</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Ubicación (para API Key)</label>
+                                    <select class="form-select" onchange="updateSecurityScheme(${securityId}, 'in', this.value)">
+                                        <option value="header">Header</option>
+                                        <option value="query">Query</option>
+                                        <option value="cookie">Cookie</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre del Parámetro</label>
+                                    <input type="text" class="form-control" placeholder="Authorization"
+                                           onchange="updateSecurityScheme(${securityId}, 'schemeName', this.value)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            if (securityList.querySelector('.empty-state')) {
+                securityList.innerHTML = '';
+            }
+            
+            securityList.insertAdjacentHTML('beforeend', securityHtml);
+        }
+
+        function updateSecurityScheme(id, field, value) {
+            const security = securitySchemes.find(s => s.id === id);
+            if (security) {
+                security[field] = value;
+            }
+        }
+
+        function removeSecurityScheme(id) {
+            securitySchemes = securitySchemes.filter(s => s.id !== id);
+            document.getElementById(`security-${id}`).remove();
+            
+            if (securitySchemes.length === 0) {
+                document.getElementById('securitySchemesList').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-lock"></i>
+                        <p>No hay esquemas de seguridad. Define cómo se autentica la API.</p>
+                    </div>
+                `;
+            } else {
+                // Renumerar esquemas de seguridad restantes
+                renumberSecuritySchemes();
+            }
+        }
+
+        function renumberSecuritySchemes() {
+            securitySchemes.forEach((security, index) => {
+                const displayNumber = index + 1;
+                const securityElement = document.getElementById(`security-${security.id}`);
+                if (securityElement) {
+                    const titleElement = securityElement.querySelector('.dynamic-item-title');
+                    if (titleElement) {
+                        titleElement.innerHTML = `<i class="fas fa-lock"></i> Seguridad ${displayNumber}`;
+                    }
+                }
+            });
+        }
+
+        // ===== UTILIDADES =====
+        
+        function toggleCollapse(itemId) {
+            const content = document.getElementById(`${itemId}-content`);
+            const icon = document.querySelector(`#${itemId} .dynamic-item-actions .btn-icon:first-child i`);
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-right');
+            } else {
+                content.classList.add('expanded');
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-down');
+            }
+        }
+
+        // ===== GENERAR YAML =====
+        
+        function generateYamlPreview() {
+            syncStep1Data(); // Sincronizar datos del Paso 1
+            
+            const title = document.getElementById('openapiTitle').value;
+            const version = document.getElementById('openapiVersion').value;
+            const description = document.getElementById('openapiDescription').value;
+            
+            let yaml = `openapi: 3.0.0\n`;
+            yaml += `info:\n`;
+            yaml += `  title: ${title}\n`;
+            yaml += `  version: ${version}\n`;
+            yaml += `  description: ${description}\n`;
+            yaml += `\n`;
+            
+            // Servers
+            if (servers.length > 0) {
+                yaml += `servers:\n`;
+                servers.forEach(server => {
+                    if (server.url) {
+                        yaml += `  - url: ${server.url}\n`;
+                        if (server.description) {
+                            yaml += `    description: ${server.description}\n`;
+                        }
+                    }
+                });
+                yaml += `\n`;
+            }
+            
+            // Paths
+            if (paths.length > 0) {
+                yaml += `paths:\n`;
+                paths.forEach(path => {
+                    if (path.path) {
+                        yaml += `  ${path.path}:\n`;
+                        path.operations.forEach(op => {
+                            yaml += `    ${op.method}:\n`;
+                            if (op.summary) yaml += `      summary: ${op.summary}\n`;
+                            if (op.description) yaml += `      description: ${op.description}\n`;
+                            
+                            // Parámetros
+                            if (op.parameters && op.parameters.length > 0) {
+                                yaml += `      parameters:\n`;
+                                op.parameters.forEach(param => {
+                                    if (param.name) {
+                                        yaml += `        - name: ${param.name}\n`;
+                                        yaml += `          in: ${param.in}\n`;
+                                        yaml += `          required: ${param.required}\n`;
+                                        yaml += `          schema:\n`;
+                                        yaml += `            type: ${param.type}\n`;
+                                        if (param.description) {
+                                            yaml += `          description: ${param.description}\n`;
+                                        }
+                                    }
+                                });
+                            }
+                            
+                            yaml += `      responses:\n`;
+                            yaml += `        '200':\n`;
+                            yaml += `          description: Successful response\n`;
+                        });
+                    }
+                });
+                yaml += `\n`;
+            }
+            
+            // Components - Schemas
+            if (schemas.length > 0) {
+                yaml += `components:\n`;
+                yaml += `  schemas:\n`;
+                schemas.forEach(schema => {
+                    if (schema.name) {
+                        yaml += `    ${schema.name}:\n`;
+                        yaml += `      type: ${schema.type}\n`;
+                        if (schema.properties) {
+                            try {
+                                const props = JSON.parse(schema.properties);
+                                yaml += `      properties:\n`;
+                                Object.keys(props).forEach(key => {
+                                    yaml += `        ${key}:\n`;
+                                    yaml += `          type: ${props[key]}\n`;
+                                });
+                            } catch (e) {
+                                yaml += `      # Error parsing properties\n`;
+                            }
+                        }
+                    }
+                });
+                yaml += `\n`;
+            }
+            
+            // Components - Security Schemes
+            if (securitySchemes.length > 0) {
+                if (schemas.length === 0) {
+                    yaml += `components:\n`;
+                }
+                yaml += `  securitySchemes:\n`;
+                securitySchemes.forEach(sec => {
+                    if (sec.name) {
+                        yaml += `    ${sec.name}:\n`;
+                        yaml += `      type: ${sec.type}\n`;
+                        if (sec.type === 'apiKey') {
+                            yaml += `      in: ${sec.in}\n`;
+                            yaml += `      name: ${sec.schemeName}\n`;
+                        }
+                    }
+                });
+            }
+            
+            document.getElementById('yamlPreview').textContent = yaml;
+            
+            // También actualizar el campo oculto
+            document.getElementById('contractContent').value = yaml;
+        }
+
+        // ========== FIN FUNCIONES DEL TAB 2 ==========
+
+        // ========== FUNCIONES DEL TAB 3: SECCIONES CMS ==========
+        
+        // Variables globales para Tab 3
+        let cmsSections = [];
+        let cmsSectionCounter = 0;
+        let currentContentEditor = null;
+
+        // Agregar nueva sección CMS
+        function addCmsSection() {
+            const sectionId = ++cmsSectionCounter;
+            const sectionsList = document.getElementById('cmsSectionsList');
+            
+            const section = {
+                id: sectionId,
+                titulo: '',
+                tipo: 'GUIA',
+                contenido: '',
+                recursos: [],
+                enlaces: []
+            };
+            cmsSections.push(section);
+            
+            const sectionHtml = `
+                <div class="dynamic-item" id="cms-section-${sectionId}">
+                    <div class="dynamic-item-header">
+                        <div class="dynamic-item-title">
+                            <i class="fas fa-file-alt"></i>
+                            <span id="cms-section-${sectionId}-label">Nueva Sección</span>
+                        </div>
+                        <div class="dynamic-item-actions">
+                            <button type="button" class="btn-icon" onclick="toggleCollapse('cms-section-${sectionId}')" title="Expandir/Contraer">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <button type="button" class="btn-icon btn-danger" onclick="removeCmsSection(${sectionId})" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="collapsible-content expanded" id="cms-section-${sectionId}-content">
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label class="form-label">Título de la Sección <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="cms-titulo-${sectionId}" 
+                                       placeholder="Ej: Guía de Inicio Rápido"
+                                       oninput="updateCmsSection(${sectionId}, 'titulo', this.value)">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Tipo de Contenido</label>
+                                <select class="form-select" id="cms-tipo-${sectionId}" 
+                                        onchange="updateCmsSection(${sectionId}, 'tipo', this.value); updateCmsSectionIcon(${sectionId}, this.value)">
+                                    <option value="GUIA">📋 Guía</option>
+                                    <option value="TUTORIAL">🎓 Tutorial</option>
+                                    <option value="VIDEO">🎥 Video</option>
+                                    <option value="SNIPPET">💻 Code Snippet</option>
+                                    <option value="OTRO">📄 Otro</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Contenido</label>
+                            <div class="cms-editor-tabs mb-2">
+                                <button type="button" class="cms-editor-tab active" data-mode="write" onclick="switchCmsEditorMode(${sectionId}, 'write')">
+                                    <i class="fas fa-edit"></i> Escribir
+                                </button>
+                                <button type="button" class="cms-editor-tab" data-mode="preview" onclick="switchCmsEditorMode(${sectionId}, 'preview')">
+                                    <i class="fas fa-eye"></i> Vista Previa
+                                </button>
+                            </div>
+                            
+                            <div id="cms-editor-${sectionId}-write" class="cms-editor-panel active">
+                                <textarea class="form-control" id="cms-contenido-${sectionId}" rows="8"
+                                          placeholder="Escribe el contenido usando Markdown...&#10;&#10;# Título&#10;## Subtítulo&#10;&#10;Puedes usar:&#10;- **Negrita**&#10;- *Cursiva*&#10;- [Enlaces](https://example.com)&#10;- \`código\`&#10;- Listas&#10;- Y más..."
+                                          oninput="updateCmsSection(${sectionId}, 'contenido', this.value)"></textarea>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i>
+                                    Soporta <strong>Markdown</strong> para formato (negrita, cursiva, enlaces, código, listas, etc.)
+                                </small>
+                            </div>
+                            
+                            <div id="cms-editor-${sectionId}-preview" class="cms-editor-panel" style="display: none;">
+                                <div class="cms-preview-container" id="cms-preview-${sectionId}">
+                                    <p class="text-muted"><i>Escribe contenido para ver la vista previa...</i></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recursos y Enlaces -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-paperclip"></i>
+                                        Enlaces de Referencia
+                                    </label>
+                                    <div id="cms-enlaces-${sectionId}"></div>
+                                    <button type="button" class="btn-outline btn-sm mt-2" onclick="addEnlace(${sectionId})">
+                                        <i class="fas fa-plus"></i>
+                                        Agregar Enlace
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-file-upload"></i>
+                                        Recursos (Archivos)
+                                    </label>
+                                    <div id="cms-recursos-${sectionId}"></div>
+                                    <div class="upload-area mt-2" onclick="document.getElementById('cms-file-${sectionId}').click()" style="cursor: pointer; padding: 1rem; border: 2px dashed var(--border-light); border-radius: var(--radius-md); text-align: center; background: #f8f9fa;">
+                                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem;"></i>
+                                        <p class="mb-0 text-muted" style="font-size: 0.875rem;">
+                                            Click para seleccionar archivos<br>
+                                            <small>PDF, imágenes, código, etc.</small>
+                                        </p>
+                                        <input type="file" id="cms-file-${sectionId}" multiple 
+                                               style="display: none;" 
+                                               onchange="handleCmsFileUpload(${sectionId}, this.files)"
+                                               accept=".pdf,.png,.jpg,.jpeg,.gif,.json,.yaml,.yml,.txt,.zip">
+                                    </div>
+                                    <small class="text-muted mt-1">
+                                        <i class="fas fa-info-circle"></i>
+                                        Los archivos se subirán cuando se cree la API
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            if (sectionsList.querySelector('.empty-state')) {
+                sectionsList.innerHTML = '';
+            }
+            
+            sectionsList.insertAdjacentHTML('beforeend', sectionHtml);
+        }
+
+        // Actualizar datos de sección CMS
+        function updateCmsSection(id, field, value) {
+            const section = cmsSections.find(s => s.id === id);
+            if (section) {
+                section[field] = value;
+                
+                // Actualizar label del header
+                if (field === 'titulo') {
+                    const label = document.getElementById(`cms-section-${id}-label`);
+                    if (label) {
+                        label.textContent = value || 'Nueva Sección';
+                    }
+                }
+                
+                updateTabsCompletionStatus();
+            }
+        }
+
+        // Actualizar icono de sección según tipo
+        function updateCmsSectionIcon(id, tipo) {
+            const iconMap = {
+                'GUIA': 'fa-book',
+                'TUTORIAL': 'fa-graduation-cap',
+                'VIDEO': 'fa-video',
+                'SNIPPET': 'fa-code',
+                'OTRO': 'fa-file-alt'
+            };
+            
+            const icon = document.querySelector(`#cms-section-${id} .dynamic-item-title i`);
+            if (icon) {
+                icon.className = `fas ${iconMap[tipo] || 'fa-file-alt'}`;
+            }
+        }
+
+        // Eliminar sección CMS
+        function removeCmsSection(id) {
+            if (!confirm('¿Estás seguro de eliminar esta sección?')) return;
+            
+            cmsSections = cmsSections.filter(s => s.id !== id);
+            document.getElementById(`cms-section-${id}`).remove();
+            
+            if (cmsSections.length === 0) {
+                document.getElementById('cmsSectionsList').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <p>No hay secciones agregadas. Agrega guías, tutoriales o ejemplos.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Cambiar modo de editor CMS (Write/Preview)
+        function switchCmsEditorMode(sectionId, mode) {
+            const writePanel = document.getElementById(`cms-editor-${sectionId}-write`);
+            const previewPanel = document.getElementById(`cms-editor-${sectionId}-preview`);
+            const writeTabs = document.querySelectorAll(`#cms-section-${sectionId} .cms-editor-tab`);
+            
+            writeTabs.forEach(tab => {
+                if (tab.dataset.mode === mode) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            if (mode === 'write') {
+                writePanel.style.display = 'block';
+                previewPanel.style.display = 'none';
+            } else {
+                writePanel.style.display = 'none';
+                previewPanel.style.display = 'block';
+                renderMarkdownPreview(sectionId);
+            }
+        }
+
+        // Renderizar vista previa Markdown (simplificada)
+        function renderMarkdownPreview(sectionId) {
+            const section = cmsSections.find(s => s.id === sectionId);
+            if (!section || !section.contenido) {
+                document.getElementById(`cms-preview-${sectionId}`).innerHTML = 
+                    '<p class="text-muted"><i>Escribe contenido para ver la vista previa...</i></p>';
+                return;
+            }
+            
+            let html = section.contenido;
+            
+            // Headers
+            html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+            html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+            
+            // Bold
+            html = html.replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>');
+            
+            // Italic
+            html = html.replace(/\*(.*)\*/gim, '<em>$1</em>');
+            
+            // Links
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" target="_blank">$1</a>');
+            
+            // Inline code
+            html = html.replace(/`([^`]+)`/gim, '<code>$1</code>');
+            
+            // Code blocks
+            html = html.replace(/```([^`]+)```/gim, '<pre><code>$1</code></pre>');
+            
+            // Line breaks
+            html = html.replace(/\n/gim, '<br>');
+            
+            // Lists
+            html = html.replace(/^\- (.*$)/gim, '<li>$1</li>');
+            html = html.replace(/(<li>.*<\/li>)/gim, '<ul>$1</ul>');
+            
+            document.getElementById(`cms-preview-${sectionId}`).innerHTML = html;
+        }
+
+        // ===== ENLACES =====
+        
+        function addEnlace(sectionId) {
+            const section = cmsSections.find(s => s.id === sectionId);
+            if (!section) return;
+            
+            const enlaceId = section.enlaces.length;
+            const enlace = {
+                titulo: '',
+                url: '',
+                tipo: 'referencia' // Tipo por defecto
+            };
+            section.enlaces.push(enlace);
+            
+            const enlacesDiv = document.getElementById(`cms-enlaces-${sectionId}`);
+            const enlaceHtml = `
+                <div class="input-group mb-2" id="cms-enlace-${sectionId}-${enlaceId}">
+                    <input type="text" class="form-control form-control-sm" placeholder="Título"
+                           onchange="updateEnlace(${sectionId}, ${enlaceId}, 'titulo', this.value)">
+                    <input type="url" class="form-control form-control-sm" placeholder="https://..."
+                           onchange="updateEnlace(${sectionId}, ${enlaceId}, 'url', this.value)">
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeEnlace(${sectionId}, ${enlaceId})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            enlacesDiv.insertAdjacentHTML('beforeend', enlaceHtml);
+        }
+
+        function updateEnlace(sectionId, enlaceId, field, value) {
+            const section = cmsSections.find(s => s.id === sectionId);
+            if (section && section.enlaces[enlaceId]) {
+                section.enlaces[enlaceId][field] = value;
+            }
+        }
+
+        function removeEnlace(sectionId, enlaceId) {
+            const section = cmsSections.find(s => s.id === sectionId);
+            if (section) {
+                section.enlaces.splice(enlaceId, 1);
+                document.getElementById(`cms-enlace-${sectionId}-${enlaceId}`).remove();
+            }
+        }
+
+        // ===== RECURSOS (ARCHIVOS) =====
+        
+        function handleCmsFileUpload(sectionId, files) {
+            const section = cmsSections.find(s => s.id === sectionId);
+            if (!section) return;
+            
+            // Inicializar array de recursos si no existe
+            if (!section.recursos) {
+                section.recursos = [];
+            }
+            
+            // Agregar archivos al array
+            Array.from(files).forEach(file => {
+                const recurso = {
+                    id: section.recursos.length,
+                    nombre: file.name,
+                    size: file.size,
+                    type: file.type,
+                    file: file // Guardar referencia al archivo para enviarlo después
+                };
+                section.recursos.push(recurso);
+            });
+            
+            // Actualizar UI
+            updateRecursosDisplay(sectionId);
+        }
+        
+        function updateRecursosDisplay(sectionId) {
+            const section = cmsSections.find(s => s.id === sectionId);
+            if (!section || !section.recursos) return;
+            
+            const recursosDiv = document.getElementById(`cms-recursos-${sectionId}`);
+            
+            if (section.recursos.length === 0) {
+                recursosDiv.innerHTML = '';
+                return;
+            }
+            
+            const recursosHtml = section.recursos.map((recurso, index) => {
+                const sizeKB = (recurso.size / 1024).toFixed(2);
+                const icon = getFileIcon(recurso.nombre);
+                
+                return `
+                    <div class="recurso-item" id="cms-recurso-${sectionId}-${recurso.id}" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: #f8f9fa; border-radius: var(--radius-sm); margin-bottom: 0.5rem;">
+                        <i class="${icon}" style="color: var(--primary-color);"></i>
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-weight: 500; font-size: 0.875rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${recurso.nombre}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${sizeKB} KB</div>
+                        </div>
+                        <button type="button" class="btn-icon btn-danger btn-sm" onclick="removeRecurso(${sectionId}, ${recurso.id})" title="Eliminar">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            
+            recursosDiv.innerHTML = recursosHtml;
+        }
+        
+        function getFileIcon(filename) {
+            const extension = filename.split('.').pop().toLowerCase();
+            const iconMap = {
+                'pdf': 'fas fa-file-pdf',
+                'png': 'fas fa-file-image',
+                'jpg': 'fas fa-file-image',
+                'jpeg': 'fas fa-file-image',
+                'gif': 'fas fa-file-image',
+                'json': 'fas fa-file-code',
+                'yaml': 'fas fa-file-code',
+                'yml': 'fas fa-file-code',
+                'txt': 'fas fa-file-alt',
+                'zip': 'fas fa-file-archive'
+            };
+            return iconMap[extension] || 'fas fa-file';
+        }
+        
+        function removeRecurso(sectionId, recursoId) {
+            const section = cmsSections.find(s => s.id === sectionId);
+            if (!section || !section.recursos) return;
+            
+            section.recursos = section.recursos.filter(r => r.id !== recursoId);
+            updateRecursosDisplay(sectionId);
+        }
+
+        // ========== FIN FUNCIONES DEL TAB 3 ==========
+        
+        // ========== FUNCIONES DE POPUP ==========
+        
+        /**
+         * Muestra un popup de éxito temporal
+         */
+        function showSuccessPopup(message) {
+            // Crear el popup
+            const popup = document.createElement('div');
+            popup.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 2rem;
+                border-radius: 12px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                z-index: 10000;
+                max-width: 500px;
+                width: 90%;
+                text-align: center;
+                animation: slideDown 0.3s ease-out;
+            `;
+            
+            popup.innerHTML = `
+                <div style="font-size: 3rem; color: #4caf50; margin-bottom: 1rem;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3 style="color: #333; margin-bottom: 0.5rem; font-size: 1.5rem;">¡Éxito!</h3>
+                <p style="color: #666; font-size: 1rem; margin: 0;">${message}</p>
+            `;
+            
+            // Crear overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 9999;
+                animation: fadeIn 0.3s ease-out;
+            `;
+            
+            // Agregar al DOM
+            document.body.appendChild(overlay);
+            document.body.appendChild(popup);
+            
+            // Agregar estilos de animación si no existen
+            if (!document.getElementById('popup-animations')) {
+                const style = document.createElement('style');
+                style.id = 'popup-animations';
+                style.textContent = `
+                    @keyframes slideDown {
+                        from {
+                            transform: translate(-50%, -60%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translate(-50%, -50%);
+                            opacity: 1;
+                        }
+                    }
+                    @keyframes fadeIn {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
+        /**
+         * Muestra un popup de error
+         */
+        function showErrorPopup(message) {
+            // Crear el popup
+            const popup = document.createElement('div');
+            popup.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 2rem;
+                border-radius: 12px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                z-index: 10000;
+                max-width: 500px;
+                width: 90%;
+                text-align: center;
+                animation: slideDown 0.3s ease-out;
+            `;
+            
+            popup.innerHTML = `
+                <div style="font-size: 3rem; color: #f44336; margin-bottom: 1rem;">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <h3 style="color: #333; margin-bottom: 0.5rem; font-size: 1.5rem;">Error</h3>
+                <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">${message}</p>
+                <button onclick="closeErrorPopup()" style="background: #2596be; color: white; border: none; padding: 0.75rem 2rem; border-radius: 6px; font-weight: 500; cursor: pointer; font-size: 1rem;">
+                    Cerrar
+                </button>
+            `;
+            
+            // Crear overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'error-popup-overlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 9999;
+                animation: fadeIn 0.3s ease-out;
+            `;
+            
+            // Agregar al DOM
+            document.body.appendChild(overlay);
+            document.body.appendChild(popup);
+            
+            // Guardar referencia para cerrar
+            window.currentErrorPopup = popup;
+            window.currentErrorOverlay = overlay;
+        }
+        
+        /**
+         * Cierra el popup de error
+         */
+        function closeErrorPopup() {
+            if (window.currentErrorPopup) {
+                window.currentErrorPopup.remove();
+                window.currentErrorOverlay.remove();
+                window.currentErrorPopup = null;
+                window.currentErrorOverlay = null;
+            }
+        }
+        
+        // ========== FIN FUNCIONES DE POPUP ==========
+    </script>
+
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+</body>
+</html>

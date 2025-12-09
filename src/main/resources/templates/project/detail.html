@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTICS DevPortal - Proyecto</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/project-repository.css}">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
+</head>
+<body>
+    <!-- Impersonation Banner -->
+    <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="project-container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-content">
+                <nav class="breadcrumb-nav">
+                    <a th:href="@{/devportal/{userRole}/{username}/dashboard(userRole=${userRole}, username=${username})}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a th:href="@{/devportal/{userRole}/{username}/projects(userRole=${userRole}, username=${username})}">
+                        Proyectos
+                    </a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span th:text="${project.nombre_proyecto}">TelDevPortal Project</span>
+                </nav>
+                
+                <div class="header-actions">
+                    <div class="user-info">
+                        <img src="/img/default-avatar.png" alt="Avatar" class="user-avatar">
+                        <span th:text="${username}">Usuario</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Project Header -->
+            <section class="dashboard-header">
+                <div class="dashboard-title">
+                    <h1>
+                        <div class="icon">
+                            <i class="fas fa-folder"></i>
+                        </div>
+                        <span th:text="${project.nombre_proyecto}">TelDevPortal Project</span>
+                    </h1>
+                    
+                    <div class="project-actions">
+                        <a th:href="@{/devportal/{userRole}/{username}/projects/P-{id}/edit(userRole=${userRole}, username=${username}, id=${project.proyecto_id})}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-edit"></i>
+                            Editar Proyecto
+                        </a>
+                        <button class="btn btn-success" onclick="createFolder()">
+                            <i class="fas fa-folder-plus"></i>
+                            Crear Carpeta
+                        </button>
+                        <div class="dropdown">
+                            <button class="create-button dropdown-toggle" type="button" id="createRepositoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-code-branch"></i>
+                                Crear Repositorio
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="createRepositoryDropdown">
+                                <li>
+                                    <a class="dropdown-item" th:href="@{/devportal/{userRole}/{username}/projects/P-{projectId}/repositories/create?type=personal(userRole=${userRole}, username=${username}, projectId=${project.proyecto_id})}">
+                                        <i class="fas fa-user"></i>
+                                        Repositorio Personal
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" th:href="@{/devportal/{userRole}/{username}/projects/P-{projectId}/repositories/create?type=colaborativo(userRole=${userRole}, username=${username}, projectId=${project.proyecto_id})}">
+                                        <i class="fas fa-users"></i>
+                                        Repositorio Colaborativo
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project Info -->
+                <div class="project-info-grid">
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Descripción</h3>
+                            <p class="project-description" th:text="${project.descripcion_proyecto}">
+                                Portal de desarrollo para gestión de proyectos y repositorios del curso GTICS
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Fecha de Creación</h3>
+                            <p th:text="${project.fecha_inicio_proyecto}">01/10/2024 10:30</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-tag"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Categoría</h3>
+                            <p th:text="${project.nombre_categoria}">Desarrollo Web</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i th:class="${project.propietario_proyecto == 'USUARIO' ? 'fas fa-user' : (project.propietario_proyecto == 'GRUPO' ? 'fas fa-users' : (project.propietario_proyecto == 'EMPRESA' ? 'fas fa-building' : 'fas fa-project-diagram'))}"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Tipo de Proyecto</h3>
+                            <div class="badge-container">
+                                <span th:class="${'badge ' + (project.propietario_proyecto == 'USUARIO' ? 'badge-primary' : (project.propietario_proyecto == 'GRUPO' ? 'badge-info' : (project.propietario_proyecto == 'EMPRESA' ? 'badge-success' : 'badge-secondary')))}">
+                                    <span th:text="${project.propietario_proyecto == 'USUARIO' ? 'Personal' : (project.propietario_proyecto == 'GRUPO' ? 'Grupal' : (project.propietario_proyecto == 'EMPRESA' ? 'Empresarial' : 'Desconocido'))}">Personal</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Visibilidad</h3>
+                            <div class="badge-container">
+                                <span th:class="${project.visibilidad_proyecto == 'PUBLICO' ? 'badge badge-public' : 'badge badge-private'}">
+                                    <i th:class="${project.visibilidad_proyecto == 'PUBLICO' ? 'fas fa-globe' : 'fas fa-lock'}"></i> 
+                                    <span th:text="${project.visibilidad_proyecto == 'PUBLICO' ? 'Público' : 'Privado'}">Público</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Estado</h3>
+                            <div class="badge-container">
+                                <span th:class="${'badge ' + (project.estado_proyecto == 'EN_DESARROLLO' ? 'badge-success' : (project.estado_proyecto == 'PLANEADO' ? 'badge-warning' : (project.estado_proyecto == 'COMPLETADO' ? 'badge-primary' : 'badge-secondary')))}">
+                                    <i th:class="${project.estado_proyecto == 'EN_DESARROLLO' ? 'fas fa-play' : (project.estado_proyecto == 'PLANEADO' ? 'fas fa-clock' : (project.estado_proyecto == 'COMPLETADO' ? 'fas fa-check' : 'fas fa-pause'))}"></i> 
+                                    <span th:text="${project.estado_proyecto == 'EN_DESARROLLO' ? 'En Desarrollo' : (project.estado_proyecto == 'PLANEADO' ? 'Planeado' : (project.estado_proyecto == 'COMPLETADO' ? 'Completado' : (project.estado_proyecto == 'PAUSADO' ? 'Pausado' : (project.estado_proyecto == 'CERRADO' ? 'Cerrado' : 'Estado Desconocido'))))}">En Desarrollo</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Team Management Section -->
+            <section class="team-management-section" th:if="${isCreator}">
+                <div class="team-header">
+                    <h2>Gestión de Equipo</h2>
+                </div>
+                <div class="team-actions-grid">
+                    <a th:href="@{/devportal/{userRole}/{username}/projects/P-{projectId}/roles(userRole=${userRole}, username=${username}, projectId=${project.proyecto_id})}" 
+                       class="team-action-card">
+                        <div class="team-action-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="team-action-content">
+                            <h3>Roles Disponibles</h3>
+                            <p>Gestiona los roles y permisos del proyecto</p>
+                        </div>
+                        <div class="team-action-arrow">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </a>
+                    
+                    <a th:href="@{/devportal/{userRole}/{username}/projects/P-{projectId}/members(userRole=${userRole}, username=${username}, projectId=${project.proyecto_id})}" 
+                       class="team-action-card">
+                        <div class="team-action-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="team-action-content">
+                            <h3>Miembros</h3>
+                            <p>Ver y gestionar los miembros del proyecto</p>
+                        </div>
+                        <div class="team-action-arrow">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </a>
+                    
+                    <!-- Botón Invitar Usuarios - Redirige dinámicamente según tipo de proyecto -->
+                    <a th:with="baseUrl=${'/devportal/' + userRole + '/' + username + '/projects/P-' + project.proyecto_id}, inviteUrl=${project.propietario_proyecto == 'GRUPO' ? baseUrl + '/invite-G' : (project.propietario_proyecto == 'EMPRESA' ? baseUrl + '/invite-E' : '#')}, isDisabled=${project.propietario_proyecto == 'USUARIO'}, msg=${'No puedes invitar usuarios a un proyecto personal. Cambia el tipo de proyecto a Grupal o Empresarial.'}"
+                       th:href="${inviteUrl}" 
+                       th:class="${'team-action-card ' + (isDisabled ? 'disabled-card' : '')}"
+                       th:data-disabled="${isDisabled}"
+                       th:data-message="${msg}">
+                        <div class="team-action-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="team-action-content">
+                            <h3>Invitar Usuarios</h3>
+                            <p th:text="${project.propietario_proyecto == 'GRUPO' ? 'Invita nuevos usuarios al proyecto grupal' : (project.propietario_proyecto == 'EMPRESA' ? 'Invita nuevos usuarios al proyecto empresarial' : 'Cambia a Grupal o Empresarial para invitar usuarios')}">Invita nuevos usuarios al proyecto</p>
+                        </div>
+                        <div class="team-action-arrow">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </a>
+                </div>
+            </section>
+            
+            <!-- Stats Section -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-code-branch"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" th:text="${projectStats.total_repositorios}">3</div>
+                            <div class="stat-label">Repositorios</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" th:text="${projectStats.total_colaboradores}">5</div>
+                            <div class="stat-label">Colaboradores</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-commit"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" th:text="${projectStats.total_commits}">47</div>
+                            <div class="stat-label">Commits</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" th:text="${projectStats.ultima_actividad}">01/10</div>
+                            <div class="stat-label">Última Actividad</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Tabs Navigation -->
+            <section class="tabs-section">
+                <nav class="nav nav-tabs" id="projectTabs" role="tablist">
+                    <button class="nav-link active" id="repositories-tab" data-bs-toggle="tab" data-bs-target="#repositories" type="button" role="tab" aria-controls="repositories" aria-selected="true">
+                        <i class="fas fa-code-branch"></i>
+                        Repositorios
+                        <span class="tab-count" th:text="'(' + ${projectStats.total_repositorios} + ')'">(3)</span>
+                    </button>
+                    <button class="nav-link" id="folders-tab" data-bs-toggle="tab" data-bs-target="#folders" type="button" role="tab" aria-controls="folders" aria-selected="false">
+                        <i class="fas fa-folder"></i>
+                        Carpetas
+                        <span class="tab-count" th:text="'(' + ${projectStats.total_carpetas} + ')'">(2)</span>
+                    </button>
+                    <button class="nav-link" id="collaborators-tab" data-bs-toggle="tab" data-bs-target="#collaborators" type="button" role="tab" aria-controls="collaborators" aria-selected="false">
+                        <i class="fas fa-users"></i>
+                        Colaboradores
+                        <span class="tab-count" th:text="'(' + ${projectStats.total_colaboradores} + ')'">(5)</span>
+                    </button>
+                    <button class="nav-link" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" type="button" role="tab" aria-controls="activity" aria-selected="false">
+                        <i class="fas fa-history"></i>
+                        Actividad Reciente
+                    </button>
+                    <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab" aria-controls="settings" aria-selected="false">
+                        <i class="fas fa-cog"></i>
+                        Configuración
+                    </button>
+                </nav>
+                
+                <div class="tab-content" id="projectTabContent">
+                    <!-- Repositories Tab -->
+                    <div class="tab-pane fade show active" id="repositories" role="tabpanel" aria-labelledby="repositories-tab">
+                        <div class="tab-header">
+                            <h3>Repositorios del Proyecto</h3>
+                            <div class="dropdown">
+                                <button class="create-button dropdown-toggle" type="button" id="createRepositoryDropdown2" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-plus"></i>
+                                    Nuevo Repositorio
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="createRepositoryDropdown2">
+                                    <li>
+                                        <a class="dropdown-item" th:href="@{/devportal/{userRole}/{username}/projects/P-{projectId}/repositories/create?type=personal(userRole=${userRole}, username=${username}, projectId=${project.proyecto_id})}">
+                                            <i class="fas fa-user"></i>
+                                            Repositorio Personal
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" th:href="@{/devportal/{userRole}/{username}/projects/P-{projectId}/repositories/create?type=colaborativo(userRole=${userRole}, username=${username}, projectId=${project.proyecto_id})}">
+                                            <i class="fas fa-users"></i>
+                                            Repositorio Colaborativo
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="repositories-grid" th:if="${repositories != null and !repositories.isEmpty()}">
+                            <div class="item-card" th:each="repo : ${repositories}">
+                                <div class="item-header">
+                                    <h4 class="item-title">
+                                        <div class="icon">
+                                            <i class="fas fa-code-branch"></i>
+                                        </div>
+                                        <a href="#" class="repo-link" th:data-repo-name="${repo.nombre_repositorio}">
+                                            <span th:text="${repo.nombre_repositorio}">backend-api</span>
+                                        </a>
+                                    </h4>
+                                    <p class="item-description" th:text="${repo.descripcion_repositorio}">
+                                        API REST del DevPortal con Spring Boot y autenticación OAuth2
+                                    </p>
+                                </div>
+                                
+                                <div class="item-meta">
+                                    <div class="item-info">
+                                        <span>
+                                            <i class="fas fa-code-branch"></i>
+                                            <span th:text="${repo.rama_principal}">main</span>
+                                        </span>
+                                        <span>
+                                            <i class="fas fa-calendar"></i>
+                                            <span th:text="${repo.fecha_creacion}">28/09/2024</span>
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="item-badges">
+                                        <span th:class="${repo.visibilidad_repositorio == 'PUBLICO' ? 'badge badge-public' : 'badge badge-private'}">
+                                            <span th:text="${repo.visibilidad_repositorio == 'PUBLICO' ? 'Público' : 'Privado'}">Público</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="item-actions">
+                                    <button class="action-button primary repo-view-btn" 
+                                            th:data-repo-name="${repo.nombre_repositorio}"
+                                            th:data-repo-id="${repo.repositorio_id}">
+                                        <i class="fas fa-eye"></i>
+                                        Ver
+                                    </button>
+                                    <button class="action-button repo-edit-btn" 
+                                            th:data-repo-name="${repo.nombre_repositorio}"
+                                            th:data-repo-id="${repo.repositorio_id}">
+                                        <i class="fas fa-edit"></i>
+                                        Editar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mensaje cuando no hay repositorios -->
+                        <div class="empty-state" th:unless="${repositories != null and !repositories.isEmpty()}">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-code-branch"></i>
+                            </div>
+                            <h4>No hay repositorios en este proyecto</h4>
+                            <p>Los repositorios contienen el código fuente y archivos del proyecto.</p>
+                            <div class="dropdown">
+                                <button class="create-button dropdown-toggle" type="button" id="createRepositoryDropdown3" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-plus"></i>
+                                    Crear Primer Repositorio
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="createRepositoryDropdown3">
+                                    <li>
+                                        <a class="dropdown-item" th:href="@{/devportal/{userRole}/{username}/projects/P-{projectId}/repositories/create?type=personal(userRole=${userRole}, username=${username}, projectId=${project.proyecto_id})}">
+                                            <i class="fas fa-user"></i>
+                                            Repositorio Personal
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" th:href="@{/devportal/{userRole}/{username}/projects/P-{projectId}/repositories/create?type=colaborativo(userRole=${userRole}, username=${username}, projectId=${project.proyecto_id})}">
+                                            <i class="fas fa-users"></i>
+                                            Repositorio Colaborativo
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Folders Tab -->
+                    <div class="tab-pane fade" id="folders" role="tabpanel" aria-labelledby="folders-tab">
+                        <div class="tab-header">
+                            <h3>Carpetas del Proyecto</h3>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <a th:href="@{/devportal/{rol}/{username}/projects/P-{projectId}/files(rol=${userRole}, username=${username}, projectId=${project.proyecto_id})}" 
+                                   class="btn btn-primary">
+                                    <i class="fas fa-folder-open"></i>
+                                    Ver Explorador de Archivos
+                                </a>
+                                <button class="btn btn-success" onclick="createFolder()">
+                                    <i class="fas fa-folder-plus"></i>
+                                    Nueva Carpeta
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="repositories-grid" th:if="${nodes != null and !nodes.isEmpty()}">
+                            <div class="item-card" th:each="node : ${nodes}">
+                                <div class="item-header">
+                                    <h4 class="item-title">
+                                        <div class="icon">
+                                            <i class="fas fa-folder"></i>
+                                        </div>
+                                        <a href="#" class="folder-link" th:data-folder-name="${node.nombre}">
+                                            <span th:text="${node.nombre}">Documentación</span>
+                                        </a>
+                                    </h4>
+                                    <p class="item-description" th:text="${node.descripcion}">
+                                        Documentos técnicos, manuales y guías del proyecto
+                                    </p>
+                                </div>
+                                
+                                <div class="item-meta">
+                                    <div class="item-info">
+                                        <span>
+                                            <i class="fas fa-file"></i>
+                                            <span th:text="${node.total_archivos} + ' archivos'">12 archivos</span>
+                                        </span>
+                                        <span>
+                                            <i class="fas fa-calendar"></i>
+                                            <span th:text="${node.fecha_creacion}">01/10/2024</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="item-actions">
+                                    <button class="action-button primary folder-open-btn" th:data-folder-name="${node.nombre}">
+                                        <i class="fas fa-folder-open"></i>
+                                        Abrir
+                                    </button>
+                                    <button class="action-button folder-edit-btn" th:data-folder-name="${node.nombre}">
+                                        <i class="fas fa-edit"></i>
+                                        Editar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mensaje cuando no hay carpetas -->
+                        <div class="empty-state" th:unless="${nodes != null and !nodes.isEmpty()}">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-folder-open"></i>
+                            </div>
+                            <h4>No hay carpetas en este proyecto</h4>
+                            <p>Las carpetas te ayudan a organizar documentos, archivos y recursos del proyecto.</p>
+                            <button class="btn btn-success" onclick="createFolder()">
+                                <i class="fas fa-folder-plus"></i>
+                                Crear Primera Carpeta
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Collaborators Tab -->
+                    <div class="tab-pane fade" id="collaborators" role="tabpanel" aria-labelledby="collaborators-tab">
+                        <div class="tab-header">
+                            <h3>Colaboradores del Proyecto</h3>
+                            <button class="btn btn-primary" onclick="inviteCollaborator()">
+                                <i class="fas fa-user-plus"></i>
+                                Invitar Colaborador
+                            </button>
+                        </div>
+                        
+                        <div class="collaborators-list">
+                            <div class="collaborator-card" th:each="collaborator : ${collaborators}">
+                                <img src="/img/default-avatar.png" alt="Avatar" class="collaborator-avatar">
+                                <div class="collaborator-info">
+                                    <h4 th:text="${collaborator.nombre_usuario}">Roberto Beltrán</h4>
+                                    <p th:text="${collaborator.username}">@rbeltran</p>
+                                </div>
+                                <div class="collaborator-role">
+                                    <span th:class="${'badge ' + (collaborator.privilegio_usuario_proyecto == 'PROPIETARIO' ? 'badge-primary' : 
+                                                               collaborator.privilegio_usuario_proyecto == 'ADMIN' ? 'badge-warning' : 'badge-secondary')}">
+                                        <span th:text="${collaborator.privilegio_usuario_proyecto}">PROPIETARIO</span>
+                                    </span>
+                                </div>
+                                <div class="collaborator-actions">
+                                    <button th:if="${collaborator.privilegio_usuario_proyecto == 'PROPIETARIO'}" 
+                                            class="btn btn-sm btn-outline-primary" disabled>
+                                        <i class="fas fa-crown"></i>
+                                        Propietario
+                                    </button>
+                                    <button th:unless="${collaborator.privilegio_usuario_proyecto == 'PROPIETARIO'}" 
+                                            class="btn btn-sm btn-outline-primary collaborator-edit-btn" 
+                                            th:data-username="${collaborator.nombre_usuario}">
+                                        <i class="fas fa-edit"></i>
+                                        Editar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Activity Tab -->
+                    <div class="tab-pane fade" id="activity" role="tabpanel" aria-labelledby="activity-tab">
+                        <div class="tab-header">
+                            <h3>Actividad Reciente</h3>
+                        </div>
+                        
+                        <div class="activity-timeline" th:if="${recentActivity != null and !recentActivity.isEmpty()}">
+                            <div class="activity-item" th:each="activity : ${recentActivity}">
+                                <div class="activity-icon">
+                                    <i th:class="${activity.icono}"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <h4 th:text="${activity.titulo}">Commit en backend-api</h4>
+                                    <p th:text="${activity.descripcion}">Roberto Beltrán actualizó la configuración de OAuth2 en el repositorio backend-api</p>
+                                    <span class="activity-date" th:text="${activity.fecha_evento}">01/10/2024 14:30</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mensaje cuando no hay actividad -->
+                        <div class="empty-state" th:unless="${recentActivity != null and !recentActivity.isEmpty()}">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <h4>No hay actividad reciente</h4>
+                            <p>Aquí aparecerá el historial de cambios, commits y eventos del proyecto.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings Tab -->
+                    <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+                        <div class="tab-header">
+                            <h3>Configuración del Proyecto</h3>
+                        </div>
+                        
+                        <div class="settings-grid">
+                            <div class="setting-card">
+                                <div class="setting-header">
+                                    <h4>Información General</h4>
+                                    <a th:href="@{/devportal/{userRole}/{username}/projects/P-{id}/edit(userRole=${userRole}, username=${username}, id=${project.proyecto_id})}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                        Editar
+                                    </a>
+                                </div>
+                                <p>Modifica el nombre, descripción y configuración básica del proyecto.</p>
+                            </div>
+                            
+                            <div class="setting-card">
+                                <div class="setting-header">
+                                    <h4>Permisos y Acceso</h4>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="alert('Configurar permisos - Demo')">
+                                        <i class="fas fa-shield-alt"></i>
+                                        Configurar
+                                    </button>
+                                </div>
+                                <p>Gestiona quién puede acceder y colaborar en este proyecto.</p>
+                            </div>
+                            
+                            <div class="setting-card">
+                                <div class="setting-header">
+                                    <h4>Integración con GitHub</h4>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="alert('Configurar GitHub - Demo')">
+                                        <i class="fab fa-github"></i>
+                                        Conectar
+                                    </button>
+                                </div>
+                                <p>Sincroniza este proyecto con un repositorio de GitHub.</p>
+                            </div>
+                            
+                            <div class="setting-card danger">
+                                <div class="setting-header">
+                                    <h4>Zona de Peligro</h4>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProject()">
+                                        <i class="fas fa-trash"></i>
+                                        Eliminar
+                                    </button>
+                                </div>
+                                <p>Elimina permanentemente este proyecto y todos sus datos asociados.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- Additional Styles for Project Detail -->
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --primary-light: rgba(13, 110, 253, 0.1);
+            --success-color: #198754;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --secondary-color: #6c757d;
+            --white: #ffffff;
+            --gray-50: #f8f9fa;
+            --gray-100: #e9ecef;
+            --border-light: #dee2e6;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --text-muted: #adb5bd;
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        }
+        
+        .project-container {
+            min-height: 100vh;
+            background: var(--gray-50);
+        }
+        
+        .main-header {
+            background: var(--white);
+            border-bottom: 1px solid var(--border-light);
+            padding: 1rem 0;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .breadcrumb-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .breadcrumb-nav a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-separator {
+            color: var(--text-muted);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .user-avatar {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+        }
+        
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .dashboard-header {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+        }
+        
+        .dashboard-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+        }
+        
+        .dashboard-title h1 {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .dashboard-title .icon {
+            width: 3rem;
+            height: 3rem;
+            background: var(--primary-color);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.5rem;
+        }
+        
+        .project-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        /* Estilos para botones dropdown de crear repositorio */
+        .create-button {
+            background: var(--primary-color);
+            color: white;
+            border: 1px solid var(--primary-color);
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        
+        .create-button:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .create-button:focus {
+            box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+            outline: none;
+        }
+        
+        .dropdown-menu {
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            padding: 0.5rem 0;
+            min-width: 200px;
+        }
+        
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: var(--transition);
+        }
+        
+        .dropdown-item:hover {
+            background: var(--gray-50);
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .dropdown-item i {
+            width: 1rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        
+        .dropdown-item:hover i {
+            color: var(--primary-color);
+        }
+        
+        .project-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .info-card {
+            background: var(--gray-50);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .info-icon {
+            width: 3rem;
+            height: 3rem;
+            background: var(--primary-color);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        
+        .info-content h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            color: var(--text-primary);
+        }
+        
+        .info-content p {
+            margin: 0;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        
+        .badge-container {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .badge-public {
+            background-color: var(--success-color);
+            color: var(--white);
+        }
+        
+        .badge-private {
+            background-color: var(--warning-color);
+            color: var(--text-primary);
+        }
+        
+        .badge-success {
+            background-color: var(--success-color);
+            color: var(--white);
+        }
+        
+        .badge-primary {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+        
+        .badge-info {
+            background-color: #0dcaf0;
+            color: var(--text-primary);
+        }
+        
+        .badge-warning {
+            background-color: var(--warning-color);
+            color: var(--text-primary);
+        }
+        
+        .badge-secondary {
+            background-color: var(--secondary-color);
+            color: var(--white);
+        }
+        
+        .stats-section {
+            margin-bottom: 2rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .stat-icon {
+            width: 3rem;
+            height: 3rem;
+            background: var(--primary-light);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-size: 1.25rem;
+        }
+        
+        .stat-content {
+            flex: 1;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        
+        .team-management-section {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+        }
+        
+        .team-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .team-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .team-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.25rem;
+        }
+        
+        .team-action-card {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            padding: 1.5rem;
+            background: var(--gray-50);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .team-action-card:hover {
+            background: var(--white);
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .team-action-icon {
+            width: 3rem;
+            height: 3rem;
+            background: var(--primary-color);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        
+        .team-action-content {
+            flex: 1;
+        }
+        
+        .team-action-content h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 0.25rem 0;
+        }
+        
+        .team-action-content p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.4;
+        }
+        
+        .team-action-arrow {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        
+        .team-action-card:hover .team-action-arrow {
+            color: var(--primary-color);
+            transform: translateX(4px);
+        }
+        
+        .tabs-section {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .nav-tabs {
+            padding: 0 2rem;
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 0;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            padding: 1rem 0;
+            margin-right: 2rem;
+            border-bottom: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .tab-count {
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+        
+        .tab-content {
+            padding: 1.5rem;
+            min-height: 300px;
+            background: var(--white);
+        }
+        
+        .tab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .tab-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .repositories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.25rem;
+        }
+        
+        .item-card {
+            background: var(--gray-50);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            transition: box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            height: fit-content;
+        }
+        
+        .item-card:hover {
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .item-header {
+            margin-bottom: 0.75rem;
+            flex: 1;
+        }
+        
+        .item-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .item-title .icon {
+            width: 2rem;
+            height: 2rem;
+            background: var(--primary-color);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 0.875rem;
+        }
+        
+        .item-title a {
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        
+        .item-title a:hover {
+            color: var(--primary-color);
+        }
+        
+        .item-description {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        .item-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            margin-top: auto;
+        }
+        
+        .item-info {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .item-info span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .item-badges {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-button {
+            padding: 0.25rem 0.75rem;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            background: var(--white);
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            text-decoration: none;
+        }
+        
+        .action-button:hover {
+            background: var(--gray-50);
+            color: var(--text-primary);
+        }
+        
+        .action-button.primary {
+            background: var(--primary-color);
+            color: var(--white);
+            border-color: var(--primary-color);
+        }
+        
+        .action-button.primary:hover {
+            background: var(--primary-color);
+            opacity: 0.9;
+        }
+        
+        .collaborators-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .collaborator-card {
+            background: var(--gray-50);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .collaborator-avatar {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+        }
+        
+        .collaborator-info {
+            flex: 1;
+        }
+        
+        .collaborator-info h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0 0 0.25rem 0;
+        }
+        
+        .collaborator-info p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .activity-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .activity-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--gray-50);
+            border-radius: var(--radius-md);
+        }
+        
+        .activity-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+        
+        .activity-content h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0 0 0.25rem 0;
+        }
+        
+        .activity-content p {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-secondary);
+        }
+        
+        .activity-date {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .settings-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .setting-card {
+            background: var(--gray-50);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+        }
+        
+        .setting-card.danger {
+            border-color: var(--danger-color);
+            background: rgba(220, 53, 69, 0.05);
+        }
+        
+        .setting-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .setting-header h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state-icon {
+            width: 3rem;
+            height: 3rem;
+            background: var(--gray-100);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .empty-state h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 0.375rem 0;
+        }
+        
+        .empty-state p {
+            margin: 0 0 1rem 0;
+            max-width: 350px;
+            font-size: 0.875rem;
+        }
+
+        /* Estilos para tarjetas deshabilitadas */
+        .disabled-card {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: auto;
+        }
+
+        .disabled-card:hover {
+            background-color: var(--gray-50);
+            border-color: var(--border-light);
+        }
+
+        .disabled-card .team-action-icon {
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .dashboard-title {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .project-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .project-info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .repositories-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-tabs {
+                padding: 0 1rem;
+                overflow-x: auto;
+            }
+            
+            .nav-tabs .nav-link {
+                white-space: nowrap;
+            }
+            
+            .tab-content {
+                padding: 1rem;
+            }
+        }
+    </style>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function createFolder() {
+            alert('Crear Carpeta - Demo\n\nEsta funcionalidad te permitirá crear una nueva carpeta en el proyecto para organizar documentos y archivos. Podrás:\n\n• Nombrar la carpeta\n• Agregar descripción\n• Establecer permisos de acceso\n• Subir archivos iniciales\n\n¡Esta es una vista demo con contenido hardcodeado!');
+        }
+        
+        function inviteCollaborator() {
+            alert('Invitar Colaborador - Demo\n\nAquí podrás invitar nuevos colaboradores al proyecto TelDevPortal Project:\n\n• Buscar usuarios por nombre o email\n• Asignar roles (Colaborador/Admin)\n• Enviar invitación personalizada\n• Gestionar permisos específicos\n\n¡Esta es una vista demo!');
+        }
+        
+        function deleteProject() {
+            if (confirm('¿Estás seguro de que deseas eliminar el proyecto TelDevPortal Project?\n\nEsta acción no se puede deshacer y eliminará:\n• Todos los repositorios\n• Todas las carpetas y archivos\n• Todos los colaboradores\n• Todo el historial de actividad')) {
+                alert('Eliminar Proyecto - Demo\n\nEn la versión real, esta acción eliminaría permanentemente el proyecto y todos sus datos asociados.\n\n¡Esta es solo una vista demo!');
+            }
+        }
+        
+        // Funcionalidad adicional para mejorar la experiencia
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar las pestañas de Bootstrap
+            const triggerTabList = document.querySelectorAll('#projectTabs button');
+            triggerTabList.forEach(triggerEl => {
+                const tabTrigger = new bootstrap.Tab(triggerEl);
+                
+                triggerEl.addEventListener('click', event => {
+                    event.preventDefault();
+                    tabTrigger.show();
+                });
+            });
+            
+            // Añadir efecto hover a las tarjetas
+            const cards = document.querySelectorAll('.item-card, .stat-card, .info-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.transition = 'transform 0.2s ease';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+            
+            // Manejar clicks en enlaces de repositorio
+            const repoLinks = document.querySelectorAll('.repo-link');
+            repoLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const repoName = this.getAttribute('data-repo-name');
+                    alert('Vista de repositorio - ' + repoName);
+                });
+            });
+            
+            // Manejar botones de repositorio
+            const repoViewBtns = document.querySelectorAll('.repo-view-btn');
+            repoViewBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const repoId = this.getAttribute('data-repo-id');
+                const pathParts = window.location.pathname.split('/');
+                const projectIdWithP = pathParts[pathParts.length - 1]; // P-29
+                
+                // Redirigir a la vista del repositorio desde el proyecto
+                const userRole = '[[${userRole}]]';
+                const username = '[[${username}]]';
+                const repositoryUrl = window.location.origin + '/devportal/' + 
+                                    userRole + '/' + username + '/projects/' + 
+                                    projectIdWithP + '/repositories/R-' + repoId;
+                window.location.href = repositoryUrl;
+            });
+        });
+        
+        const repoEditBtns = document.querySelectorAll('.repo-edit-btn');
+        repoEditBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const repoId = this.getAttribute('data-repo-id');
+                const pathParts = window.location.pathname.split('/');
+                const projectIdWithP = pathParts[pathParts.length - 1]; // P-29
+                
+                // Construir URL de edición del repositorio desde el proyecto
+                const userRole = '[[${userRole}]]';
+                const username = '[[${username}]]';
+                const editUrl = window.location.origin + '/devportal/' + 
+                              userRole + '/' + username + '/projects/' + 
+                              projectIdWithP + '/repositories/R-' + repoId + '/edit';
+                window.location.href = editUrl;
+            });
+        });            // Manejar enlaces de carpetas
+            const folderLinks = document.querySelectorAll('.folder-link');
+            folderLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const folderName = this.getAttribute('data-folder-name');
+                    alert('Vista de carpeta - ' + folderName);
+                });
+            });
+            
+            // Manejar botones de carpetas
+            const folderOpenBtns = document.querySelectorAll('.folder-open-btn');
+            folderOpenBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const folderName = this.getAttribute('data-folder-name');
+                    alert('Abrir carpeta ' + folderName);
+                });
+            });
+            
+            const folderEditBtns = document.querySelectorAll('.folder-edit-btn');
+            folderEditBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const folderName = this.getAttribute('data-folder-name');
+                    alert('Editar carpeta ' + folderName);
+                });
+            });
+            
+            // Manejar botones de colaboradores
+            const collaboratorEditBtns = document.querySelectorAll('.collaborator-edit-btn');
+            collaboratorEditBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const username = this.getAttribute('data-username');
+                    alert('Editar permisos de ' + username);
+                });
+            });
+            
+            // Manejar enlaces de invitación con estado deshabilitado
+            const invitationLinks = document.querySelectorAll('a[data-disabled]');
+            invitationLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const isDisabled = this.getAttribute('data-disabled') === 'true';
+                    if (isDisabled) {
+                        e.preventDefault();
+                        const message = this.getAttribute('data-message');
+                        alert(message);
+                    }
+                });
+            });
+            
+            // Debug: Verificar que Bootstrap está cargado
+            if (typeof bootstrap === 'undefined') {
+                console.error('Bootstrap JavaScript no está cargado correctamente');
+            } else {
+                console.log('Bootstrap cargado correctamente - versión:', bootstrap);
+            }
+        });
+    </script>    <!-- Chatbot Widget -->
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+
+</body>
+</html>
+
+
+
+

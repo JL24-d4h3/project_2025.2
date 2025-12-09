@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Repositorio - DevPortal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/project-repository.css}">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" th:href="@{/img/favicon.ico}">
+</head>
+<body>
+    <!-- Banner de Impersonación -->
+    <div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <div class="repository-container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-content">
+                <nav class="breadcrumb-nav">
+                    <a th:href="@{/devportal/{userRole}/{username}/dashboard(userRole=${userRole}, username=${username})}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a th:href="@{/devportal/{userRole}/{username}/projects(userRole=${userRole}, username=${username})}">
+                        Proyectos
+                    </a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a th:href="@{/devportal/{userRole}/{username}/projects/P-{projectId}(userRole=${userRole}, username=${username}, projectId=${proyecto.proyectoId})}"
+                       th:text="${proyecto.nombreProyecto}">Proyecto</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span>Repositorios</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span th:if="${repositoryType == 'personal'}">Personal</span>
+                    <span th:if="${repositoryType == 'colaborativo'}">Colaborativo</span>
+                    <span th:unless="${repositoryType}">Repositorio</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span>Crear</span>
+                </nav>
+                
+                <div class="header-actions">
+                    <div class="user-info">
+                        <img th:src="${user.fotoPerfil != null ? user.fotoPerfil : '/img/default-avatar.svg'}" 
+                             alt="Avatar" class="user-avatar">
+                        <span th:text="${user.nombreUsuario}">Usuario</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Form Header -->
+            <section class="form-header">
+                <div class="form-title">
+                    <h1>
+                        <div class="icon">
+                            <i class="fas fa-user" th:if="${repositoryType == 'personal'}"></i>
+                            <i class="fas fa-users" th:if="${repositoryType == 'colaborativo'}"></i>
+                            <i class="fas fa-code-branch" th:unless="${repositoryType}"></i>
+                        </div>
+                        <span th:if="${repositoryType == 'personal'}">Crear Repositorio Personal</span>
+                        <span th:if="${repositoryType == 'colaborativo'}">Crear Repositorio Colaborativo</span>
+                        <span th:unless="${repositoryType}">Crear Nuevo Repositorio</span>
+                    </h1>
+                    <p class="form-subtitle">
+                        <span th:if="${repositoryType == 'personal'}">Crea un repositorio personal para el proyecto "<span th:text="${proyecto.nombreProyecto}">Proyecto</span>".</span>
+                        <span th:if="${repositoryType == 'colaborativo'}">Crea un repositorio colaborativo para el proyecto "<span th:text="${proyecto.nombreProyecto}">Proyecto</span>".</span>
+                        <span th:unless="${repositoryType}">Crea un nuevo repositorio para el proyecto "<span th:text="${proyecto.nombreProyecto}">Proyecto</span>".</span>
+                    </p>
+                </div>
+            </section>
+            
+            <!-- Repository Form -->
+            <section class="form-section">
+            <form th:action="@{/devportal/{userRole}/{username}/projects/P-{projectId}/repositories/create(userRole=${userRole}, username=${username}, projectId=${proyecto.proyectoId})}"
+                method="post"
+                class="repository-form">
+                    
+                    <!-- Hidden Field for Repository Type -->
+                    <input type="hidden" name="tipoRepositorio" th:value="${repositoryType == 'colaborativo' ? 'COLABORATIVO' : 'PERSONAL'}" />
+                    
+                    <!-- Hidden Field for Project ID -->
+                    <input type="hidden" name="proyectoId" th:value="${proyecto.proyectoId}" />
+                    
+                    <!-- Error Messages -->
+                    <div class="alert alert-danger" th:if="${error}">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span th:text="${error}">Error message</span>
+                    </div>
+                    
+                    <!-- Success Messages -->
+                    <div class="alert alert-success" th:if="${success}">
+                        <i class="fas fa-check-circle"></i>
+                        <span th:text="${success}">Success message</span>
+                    </div>
+                    
+                    <!-- Basic Information -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3>
+                                <i class="fas fa-info-circle"></i>
+                                Información Básica
+                            </h3>
+                            <p>Información fundamental sobre tu repositorio.</p>
+                        </div>
+                        
+                        <div class="form-card-body">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="nombreRepositorio">
+                                        Nombre del repositorio <span class="required">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           id="nombreRepositorio" 
+                                           name="nombreRepositorio" 
+                                           class="form-control" 
+                                           required 
+                                           placeholder="Ingresa un nombre descriptivo">
+                                    <div class="form-text">
+                                        El nombre debe ser único y descriptivo para identificar fácilmente tu repositorio.
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Tipo de Repositorio</label>
+                                    <div class="form-control-readonly">
+                                        <span th:if="${repositoryType == 'colaborativo'}" class="repository-type">
+                                            <i class="fas fa-users"></i>
+                                            Colaborativo
+                                        </span>
+                                        <span th:unless="${repositoryType == 'colaborativo'}" class="repository-type">
+                                            <i class="fas fa-user"></i>
+                                            Personal
+                                        </span>
+                                    </div>
+                                    <div class="form-text">
+                                        Tipo seleccionado al crear el repositorio.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="descripcionRepositorio">Descripción</label>
+                                <textarea id="descripcionRepositorio" 
+                                          name="descripcionRepositorio" 
+                                          class="form-control" 
+                                          rows="4" 
+                                          placeholder="Describe el propósito y contenido de tu repositorio..."></textarea>
+                                <div class="form-text">
+                                    Una buena descripción ayuda a otros a entender de qué trata tu repositorio.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3>
+                                <i class="fas fa-cog"></i>
+                                Configuración
+                            </h3>
+                            <p>Configura la visibilidad y permisos de tu repositorio.</p>
+                        </div>
+                        
+                        <div class="form-card-body">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="visibilidadRepositorio">Visibilidad</label>
+                                    <select id="visibilidadRepositorio" name="visibilidadRepositorio" class="form-select">
+                                        <option value="PUBLICO">Público</option>
+                                        <option value="PRIVADO" selected>Privado</option>
+                                    </select>
+                                    <div class="form-text">
+                                        Público: visible para todos. Privado: solo para colaboradores autorizados.
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="categoriaId">Categoría</label>
+                                    <select id="categoriaId" name="categoriaId" class="form-select">
+                                        <option value="">Seleccionar categoría</option>
+                                        <option th:each="categoria : ${categories}" 
+                                                th:value="${categoria.idCategoria}"
+                                                th:text="${categoria.nombreCategoria}">
+                                            Categoría
+                                        </option>
+                                    </select>
+                                    <div class="form-text">
+                                        Selecciona una categoría para organizar mejor tu repositorio.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Project Association -->
+                    <div class="form-card">
+                        <div class="form-card-header">
+                            <h3>
+                                <i class="fas fa-project-diagram"></i>
+                                Proyecto Asociado
+                            </h3>
+                            <p>Este repositorio será automáticamente asociado al proyecto seleccionado.</p>
+                        </div>
+                        
+                        <div class="form-card-body">
+                            <div class="form-group">
+                                <label class="form-label">Proyecto</label>
+                                <div class="form-control-readonly">
+                                    <span class="repository-type">
+                                        <i class="fas fa-project-diagram"></i>
+                                        <span th:text="${proyecto.nombreProyecto}">Proyecto</span>
+                                    </span>
+                                </div>
+                                <div class="form-text">
+                                    El repositorio será creado dentro de este proyecto y heredará algunos permisos del mismo.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <div class="actions-left">
+                            <a th:href="@{/devportal/{userRole}/{username}/projects/P-{projectId}(userRole=${userRole}, username=${username}, projectId=${proyecto.proyectoId})}" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-times"></i>
+                                Cancelar
+                            </a>
+                        </div>
+                        
+                        <div class="actions-right">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                Crear Repositorio
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+    
+    <!-- Additional Styles for Form -->
+    <style>
+        .form-header {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            margin-bottom: 2rem;
+        }
+        
+        .form-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .form-subtitle {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 1.125rem;
+        }
+        
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .repository-form {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .form-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+        
+        .form-card-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--gray-50);
+        }
+        
+        .form-card-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-card-header p {
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        
+        .form-card-body {
+            padding: 2rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem;
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            position: sticky;
+            bottom: 2rem;
+        }
+        
+        .actions-left,
+        .actions-right {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            color: var(--danger-color);
+        }
+        
+        .alert-success {
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+            color: var(--success-color);
+        }
+        
+        .required {
+            color: var(--danger-color);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .form-control,
+        .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        
+        .form-control:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+        }
+        
+        .form-text {
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .form-control-readonly {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            background: var(--gray-50);
+            color: var(--text-primary);
+        }
+        
+        .repository-type {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .actions-left,
+            .actions-right {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/project-repository.js}"></script>
+</body>
+</html>
+
+
+

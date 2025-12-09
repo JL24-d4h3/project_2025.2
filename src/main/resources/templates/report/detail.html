@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <base href="/">
+    <title th:text="${reporte.tituloReporte + ' - Reporte - DevPortal'}">Detalle Reporte - DevPortal</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/project-repository.css}">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <style>
+        :root {
+            --primary-color: #2596be;
+            --primary-dark: #1e7a9a;
+            --primary-light: #e3f2fd;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --border-light: #e0e0e0;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        .feedback-detail-container {
+            padding: 2rem;
+            min-height: 100vh;
+            background: #f8f9fa;
+        }
+
+        .feedback-detail-main {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feedback-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+        }
+
+        .breadcrumb {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-dark);
+        }
+
+        .feedback-id-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .feedback-id-badge i {
+            color: var(--primary-color);
+        }
+
+        .report-badges {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .badge-tipo,
+        .badge-estado {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: white;
+        }
+
+        .badge-tipo.API { background: #1976d2; }
+        .badge-tipo.TICKET { background: #f57c00; }
+        .badge-tipo.PROYECTO { background: #7b1fa2; }
+        .badge-tipo.REPOSITORIO { background: #388e3c; }
+        .badge-tipo.DOCUMENTACION { background: #c2185b; }
+        .badge-tipo.FORO { background: #f57f17; }
+        .badge-tipo.GENERAL { background: #455a64; }
+
+        .badge-estado.BORRADOR { background: #6c757d; }
+        .badge-estado.PUBLICADO { background: var(--success-color); }
+        .badge-estado.REVISADO { background: var(--info-color); }
+
+        .feedback-content-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .info-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .feedback-description {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--primary-color);
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .report-content-html {
+            background: white;
+            padding: 1.5rem;
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-md);
+            line-height: 1.8;
+            font-size: 1rem;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        .report-content-html h1,
+        .report-content-html h2,
+        .report-content-html h3 {
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .report-content-html p {
+            margin-bottom: 1rem;
+        }
+
+        .report-content-html ul,
+        .report-content-html ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .report-content-html blockquote {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .report-content-html code {
+            background: #f8f9fa;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .report-content-html pre {
+            background: #2c3e50;
+            color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .report-content-html img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .attachments-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .attachment-item {
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: var(--radius-md);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .attachment-item:hover {
+            background: #e9ecef;
+        }
+
+        .attachment-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .attachment-info {
+            flex: 1;
+        }
+
+        .attachment-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .attachment-size {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .attachment-download {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 1.25rem;
+            padding: 0.5rem;
+        }
+
+        .attachment-download:hover {
+            color: var(--primary-dark);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.9375rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+            color: white;
+        }
+
+        .btn-edit {
+            background: var(--warning-color);
+            color: #333;
+        }
+
+        .btn-edit:hover {
+            background: #e0a800;
+            color: #333;
+        }
+
+        .btn-publish {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-publish:hover {
+            background: #218838;
+            color: white;
+        }
+
+        .btn-review {
+            background: var(--info-color);
+            color: white;
+        }
+
+        .btn-review:hover {
+            background: #138496;
+            color: white;
+        }
+
+        .btn-reject {
+            background: var(--warning-color);
+            color: #333;
+        }
+
+        .btn-reject:hover {
+            background: #e0a800;
+            color: #333;
+        }
+
+        .btn-delete {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+            color: white;
+        }
+
+        .btn-pdf {
+            background: #dc3545;
+            color: white;
+            border: none;
+        }
+
+        .btn-pdf:hover {
+            background: #c82333;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .feedback-detail-container {
+                padding: 1rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-action {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar(username=${username}, rol=${rol})}"></div>
+
+    <div class="feedback-detail-container">
+        <div class="feedback-detail-main">
+            <!-- Header -->
+            <div class="feedback-header">
+                <nav class="breadcrumb">
+                    <a th:href="@{/devportal/{rol}/{username}/dashboard(rol=${rol}, username=${username})}">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <span>/</span>
+                    <a th:href="@{/devportal/{rol}/{username}/reports(rol=${rol}, username=${username})}">
+                        Reportes
+                    </a>
+                    <span>/</span>
+                    <span th:text="${reporte.tituloReporte}">Título del Reporte</span>
+                </nav>
+
+                <div class="feedback-id-badge">
+                    <i class="fas fa-file-alt"></i>
+                    <span th:text="${reporte.tituloReporte}">Título del Reporte</span>
+                    <span style="font-size: 0.9rem; color: #999; font-weight: 400; margin-left: 0.5rem;" 
+                          th:text="'(R-' + ${reporte.reporteId} + ')'">
+                        (R-1)
+                    </span>
+                </div>
+                
+                <!-- Badges de Estado y Tipo -->
+                <div class="report-badges" style="margin-top: 1rem;">
+                    <span class="badge-tipo" th:classappend="${reporte.tipoReporte}" 
+                          th:text="${reporte.tipoReporte}">API</span>
+                    <span class="badge-estado" th:classappend="${reporte.estadoReporte}" 
+                          th:text="${reporte.estadoReporte}">PUBLICADO</span>
+                </div>
+            </div>
+            <!-- Información Principal -->
+            <div class="feedback-content-card">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Información del Reporte
+                </h3>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Tipo</span>
+                        <span class="info-value" th:text="${reporte.tipoReporte}">TIPO</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Estado</span>
+                        <span class="info-value" th:text="${reporte.estadoReporte}">ESTADO</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Creado por</span>
+                        <span class="info-value" th:text="${reporte.autorNombre} + ' (@' + ${reporte.autorUsername} + ')'">Nombre Usuario (@username)</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Fecha de creación</span>
+                        <span class="info-value" th:text="${#temporals.format(reporte.creadoEn, 'dd/MM/yyyy HH:mm')}">28/10/2025 10:30</span>
+                    </div>
+
+                    <div class="info-item" th:if="${reporte.actualizadoEn != null}">
+                        <span class="info-label">Última actualización</span>
+                        <span class="info-value" th:text="${#temporals.format(reporte.actualizadoEn, 'dd/MM/yyyy HH:mm')}">30/10/2025 14:20</span>
+                    </div>
+
+                    <div class="info-item" th:if="${reporte.entidadRelacionadaNombre != null && reporte.entidadRelacionadaNombre != 'Sin especificar'}">
+                        <span class="info-label">Relacionado con</span>
+                        <span class="info-value">
+                            <strong th:text="${reporte.tipoReporte}">TIPO</strong>: 
+                            <span th:text="${reporte.entidadRelacionadaNombre}">Entidad Relacionada</span>
+                        </span>
+                    </div>
+                </div>
+
+                <h4 class="section-title mt-4">
+                    <i class="fas fa-align-left"></i>
+                    Descripción
+                </h4>
+
+                <div class="feedback-description" th:text="${reporte.descripcionReporte}">
+                    Descripción del reporte...
+                </div>
+
+                <h4 class="section-title mt-4">
+                    <i class="fas fa-file-alt"></i>
+                    Contenido Detallado
+                </h4>
+
+                <div class="report-content-html" th:utext="${reporte.contenidoReporte}">
+                    <!-- Contenido HTML renderizado aquí -->
+                </div>
+
+                <!-- Archivos Adjuntos -->
+                <div th:if="${adjuntos != null && !#lists.isEmpty(adjuntos)}">
+                    <h4 class="section-title mt-4">
+                        <i class="fas fa-paperclip"></i>
+                        Archivos Adjuntos (<span th:text="${#lists.size(adjuntos)}">0</span>)
+                    </h4>
+
+                    <ul class="attachments-list">
+                        <li class="attachment-item" th:each="adjunto : ${adjuntos}">
+                            <div class="attachment-icon">
+                                <i class="fas fa-file"></i>
+                            </div>
+                            <div class="attachment-info">
+                                <div class="attachment-name" th:text="${adjunto.nombreArchivo}">archivo.pdf</div>
+                                <div class="attachment-size" th:if="${adjunto.tamanioBytes != null}" 
+                                     th:text="${#numbers.formatDecimal(adjunto.tamanioBytes / 1024.0, 1, 2)} + ' KB'">
+                                    1.5 KB
+                                </div>
+                                <div class="attachment-size" th:if="${adjunto.tipoMime != null}" 
+                                     th:text="${adjunto.tipoMime}">
+                                    application/pdf
+                                </div>
+                            </div>
+                            <a th:if="${adjunto.gcsPublicUrl != null}" 
+                               th:href="${adjunto.gcsPublicUrl}" 
+                               target="_blank" 
+                               class="attachment-download"
+                               title="Descargar archivo">
+                                <i class="fas fa-download"></i>
+                            </a>
+                            <a th:if="${adjunto.gcsPublicUrl == null}" 
+                               th:href="@{/devportal/{rol}/{username}/reports/adjuntos/{adjuntoId}/download(rol=${rol}, username=${username}, adjuntoId=${adjunto.adjuntoId})}" 
+                               class="attachment-download"
+                               title="Descargar archivo">
+                                <i class="fas fa-download"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Botones de Acción -->
+            <div class="action-buttons">
+                <a th:href="@{/devportal/{rol}/{username}/reports/sent(rol=${rol}, username=${username})}" 
+                   class="btn-action btn-back">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver
+                </a>
+
+                <button onclick="descargarPDF()" 
+                        class="btn-action btn-pdf"
+                        title="Descargar reporte en formato PDF">
+                    <i class="fas fa-file-pdf"></i> 
+                    Descargar PDF
+                </button>
+
+                <a th:href="@{/devportal/{rol}/{username}/reports/edit/{id}(rol=${rol}, username=${username}, id=${reporte.reporteId})}" 
+                   th:if="${puedeEditar}"
+                   class="btn-action btn-edit">
+                    <i class="fas fa-edit"></i> 
+                    Editar
+                </a>
+
+                <button th:if="${puedePublicar}" 
+                        onclick="publishReport()"
+                        class="btn-action btn-publish">
+                    <i class="fas fa-upload"></i> 
+                    Publicar
+                </button>
+
+                <button th:if="${puedeMarcarRevisado}" 
+                        onclick="reviewReport()"
+                        class="btn-action btn-review">
+                    <i class="fas fa-check-circle"></i> 
+                    Marcar Revisado
+                </button>
+
+                <button th:if="${puedeRechazar}" 
+                        onclick="rejectReport()"
+                        class="btn-action btn-reject">
+                    <i class="fas fa-undo"></i> 
+                    Rechazar
+                </button>
+
+                <button th:if="${puedeEliminar}" 
+                        onclick="deleteReport()"
+                        class="btn-action btn-delete">
+                    <i class="fas fa-trash"></i> 
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script th:inline="javascript">
+        const reporteId = /*[[${reporte.reporteId}]]*/ 0;
+        const rol = /*[[${rol}]]*/ 'dev';
+        const username = /*[[${username}]]*/ 'user';
+
+        // Publish report
+        async function publishReport() {
+            if (!confirm('¿Estás seguro de que deseas publicar este reporte? Se enviará a los destinatarios correspondientes y no podrás editarlo después.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/devportal/${rol}/${username}/reports/${reporteId}/publish`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    alert('Reporte publicado exitosamente.');
+                    // Redirigir a reportes enviados
+                    window.location.href = `/devportal/${rol}/${username}/reports/sent`;
+                } else {
+                    const errorData = await response.json();
+                    alert('Error al publicar el reporte: ' + (errorData.error || 'Error desconocido'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al publicar el reporte. Por favor, intenta de nuevo.');
+            }
+        }
+
+        // Review report
+        async function reviewReport() {
+            if (!confirm('¿Marcar este reporte como revisado?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/devportal/${rol}/${username}/reports/${reporteId}/review`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Reporte marcado como revisado.');
+                    location.reload();
+                } else {
+                    const errorData = await response.json();
+                    alert('Error al marcar el reporte como revisado: ' + (errorData.error || 'Error desconocido'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al marcar el reporte como revisado. Por favor, intenta de nuevo.');
+            }
+        }
+
+        // Reject report (back to BORRADOR)
+        async function rejectReport() {
+            if (!confirm('¿Estás seguro de que deseas rechazar este reporte y devolverlo a BORRADOR?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/devportal/${rol}/${username}/reports/${reporteId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Reporte rechazado. Estado cambiado a BORRADOR.');
+                    location.reload();
+                } else {
+                    const errorData = await response.json();
+                    alert('Error al rechazar el reporte: ' + (errorData.error || 'Error desconocido'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al rechazar el reporte. Por favor, intenta de nuevo.');
+            }
+        }
+
+        // Delete report
+        async function deleteReport() {
+            if (!confirm('¿Estás seguro de que deseas eliminar este reporte? Esta acción no se puede deshacer.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/devportal/${rol}/${username}/reports/${reporteId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Reporte eliminado exitosamente.');
+                    window.location.href = `/devportal/${rol}/${username}/reports/sent`;
+                } else {
+                    const errorData = await response.json();
+                    alert('Error al eliminar el reporte: ' + (errorData.error || 'Error desconocido'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al eliminar el reporte. Por favor, intenta de nuevo.');
+            }
+        }
+
+        /**
+         * Descarga el reporte como PDF
+         */
+        function descargarPDF() {
+            console.log('📄 Descargando PDF del reporte:', reporteId);
+            window.location.href = `/devportal/${rol}/${username}/reports/${reporteId}/export/pdf`;
+        }
+    </script>
+
+    <div th:replace="~{fragments/chatbot-widget :: chatbot-widget}"></div>
+
+</body>
+</html>
+

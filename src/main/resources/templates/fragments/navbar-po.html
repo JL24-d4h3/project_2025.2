@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Fragment del navbar para Product Owner -->
+    <div th:fragment="navbar-po" id="teldev-navbar-container">
+        <nav class="dp-navbar navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <!-- Brand -->
+                <a class="navbar-brand d-flex align-items-center gap-2"
+                   th:href="@{/devportal/{rol}/{username}/dashboard(rol=${rol}, username=${username})}">
+                    <span class="fw-bold">TelDev</span>
+                    <span class="badge bg-primary ms-2">Product Owner</span>
+                </a>
+
+                <!-- Mobile toggle button -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#poNavbar"
+                        aria-controls="poNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Collapsible content -->
+                <div class="collapse navbar-collapse" id="poNavbar">
+                    <!-- Main navigation -->
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <!-- Dashboard -->
+                        <li class="nav-item">
+                            <a class="nav-link" 
+                               th:href="@{/devportal/{rol}/{username}/dashboard(rol=${rol}, username=${username})}"
+                               th:classappend="${currentNavSection == 'dashboard'} ? 'active' : ''">
+                                <i class="fas fa-tachometer-alt me-1"></i>
+                                Dashboard
+                            </a>
+                        </li>
+
+                        <!-- User Management - Nueva opción -->
+                        <li class="nav-item">
+                            <a class="nav-link" 
+                               th:href="@{/devportal/{rol}/{username}/platform-user-management(rol=${rol}, username=${username})}"
+                               th:classappend="${currentNavSection == 'platform-user-management'} ? 'active' : ''">
+                                <i class="fas fa-users me-1"></i>
+                                Usuarios
+                            </a>
+                        </li>
+
+                        <!-- Catalogo -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               th:href="@{/devportal/{rol}/{username}/catalog(rol=${rol}, username=${username})}"
+                               th:classappend="${currentNavSection == 'catalog'} ? 'active' : ''">
+                                <i class="fas fa-book me-1"></i>
+                                Catálogo
+                            </a>
+                        </li>
+
+                        <!-- API -->
+                        <li class="nav-item">
+                            <a class="nav-link" 
+                               th:href="@{/devportal/{rol}/{username}/apis(rol=${rol}, username=${username})}"
+                               th:classappend="${currentNavSection == 'apis'} ? 'active' : ''">
+                                <i class="fas fa-code me-1"></i>
+                                APIs
+                            </a>
+                        </li>
+
+
+                        <!-- Projects -->
+                        <li class="nav-item">
+                            <a class="nav-link" 
+                               th:href="@{/devportal/{rol}/{username}/projects(rol=${rol}, username=${username})}"
+                               th:classappend="${currentNavSection == 'projects'} ? 'active' : ''">
+                                <i class="fas fa-project-diagram me-1"></i>
+                                Proyectos
+                            </a>
+                        </li>
+
+                        <!-- Repositories -->
+                        <li class="nav-item">
+                            <a class="nav-link" 
+                               th:href="@{/devportal/{rol}/{username}/repositories(rol=${rol}, username=${username})}"
+                               th:classappend="${currentNavSection == 'repositories'} ? 'active' : ''">
+                                <i class="fab fa-git-alt me-1"></i>
+                                Repositorios
+                            </a>
+                        </li>
+
+                        <!-- Tickets -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               th:href="@{/devportal/{rol}/{username}/tickets(rol=${rol}, username=${username})}"
+                               th:classappend="${currentNavSection == 'tickets'} ? 'active' : ''">
+                                <i class="fas fa-ticket-alt me-1"></i>
+                                Tickets
+                            </a>
+                        </li>
+
+                        <!-- Reports & Analytics -->
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               th:href="@{/devportal/{rol}/{username}/reports(rol=${rol}, username=${username})}"
+                               th:classappend="${currentNavSection == 'reports'} ? 'active' : ''">
+                                <i class="fas fa-clipboard me-1"></i>
+                                Reportes
+                            </a>
+                        </li>
+
+                        <!-- Monitoreo -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" 
+                               role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-chart-line me-1"></i>
+                                Monitoreo
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" 
+                                       th:href="@{/devportal/{rol}/{username}/reports/performance(rol=${rol}, username=${username})}">
+                                    <i class="fas fa-chart-line me-2"></i>Performance
+                                </a></li>
+                                <li><a class="dropdown-item" 
+                                       th:href="@{/devportal/{rol}/{username}/reports/usage(rol=${rol}, username=${username})}">
+                                    <i class="fas fa-chart-pie me-2"></i>Uso de APIs
+                                </a></li>
+                                <li><a class="dropdown-item" 
+                                       th:href="@{/devportal/{rol}/{username}/reports/projects(rol=${rol}, username=${username})}">
+                                    <i class="fas fa-project-diagram me-2"></i>Estado de Proyectos
+                                </a></li>
+                            </ul>
+                        </li>
+                    </ul>
+
+<!--                    &lt;!&ndash; Search bar &ndash;&gt;-->
+<!--                    <form class="dp-search d-none d-lg-flex me-3" role="search">-->
+<!--                        <div class="input-group">-->
+<!--                            <span class="input-group-text bg-transparent border-end-0">-->
+<!--                                <i class="fas fa-search text-muted"></i>-->
+<!--                            </span>-->
+<!--                            <input class="form-control dp-search-input border-start-0" -->
+<!--                                   type="search" -->
+<!--                                   placeholder="Buscar proyectos, APIs, usuarios..."-->
+<!--                                   id="globalSearch">-->
+<!--                        </div>-->
+<!--                    </form>-->
+
+                    <!-- Right side navigation -->
+                    <ul class="navbar-nav mb-2 mb-lg-0 align-items-lg-center">
+                        <!-- Notifications -->
+                        <li class="nav-item dropdown me-2">
+                            <a class="nav-link position-relative" href="#" id="notificationsDropdown" 
+                               role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-bell"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    <span class="visually-hidden">notificaciones no leídas</span>
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end notifications-dropdown">
+                                <li class="dropdown-header d-flex justify-content-between align-items-center">
+                                    <span>Notificaciones</span>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item notification-item" href="#">
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0">
+                                                <i class="fas fa-user-plus text-success"></i>
+                                            </div>
+                                            <div class="flex-grow-1 ms-2">
+                                                <div class="notification-title">Nuevo usuario registrado</div>
+                                                <div class="notification-text">Juan Pérez se registró en la plataforma</div>
+                                                <small class="text-muted">Hace 5 min</small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item notification-item" href="#">
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0">
+                                                <i class="fas fa-code-branch text-info"></i>
+                                            </div>
+                                            <div class="flex-grow-1 ms-2">
+                                                <div class="notification-title">Nueva versión de API</div>
+                                                <div class="notification-text">API Users v2.1 está disponible</div>
+                                                <small class="text-muted">Hace 1 hora</small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-center" href="#">Ver todas las notificaciones</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Stop Impersonation Button (only visible during impersonation) -->
+                        <li class="nav-item me-2" id="stopImpersonationBtn" style="display: none;">
+                            <button type="button" class="btn btn-outline-warning btn-sm" 
+                                    title="Dejar de Impersonar Usuario"
+                                    onclick="stopImpersonation()">
+                                <i class="fas fa-user-times me-1"></i>
+                                <span class="d-none d-md-inline">Dejar de Impersonar</span>
+                            </button>
+                        </li>
+
+                        <!-- User menu -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link d-flex align-items-center gap-2" href="#" 
+                               id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img class="rounded-circle border border-2" 
+                                     th:src="${currentUser != null and currentUser.fotoPerfil != null ? currentUser.fotoPerfil : '/img/default-avatar.png'}" 
+                                     alt="static/img/tel-dev-logo.png" width="32" height="32">
+                                <span class="d-none d-md-inline" 
+                                      th:text="${currentUser != null ? currentUser.nombreUsuario : 'Usuario'}">Usuario</span>
+                                <i class="fas fa-chevron-down d-none d-md-inline"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end user-dropdown">
+                                <li class="dropdown-header">
+                                    <div class="d-flex align-items-center">
+                                        <img class="rounded-circle me-2" 
+                                             th:src="${currentUser != null and currentUser.fotoPerfil != null ? currentUser.fotoPerfil : '/img/default-avatar.png'}" 
+                                             alt="Avatar" width="40" height="40">
+                                        <div>
+                                            <div class="fw-semibold" 
+                                                 th:text="${currentUser != null ? currentUser.nombreUsuario + ' ' + currentUser.apellidoPaterno : 'Usuario Nombre'}">Usuario Nombre</div>
+                                            <small class="text-muted" 
+                                                   th:text="${currentUser != null ? '@' + currentUser.username : '@usuario'}">@usuario</small>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                
+                                <!-- Profile section -->
+                                <li class="dropdown-header small text-uppercase">Perfil</li>
+                                <li>
+                                    <a class="dropdown-item" 
+                                       th:href="@{/devportal/{rol}/{username}/profile(rol=${rol}, username=${username})}">
+                                        <i class="fas fa-user me-2"></i>Mi Perfil
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" 
+                                       th:href="@{/devportal/{rol}/{username}/settings(rol=${rol}, username=${username})}">
+                                        <i class="fas fa-cog me-2"></i>Configuración
+                                    </a>
+                                </li>
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                
+                                <!-- Quick actions -->
+                                <li class="dropdown-header small text-uppercase">Acciones Rápidas</li>
+                                <li>
+                                    <a class="dropdown-item" 
+                                       th:href="@{/devportal/{rol}/{username}/platform-user-management/create-new-user(rol=${rol}, username=${username})}">
+                                        <i class="fas fa-user-plus me-2"></i>Crear Usuario
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" 
+                                       th:href="@{/devportal/{rol}/{username}/projects/create(rol=${rol}, username=${username})}">
+                                        <i class="fas fa-plus me-2"></i>Nuevo Proyecto
+                                    </a>
+                                </li>
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                
+                                <!-- Help & Support -->
+                                <li>
+                                    <a class="dropdown-item" href="/help">
+                                        <i class="fas fa-question-circle me-2"></i>Ayuda
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/foro/ver-foro">
+                                        <i class="fas fa-comments me-2"></i>Foro
+                                    </a>
+                                </li>
+                                
+                                <li><hr class="dropdown-divider"></li>
+                                
+                                <!-- Logout -->
+                                <li>
+                                    <form th:action="@{/auth/logout}" method="post" class="d-inline">
+                                        <button class="dropdown-item text-danger" type="submit">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Scripts específicos para PO navbar -->
+    <script th:fragment="navbar-po-scripts">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar impersonación
+            checkImpersonationStatus();
+            
+            // Configurar búsqueda global
+            setupGlobalSearch();
+            
+            // Configurar notificaciones
+            setupNotifications();
+        });
+
+        function checkImpersonationStatus() {
+            fetch('/impersonacion/check-status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.isImpersonating) {
+                        document.getElementById('stopImpersonationBtn').style.display = 'block';
+                        document.body.classList.add('impersonation-active');
+                    }
+                })
+                .catch(error => {
+                    console.log('No hay impersonación activa:', error);
+                });
+        }
+
+        function stopImpersonation() {
+            if (confirm('¿Estás seguro que deseas dejar de impersonar este usuario?')) {
+                fetch('/impersonacion/finalizar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Impersonación finalizada exitosamente.');
+                        window.location.href = data.redirectUrl;
+                    } else {
+                        alert('Error al finalizar la impersonación: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error de conexión al finalizar la impersonación');
+                });
+            }
+        }
+
+        function setupGlobalSearch() {
+            const searchInput = document.getElementById('globalSearch');
+            if (searchInput) {
+                let searchTimeout;
+                
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        performGlobalSearch(this.value);
+                    }, 300);
+                });
+
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        performGlobalSearch(this.value);
+                    }
+                });
+            }
+        }
+
+        function performGlobalSearch(query) {
+            if (query.trim().length < 2) return;
+            
+            // Implementar búsqueda global aquí
+            console.log('Buscando:', query);
+            // TODO: Implementar llamada a API de búsqueda
+        }
+
+        function setupNotifications() {
+            // Cargar notificaciones al hacer clic en el dropdown
+            const notificationsDropdown = document.getElementById('notificationsDropdown');
+            if (notificationsDropdown) {
+                notificationsDropdown.addEventListener('click', function() {
+                    // TODO: Cargar notificaciones dinámicamente
+                    console.log('Cargando notificaciones...');
+                });
+            }
+        }
+    </script>
+</body>
+</html>
+
+

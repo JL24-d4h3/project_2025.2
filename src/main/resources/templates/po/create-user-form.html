@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Usuario - DevPortal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/navbar.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-dark: #2980b9;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --dark-color: #2c3e50;
+            --light-color: #f8f9fa;
+            --border-color: #dee2e6;
+            --text-muted: #6c757d;
+        }
+
+        body {
+            background-color: var(--light-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 0;
+        }
+
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .form-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-header .icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .form-header h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-header p {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .breadcrumb-nav {
+            background: none;
+            padding: 0;
+            margin-bottom: 2rem;
+        }
+
+        .breadcrumb {
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+        }
+
+        .breadcrumb-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item.active {
+            color: var(--text-muted);
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section h5 {
+            color: var(--dark-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-control {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            outline: none;
+        }
+
+        .form-floating {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-floating label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .role-selection {
+            margin-bottom: 1.5rem;
+        }
+
+        .role-options {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .role-option {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .role-card {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: white;
+        }
+
+        .role-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+        }
+
+        .role-card.selected {
+            border-color: var(--primary-color);
+            background: rgba(52, 152, 219, 0.05);
+        }
+
+        .role-card .icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .role-card .title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .role-card .description {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .role-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .options-section {
+            background: var(--light-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .option-item:last-child {
+            border-bottom: none;
+        }
+
+        .option-info h6 {
+            margin: 0 0 0.25rem 0;
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+
+        .option-info p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            border-radius: 8px;
+            padding: 0.75rem 2rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .role-options {
+                flex-direction: column;
+            }
+
+            .role-option {
+                min-width: unset;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Banner de Impersonación -->
+<div th:replace="~{fragments/impersonation-banner :: impersonation-banner}"></div>
+
+<!-- Navbar -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="main-container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb-nav">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a th:href="@{'/devportal/' + ${#strings.toLowerCase(role)} + '/' + ${username} + '/platform-user-management'}">
+                    <i class="fas fa-users me-1"></i>Gestión de Usuarios
+                </a>
+            </li>
+            <li class="breadcrumb-item active">Crear Usuario</li>
+        </ol>
+    </nav>
+
+    <div class="form-card">
+        <div class="form-header">
+            <div class="icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h2>Crear Nuevo Usuario</h2>
+            <p>Crea un usuario directamente en la plataforma</p>
+        </div>
+
+        <!-- Mostrar mensajes de error o éxito -->
+        <div th:if="${error}" class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}"></span>
+        </div>
+
+        <!-- Formulario -->
+        <form th:action="@{'/devportal/' + ${#strings.toLowerCase(role)} + '/' + ${username} + '/platform-user-management/create-user'}"
+              method="post" novalidate>
+
+            <!-- Información Personal -->
+            <div class="form-section">
+                <h5><i class="fas fa-user me-2"></i>Información Personal</h5>
+
+                <div class="row">
+                    <!-- Email -->
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="email" class="form-control" id="correo" name="correo"
+                                   placeholder="correo@ejemplo.com" required>
+                            <label for="correo">Email *</label>
+                            <div id="email-availability" class="form-text"></div>
+                        </div>
+                    </div>
+
+                    <!-- Username -->
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="username" name="username"
+                                   placeholder="Username" required
+                                   pattern="[a-zA-Z0-9_.-]+"
+                                   minlength="3" maxlength="20">
+                            <label for="username">Username *</label>
+                            <div id="username-availability" class="form-text"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Nombres -->
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="nombreUsuario" name="nombreUsuario"
+                                   placeholder="Nombres" required>
+                            <label for="nombreUsuario">Nombres *</label>
+                        </div>
+                    </div>
+
+                    <!-- Apellido Paterno -->
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="apellidoPaterno" name="apellidoPaterno"
+                                   placeholder="Apellido Paterno" required>
+                            <label for="apellidoPaterno">Apellido Paterno *</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Apellido Materno -->
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="apellidoMaterno" name="apellidoMaterno"
+                                   placeholder="Apellido Materno">
+                            <label for="apellidoMaterno">Apellido Materno</label>
+                        </div>
+                    </div>
+
+                    <!-- DNI -->
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="dni" name="dni"
+                                   placeholder="DNI" required
+                                   pattern="[0-9]{8}">
+                            <label for="dni">DNI *</label>
+                            <div id="dni-availability" class="form-text"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de Contacto -->
+            <div class="form-section">
+                <h5><i class="fas fa-address-book me-2"></i>Información de Contacto</h5>
+
+                <div class="row">
+                    <!-- Teléfono -->
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="tel" class="form-control" id="telefono" name="telefono"
+                                   placeholder="Teléfono">
+                            <label for="telefono">Teléfono</label>
+                        </div>
+                    </div>
+
+                    <!-- Dirección -->
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="direccionUsuario" name="direccionUsuario"
+                                   placeholder="Dirección" required>
+                            <label for="direccionUsuario">Dirección *</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selección de Rol -->
+            <div class="form-section">
+                <h5><i class="fas fa-user-tag me-2"></i>Rol del Usuario</h5>
+
+                <div class="role-selection">
+                    <div class="role-options">
+                        <div class="role-option" th:each="rol : ${rolesDisponibles}">
+                            <label class="role-card" th:for="'role-' + ${rol.rolId}">
+                                <input type="radio" th:id="'role-' + ${rol.rolId}" name="rolId"
+                                       th:value="${rol.rolId}" required>
+                                <div class="icon">
+                                    <i th:class="${rol.nombreRol.name() == 'DEV'} ? 'fas fa-code' :
+                                                     (${rol.nombreRol.name() == 'QA'} ? 'fas fa-bug' : 'fas fa-project-diagram')"></i>
+                                </div>
+                                <div class="title" th:text="${rol.nombreRol}"></div>
+                                <div class="description" th:text="${rol.descripcionRol}"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Opciones Adicionales -->
+            <div class="form-section">
+                <h5><i class="fas fa-cog me-2"></i>Opciones de Configuración</h5>
+
+                <div class="options-section">
+                    <div class="option-item">
+                        <div class="option-info">
+                            <h6>Enviar email de bienvenida</h6>
+                            <p>Envía un email con las credenciales temporales y enlace para configurar contraseña</p>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="sendWelcomeEmail"
+                                   name="sendWelcomeEmail" checked>
+                            <label class="form-check-label" for="sendWelcomeEmail"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                    <i class="fas fa-arrow-left me-2"></i>Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-user-plus me-2"></i>Crear Usuario
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Funciones de validación en tiempo real
+    function debounce(fn, delay) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => fn.apply(this, args), delay);
+        };
+    }
+
+    function checkAvailability(field, value, displayId) {
+        if (!value) {
+            document.getElementById(displayId).textContent = '';
+            return;
+        }
+        fetch(`/devportal/user/validate-field?field=${field}&value=${encodeURIComponent(value)}`)
+                .then(res => res.json())
+                .then(isAvailable => {
+                    const display = document.getElementById(displayId);
+                    display.textContent = isAvailable ? '✓ Disponible' : '✗ Ya está en uso';
+                    display.style.color = isAvailable ? 'green' : 'red';
+                })
+                .catch(() => {
+                    const display = document.getElementById(displayId);
+                    display.textContent = 'Error al verificar disponibilidad';
+                    display.style.color = 'orange';
+                });
+    }
+
+    function setupRoleSelection() {
+        const roleCards = document.querySelectorAll('.role-card');
+        const radioInputs = document.querySelectorAll('input[name="rolId"]');
+
+        roleCards.forEach(card => {
+            card.addEventListener('click', function() {
+                // Remover selección previa
+                roleCards.forEach(c => c.classList.remove('selected'));
+                // Seleccionar la actual
+                this.classList.add('selected');
+                // Marcar radio button
+                const radio = this.querySelector('input[type="radio"]');
+                radio.checked = true;
+            });
+        });
+
+        // Manejar cambios en radio buttons
+        radioInputs.forEach(radio => {
+            radio.addEventListener('change', function() {
+                roleCards.forEach(c => c.classList.remove('selected'));
+                this.closest('.role-card').classList.add('selected');
+            });
+        });
+    }
+
+    function setupFormValidation() {
+        const form = document.querySelector('form');
+
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+
+            // Validar campos requeridos
+            const requiredFields = form.querySelectorAll('input[required]');
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                    field.classList.add('is-valid');
+                }
+            });
+
+            // Validar email
+            const email = document.getElementById('correo');
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email.value)) {
+                email.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                email.classList.remove('is-invalid');
+                email.classList.add('is-valid');
+            }
+
+            // Validar username
+            const username = document.getElementById('username');
+            const usernamePattern = /^[a-zA-Z0-9_.-]+$/;
+            if (!usernamePattern.test(username.value)) {
+                username.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                username.classList.remove('is-invalid');
+                username.classList.add('is-valid');
+            }
+
+            // Validar DNI
+            const dni = document.getElementById('dni');
+            if (!/^[0-9]{8}$/.test(dni.value)) {
+                dni.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                dni.classList.remove('is-invalid');
+                dni.classList.add('is-valid');
+            }
+
+            // Validar que se haya seleccionado un rol
+            const roleSelected = document.querySelector('input[name="rolId"]:checked');
+            if (!roleSelected) {
+                alert('Por favor selecciona un rol para el usuario');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                e.stopPropagation();
+            } else {
+                // Mostrar mensaje de confirmación antes de enviar
+                const email = document.getElementById('correo').value;
+                if (!confirm('¿Confirmas la creación del usuario? Se enviará un enlace al correo ' + email + ' para configurar su contraseña.')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }
+        });
+    }
+
+    // Configurar validaciones en tiempo real
+    document.addEventListener('DOMContentLoaded', function() {
+        setupRoleSelection();
+        setupFormValidation();
+
+        // Validación email en tiempo real
+        document.getElementById('correo').addEventListener('input', debounce(function(e) {
+            const value = e.target.value;
+            const display = document.getElementById('email-availability');
+            if (value.length === 0) {
+                display.textContent = '';
+                return;
+            }
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(value)) {
+                display.textContent = 'Email no válido';
+                display.style.color = 'red';
+                return;
+            }
+            checkAvailability('email', value, 'email-availability');
+        }, 400));
+
+        // Validación username en tiempo real
+        document.getElementById('username').addEventListener('input', debounce(function(e) {
+            const value = e.target.value;
+            const display = document.getElementById('username-availability');
+            if (value.length === 0) {
+                display.textContent = '';
+                return;
+            }
+            if (value.length < 3 || value.length > 20) {
+                display.textContent = 'El nombre debe tener entre 3 y 20 caracteres';
+                display.style.color = 'orange';
+                return;
+            }
+            if (!/^[a-zA-Z0-9_.-]+$/.test(value)) {
+                display.textContent = 'Solo se permiten letras, números, puntos, guiones y guiones bajos';
+                display.style.color = 'red';
+                return;
+            }
+            checkAvailability('username', value, 'username-availability');
+        }, 400));
+
+        // Validación DNI en tiempo real
+        document.getElementById('dni').addEventListener('input', debounce(function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            e.target.value = value;
+            const display = document.getElementById('dni-availability');
+            if (value.length === 0) {
+                display.textContent = '';
+                return;
+            }
+            if (value.length !== 8) {
+                display.textContent = 'El DNI debe tener exactamente 8 dígitos';
+                display.style.color = 'red';
+                return;
+            }
+            checkAvailability('dni', value, 'dni-availability');
+        }, 400));
+
+        // Restricción de caracteres para DNI
+        document.getElementById('dni').addEventListener('keypress', function(e) {
+            const charCode = e.which ? e.which : e.keyCode;
+            if (charCode < 48 || charCode > 57) {
+                if (![8, 46, 37, 39].includes(charCode)) {
+                    e.preventDefault();
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>
+
+
+

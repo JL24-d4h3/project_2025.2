@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Miembros - GTICS DevPortal</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/project-repository.css}">
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    
+    <style>
+        .members-container {
+            padding: 20px;
+        }
+        
+        .member-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 20px;
+        }
+        
+        .member-header h2 {
+            margin: 0;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .member-header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .filters-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .filter-group select {
+            padding: 6px 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .member-table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .member-table thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .member-table th {
+            padding: 15px;
+            font-weight: 600;
+            color: #2c3e50;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .member-table td {
+            padding: 12px 15px;
+            vertical-align: middle;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .member-table tbody tr:hover {
+            background: #f8f9fa;
+            transition: background 0.2s;
+        }
+        
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e3f2fd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #1976d2;
+            flex-shrink: 0;
+        }
+        
+        .member-details h6 {
+            margin: 0;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .member-details small {
+            color: #6c757d;
+            display: block;
+            margin-top: 2px;
+        }
+        
+        .role-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .role-badge.admin {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        
+        .role-badge.editor {
+            background: #f3e5f5;
+            color: #6a1b9a;
+        }
+        
+        .member-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .member-actions .btn {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-radius: 4px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state p {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <div class="container-fluid members-container">
+        <!-- Header -->
+        <div class="member-header">
+            <div>
+                <h2>
+                    <i class="fas fa-users"></i> Gestión de Miembros
+                </h2>
+                <small class="text-muted d-block mt-2" th:text="'Proyecto: ' + ${proyecto.nombreProyecto}">
+                    Proyecto: TelDevPortal
+                </small>
+            </div>
+            <div class="member-header-buttons">
+                <a th:href="@{/devportal/sa/{username}/projects/P-{id}/invite-G(username=${username}, id=${proyecto.proyectoId})}" 
+                   class="btn btn-outline-primary">
+                    <i class="fas fa-users-plus"></i> Invitar Grupo
+                </a>
+                <a th:href="@{/devportal/sa/{username}/projects/P-{id}/invite-E(username=${username}, id=${proyecto.proyectoId})}" 
+                   class="btn btn-primary">
+                    <i class="fas fa-envelope"></i> Invitar Empresa
+                </a>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="filter-group">
+                <label for="filterRol">Filtrar por Rol:</label>
+                <select id="filterRol" class="form-select" style="width: 150px;">
+                    <option value="">-- Todos --</option>
+                    <option value="LECTOR">Lector</option>
+                    <option value="EDITOR">Editor</option>
+                    <option value="COMENTADOR">Comentador</option>
+                    <option value="ADMINISTRADOR">Administrador</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="filterEstado">Filtrar por Estado:</label>
+                <select id="filterEstado" class="form-select" style="width: 150px;">
+                    <option value="">-- Todos --</option>
+                    <option value="ACTIVO">Activo</option>
+                    <option value="INACTIVO">Inactivo</option>
+                </select>
+            </div>
+            
+            <div class="filter-group ms-auto">
+                <input type="search" id="searchMember" class="form-control" 
+                       placeholder="Buscar miembro..." style="width: 200px;">
+            </div>
+        </div>
+
+        <!-- Members Table -->
+        <div class="member-table" th:if="${not #lists.isEmpty(members)}">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Rol(es)</th>
+                        <th>Estado</th>
+                        <th>Fecha Unión</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="miembro : ${members}">
+                        <td>
+                            <div class="member-info">
+                                <div class="member-avatar" th:text="${miembro.nombre.charAt(0)}">J</div>
+                                <div class="member-details">
+                                    <h6 th:text="${miembro.nombre}">Juan Pérez</h6>
+                                    <small th:text="${miembro.departamento}">Desarrollo</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:text="${miembro.correo}">juan@example.com</td>
+                        <td>
+                            <span th:each="rol : ${miembro.roles}" 
+                                  class="role-badge" 
+                                  th:classappend="${rol.toLowerCase()}"
+                                  th:text="${rol}">
+                                Editor
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-success" th:text="Activo">Activo</span>
+                        </td>
+                        <td th:text="${#temporals.format(miembro.fechaUnion, 'dd/MM/yyyy')}">
+                            01/01/2024
+                        </td>
+                        <td>
+                            <div class="member-actions">
+                                <a th:href="@{/devportal/sa/{username}/projects/P-{id}/members/{memberId}/profile(username=${username}, id=${proyecto.proyectoId}, memberId=${miembro.usuarioId})}" 
+                                   class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i> Ver Perfil
+                                </a>
+                                <button class="btn btn-sm btn-danger" 
+                                        th:onclick="'removeMember(' + ${miembro.usuarioId} + ', \"' + ${miembro.nombre} + '\")'">
+                                    <i class="fas fa-user-minus"></i> Remover
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" th:if="${#lists.isEmpty(members)}">
+            <i class="fas fa-inbox"></i>
+            <p class="mt-3">
+                <strong>No hay miembros en este proyecto</strong>
+            </p>
+            <p class="text-muted">
+                Invita miembros del equipo para que colaboren en el proyecto.
+            </p>
+            <a th:href="@{/devportal/sa/{username}/projects/P-{id}/invite-G(username=${username}, id=${proyecto.proyectoId})}" 
+               class="btn btn-primary">
+                <i class="fas fa-users-plus"></i> Invitar Primer Miembro
+            </a>
+        </div>
+    </div>
+
+    <!-- Remove Member Modal -->
+    <div class="modal fade" id="removeMemberModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas remover a <strong id="memberNombre"></strong> del proyecto?</p>
+                    <p class="text-warning small">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        El usuario perderá todos los permisos en este proyecto.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form th:action="@{/devportal/sa/{username}/projects/P-{id}/members/remove(username=${username}, id=${proyecto.proyectoId})}" 
+                          method="POST" style="display: inline;">
+                        <input type="hidden" name="memberId" id="memberId">
+                        <button type="submit" class="btn btn-danger">Remover</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function removeMember(memberId, memberNombre) {
+            document.getElementById('memberId').value = memberId;
+            document.getElementById('memberNombre').textContent = memberNombre;
+            new bootstrap.Modal(document.getElementById('removeMemberModal')).show();
+        }
+        
+        // Simple filter implementation
+        document.getElementById('filterRol').addEventListener('change', filterTable);
+        document.getElementById('filterEstado').addEventListener('change', filterTable);
+        document.getElementById('searchMember').addEventListener('input', filterTable);
+        
+        function filterTable() {
+            // Placeholder for filter logic - would need to be implemented with actual filtering
+            console.log('Filter applied');
+        }
+    </script>
+</body>
+</html>
+
+
+

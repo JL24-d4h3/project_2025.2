@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invitación a Repositorio - TelDev</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .invitation-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .card-header i {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+        
+        .card-body {
+            padding: 40px;
+        }
+        
+        .info-section {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+        }
+        
+        .info-value {
+            color: #212529;
+            font-weight: 500;
+        }
+        
+        .btn-accept {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        
+        .btn-accept:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-reject {
+            background: transparent;
+            border: 2px solid #dc3545;
+            color: #dc3545;
+            padding: 13px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .btn-reject:hover {
+            background: #dc3545;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .permission-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .permission-PROPIETARIO {
+            background: #ffd700;
+            color: #856404;
+        }
+        
+        .permission-EDITOR {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .permission-LECTOR {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="invitation-card">
+        <!-- Header -->
+        <div class="card-header">
+            <i class="fas fa-code-branch"></i>
+            <h2 class="mb-0">Invitación a Repositorio</h2>
+            <p class="mb-0">Has sido invitado a colaborar</p>
+        </div>
+        
+        <!-- Body -->
+        <div class="card-body">
+            <!-- Mensajes de error -->
+            <div th:if="${error}" class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span th:text="${error}"></span>
+            </div>
+            
+            <!-- Información de la invitación -->
+            <div th:if="${invitacion}" class="info-section">
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-code-branch me-2"></i>Repositorio:
+                    </span>
+                    <span class="info-value" th:text="${invitacion.repositorio.nombreRepositorio}"></span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-user-tie me-2"></i>Invitado por:
+                    </span>
+                    <span class="info-value" th:text="${invitacion.invitadoPor.correo}"></span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-shield-alt me-2"></i>Permiso:
+                    </span>
+                    <span class="info-value">
+                        <span class="permission-badge" 
+                              th:classappend="${'permission-' + invitacion.permiso}"
+                              th:text="${invitacion.permiso}"></span>
+                    </span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-calendar-alt me-2"></i>Fecha de invitación:
+                    </span>
+                    <span class="info-value" th:text="${#temporals.format(invitacion.fechaInvitacion, 'dd/MM/yyyy HH:mm')}"></span>
+                </div>
+                
+                <div class="info-row">
+                    <span class="info-label">
+                        <i class="fas fa-clock me-2"></i>Válida hasta:
+                    </span>
+                    <span class="info-value" th:text="${#temporals.format(invitacion.fechaExpiracion, 'dd/MM/yyyy HH:mm')}"></span>
+                </div>
+            </div>
+            
+            <!-- Descripción del permiso -->
+            <div th:if="${invitacion}" class="mt-4 mb-4">
+                <h5 class="mb-3">
+                    <i class="fas fa-info-circle me-2"></i>¿Qué puedo hacer?
+                </h5>
+                
+                <div th:if="${invitacion.permiso == 'PROPIETARIO'}">
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Acceso total al repositorio</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Administrar colaboradores</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Configurar permisos</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Eliminar el repositorio</li>
+                    </ul>
+                </div>
+                
+                <div th:if="${invitacion.permiso == 'EDITOR'}">
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Ver contenido del repositorio</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Crear y editar archivos</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Realizar commits</li>
+                        <li><i class="fas fa-times text-danger me-2"></i>No puede administrar colaboradores</li>
+                    </ul>
+                </div>
+                
+                <div th:if="${invitacion.permiso == 'LECTOR'}">
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Ver contenido del repositorio</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Descargar archivos</li>
+                        <li><i class="fas fa-times text-danger me-2"></i>No puede editar</li>
+                        <li><i class="fas fa-times text-danger me-2"></i>No puede realizar commits</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Botones de acción -->
+            <div th:if="${invitacion}" class="d-grid gap-3">
+                <form th:action="@{/invitations/repository/accept}" method="post">
+                    <input type="hidden" name="token" th:value="${token}">
+                    <button type="submit" class="btn btn-accept w-100">
+                        <i class="fas fa-check-circle me-2"></i>Aceptar Invitación
+                    </button>
+                </form>
+                
+                <form th:action="@{/invitations/repository/reject}" method="post">
+                    <input type="hidden" name="token" th:value="${token}">
+                    <button type="submit" class="btn btn-reject w-100">
+                        <i class="fas fa-times-circle me-2"></i>Rechazar Invitación
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+
+
